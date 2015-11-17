@@ -10,10 +10,10 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <linux/wireless.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <net/if.h>
 
 #include <detect/Device.h>
 
@@ -43,6 +43,8 @@ namespace detect {
     std::list<Device*> knownDevices();
     
     Device::HardwareType deviceHardwareType(std::string strDeviceName);
+    
+    void maintainDeviceStatus(Device* dvMaintain);
     
     bool systemDeviceNameExists(std::string strDeviceName);
     std::list<std::string> systemDeviceNames();

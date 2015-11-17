@@ -45,6 +45,12 @@ namespace detect {
       for(std::string strDeviceName : lstAddedDevices) {
 	this->addDevice(strDeviceName);
 	std::cout << "Added device '" << strDeviceName << "'" << std::endl;
+	
+	switch(this->knownDevice(strDeviceName)->hardwareType()) {
+	case Device::Loopback: std::cout << " - Loopback" << std::endl; break;
+	case Device::Wireless: std::cout << " - Wireless" << std::endl; break;
+	case Device::Wired: std::cout << " - Wired" << std::endl; break;
+	}
       }
     }
     
@@ -131,6 +137,23 @@ namespace detect {
     return lstDevices;
   }
   
+  void Network::maintainDeviceStatus(Device* dvMaintain) {
+    if(m_nSocketFDControl >= 0) {
+      struct ifreq ifrTemp;
+      
+      unsigned int unLength = dvMaintain->deviceName().length();
+      
+      unLength = (unLength > 15 ? 15 : unLength);
+      memset(ifrTemp.ifr_name, 0, 16);
+      memcpy(ifrTemp.ifr_name, dvMaintain->deviceName().c_str(), unLength);
+      
+      ioctl(m_nSocketFDControl, SIOCGIFFLAGS, &ifrTemp);
+      
+      dvMaintain->setUp(ifrTemp.ifr_flags & IFF_UP);
+      dvMaintain->setRunning(ifrTemp.ifr_flags & IFF_RUNNING);
+    }
+  }
+  
   Device::HardwareType Network::deviceHardwareType(std::string strDeviceName) {
     Device::HardwareType hwtReturn;
     
@@ -139,7 +162,39 @@ namespace detect {
     if(dvDevice) {
       hwtReturn = dvDevice->hardwareType();
     } else {
-      // TODO: Find the system device hardware type.
+      struct ifconf ifcConf;
+      struct ifreq ifrReq[100];
+      
+      if(m_nSocketFDControl >= 0) {
+	ifcConf.ifc_buf = (char*)ifrReq;
+	ifcConf.ifc_len = sizeof(ifrReq);
+	
+	if(ioctl(m_nSocketFDControl, SIOCGIFCONF, &ifcConf) != -1) {
+	  unsigned int unInterfaces = ifcConf.ifc_len / sizeof(ifrReq[0]);
+	  
+	  for(unsigned int unInterface = 0; unInterface < unInterfaces; unInterface++) {
+	    struct ifreq ifrReqCurrent = ifrReq[unInterface];
+	    std::string strInterfaceName = ifrReqCurrent.ifr_name;
+	    
+	    if(strInterfaceName == strDeviceName) {
+	      struct ifreq ifrTemp;
+	      
+	      strcpy(ifrTemp.ifr_name, ifrReqCurrent.ifr_name);
+	      ioctl(m_nSocketFDControl, SIOCGIFFLAGS, &ifrTemp);
+	      
+	      if(ifrTemp.ifr_flags & IFF_LOOPBACK) {
+		hwtReturn = Device::Loopback;
+	      } else if(ioctl(m_nSocketFDControl, SIOCGIWNAME, &ifrTemp) == -1) {
+		hwtReturn = Device::Wired;
+	      } else {
+		hwtReturn = Device::Wireless;
+	      }
+	      
+	      break;
+	    }
+	  }
+	}
+      }
     }
     
     return hwtReturn;

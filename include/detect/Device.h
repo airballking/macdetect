@@ -16,6 +16,8 @@ namespace detect {
     
   private:
     int m_nSocketFD;
+    bool m_bUp;
+    bool m_bRunning;
     std::string m_strDeviceName;
     HardwareType m_hwtType;
     
@@ -26,6 +28,12 @@ namespace detect {
     
     std::string deviceName();
     HardwareType hardwareType();
+    
+    void setUp(bool bUp);
+    void setRunning(bool bRunning);
+    
+    bool up();
+    bool running();
     
     static bool systemDeviceExists(std::string strDeviceName);
   };
