@@ -19,6 +19,12 @@ namespace detect {
   bool Network::cycle() {
     bool bResult = true;
     
+    for(Event* evDelete : m_lstEvents) {
+      delete evDelete;
+    }
+    
+    m_lstEvents.clear();
+    
     m_lstSystemDeviceNames = this->systemDeviceNames();
     
     if(this->autoManageDevices()) {
@@ -39,18 +45,10 @@ namespace detect {
       
       for(std::string strDeviceName : lstRemovedDevices) {
 	this->removeDevice(strDeviceName);
-	std::cout << "Removed device '" << strDeviceName << "'" << std::endl;
       }
       
       for(std::string strDeviceName : lstAddedDevices) {
 	this->addDevice(strDeviceName);
-	std::cout << "Added device '" << strDeviceName << "'" << std::endl;
-	
-	switch(this->knownDevice(strDeviceName)->hardwareType()) {
-	case Device::Loopback: std::cout << " - Loopback" << std::endl; break;
-	case Device::Wireless: std::cout << " - Wireless" << std::endl; break;
-	case Device::Wired: std::cout << " - Wired" << std::endl; break;
-	}
       }
     }
     
@@ -60,8 +58,12 @@ namespace detect {
   bool Network::addDevice(std::string strDeviceName) {
     bool bResult = false;
     
-    if(this->systemDeviceNameExists(strDeviceName)) {
-      m_lstDevices.push_back(new Device(strDeviceName, this->deviceHardwareType(strDeviceName)));
+    if(this->knownDevice(strDeviceName) == NULL) {
+      if(this->systemDeviceNameExists(strDeviceName)) {
+	m_lstDevices.push_back(new Device(strDeviceName, this->deviceHardwareType(strDeviceName)));
+      }
+      
+      this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
     }
     
     return bResult;
@@ -79,6 +81,8 @@ namespace detect {
 	break;
       }
     }
+    
+    this->scheduleEvent(new DeviceEvent(Event::DeviceRemoved, strDeviceName));
     
     return bResult;
   }
@@ -149,8 +153,25 @@ namespace detect {
       
       ioctl(m_nSocketFDControl, SIOCGIFFLAGS, &ifrTemp);
       
-      dvMaintain->setUp(ifrTemp.ifr_flags & IFF_UP);
-      dvMaintain->setRunning(ifrTemp.ifr_flags & IFF_RUNNING);
+      bool bUp = ifrTemp.ifr_flags & IFF_UP;
+      bool bRunning = ifrTemp.ifr_flags & IFF_RUNNING;
+      
+      if(dvMaintain->up() != bUp) {
+	DeviceEvent* evUp = new DeviceEvent(Event::DeviceStateChanged, dvMaintain->deviceName());
+	evUp->setStateChangeUp(true);
+	
+	this->scheduleEvent(evUp);
+      }
+      
+      if(dvMaintain->running() != bRunning) {
+	DeviceEvent* evRunning = new DeviceEvent(Event::DeviceStateChanged, dvMaintain->deviceName());
+	evRunning->setStateChangeRunning(true);
+	
+	this->scheduleEvent(evRunning);
+      }
+      
+      dvMaintain->setUp(bUp);
+      dvMaintain->setRunning(bRunning);
     }
   }
   
@@ -198,5 +219,13 @@ namespace detect {
     }
     
     return hwtReturn;
+  }
+  
+  void Network::scheduleEvent(Event* evSchedule) {
+    m_lstEvents.push_back(evSchedule);
+  }
+  
+  std::list<Event*> Network::events() {
+    return m_lstEvents;
   }
 }

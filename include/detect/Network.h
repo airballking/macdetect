@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include <detect/Device.h>
+#include <detect/Event.h>
 
 
 namespace detect {
@@ -26,7 +27,11 @@ namespace detect {
     std::list<Device*> m_lstDevices;
     std::list<std::string> m_lstSystemDeviceNames;
     
+    std::list<Event*> m_lstEvents;
+    
   protected:
+    void scheduleEvent(Event* evSchedule);
+    
   public:
     Network();
     ~Network();
@@ -48,6 +53,8 @@ namespace detect {
     
     bool systemDeviceNameExists(std::string strDeviceName);
     std::list<std::string> systemDeviceNames();
+    
+    std::list<Event*> events();
   };
 }
 

@@ -2,12 +2,7 @@
 
 
 namespace detect {
-  Device::Device(std::string strDeviceName, HardwareType hwtType) {
-    m_strDeviceName = strDeviceName;
-    m_hwtType = hwtType;
-    
-    m_bUp = false;
-    m_bRunning = false;
+  Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false) {
   }
   
   Device::~Device() {
