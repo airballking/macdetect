@@ -1,15 +1,36 @@
 #include <cstdlib>
+#include <signal.h>
 
 #include <detect/Network.h>
 
 
+detect::Network g_nwNetwork;
+
+
+void catchHandler(int nSignum) {
+  switch(nSignum) {
+  case SIGTERM:
+  case SIGINT: {
+    g_nwNetwork.shutdown();
+  } break;
+    
+  default:
+    break;
+  }
+}
+
+
 int main(int argc, char** argv) {
-  detect::Network nwNetwork;
+  struct sigaction action;
+  memset(&action, 0, sizeof(struct sigaction));
+  action.sa_handler = catchHandler;
+  sigaction(SIGTERM, &action, NULL);
+  sigaction(SIGINT, &action, NULL);
   
-  nwNetwork.setAutoManageDevices(true);
+  g_nwNetwork.setAutoManageDevices(true);
   
-  while(nwNetwork.cycle()) {
-    std::list<detect::Event*> lstEvents = nwNetwork.events();
+  while(g_nwNetwork.cycle()) {
+    std::list<detect::Event*> lstEvents = g_nwNetwork.events();
     
     for(detect::Event* evEvent : lstEvents) {
       switch(evEvent->type()) {
@@ -25,11 +46,22 @@ int main(int argc, char** argv) {
 	
       case detect::Event::DeviceStateChanged: {
 	detect::DeviceEvent* devEvent = (detect::DeviceEvent*)evEvent;
-	std::cout << "Device state changed: '" << devEvent->deviceName() << "'" << std::endl;
+	detect::Device* dvDevice = g_nwNetwork.knownDevice(devEvent->deviceName());
+	
+	if(devEvent->stateChangeUp()) {
+	  std::cout << "Device '" << devEvent->deviceName() << "' is now " << (dvDevice->up() ? "up" : "down") << std::endl;
+	}
+	
+	if(devEvent->stateChangeRunning()) {
+	  std::cout << "Device '" << devEvent->deviceName() << "' is now " << (dvDevice->running() ? "running" : "not running") << std::endl;
+	}
       } break;
       }
     }
   }
+  
+  std::cout << "\r";
+  std::cout << "Exiting gracefully." << std::endl;
   
   return EXIT_SUCCESS;
 }

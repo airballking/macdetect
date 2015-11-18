@@ -2,7 +2,7 @@
 
 
 namespace detect {
-  Network::Network() {
+  Network::Network() : m_bShouldRun(true) {
     m_nSocketFDControl = socket(AF_INET, SOCK_STREAM, 0);
   }
   
@@ -12,6 +12,12 @@ namespace detect {
     }
     
     m_lstDevices.clear();
+    
+    for(Event* evDelete : m_lstEvents) {
+      delete evDelete;
+    }
+    
+    m_lstEvents.clear();
     
     close(m_nSocketFDControl);
   }
@@ -52,7 +58,15 @@ namespace detect {
       }
     }
     
-    return bResult;
+    for(Device* dvMaintain : m_lstDevices) {
+      this->maintainDeviceStatus(dvMaintain);
+    }
+    
+    return (bResult && m_bShouldRun);
+  }
+  
+  void Network::shutdown() {
+    m_bShouldRun = false;
   }
   
   bool Network::addDevice(std::string strDeviceName) {

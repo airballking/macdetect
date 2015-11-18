@@ -29,6 +29,8 @@ namespace detect {
     
     std::list<Event*> m_lstEvents;
     
+    bool m_bShouldRun;
+    
   protected:
     void scheduleEvent(Event* evSchedule);
     
@@ -37,6 +39,7 @@ namespace detect {
     ~Network();
     
     bool cycle();
+    void shutdown();
     
     bool addDevice(std::string strDeviceName);
     bool removeDevice(std::string strDeviceName);
