@@ -37,12 +37,28 @@ int main(int argc, char** argv) {
 	switch(evEvent->type()) {
 	case detect::Event::DeviceAdded: {
 	  detect::DeviceEvent* devEvent = (detect::DeviceEvent*)evEvent;
-	  std::cout << "Device added: '" << devEvent->deviceName() << "'" << std::endl;
+	  std::cout << "Device added: '" << devEvent->deviceName() << "' (";
+	  
+	  switch(g_nwNetwork.knownDevice(devEvent->deviceName())->hardwareType()) {
+	  case detect::Device::Loopback: {
+	    std::cout << "loopback";
+	  } break;
+	    
+	  case detect::Device::Wired: {
+	    std::cout << "wired";
+	  } break;
+	    
+	  case detect::Device::Wireless: {
+	    std::cout << "wireless";
+	  } break;
+	  }
+	  
+	  std::cout << ")" << std::endl;
 	} break;
 	
 	case detect::Event::DeviceRemoved: {
 	  detect::DeviceEvent* devEvent = (detect::DeviceEvent*)evEvent;
-	  std::cout << "Device removed: '" << devEvent->deviceName() << "'" << std::endl;
+	  std::cout << "Device removed: '" << devEvent->deviceName() << std::endl;
 	} break;
 	
 	case detect::Event::DeviceStateChanged: {

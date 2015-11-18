@@ -6,6 +6,9 @@
 
 
 namespace detect {
+  /*
+    Base Events
+  */
   class Event {
   public:
     typedef enum {
@@ -28,6 +31,9 @@ namespace detect {
     void setEventType(EventType tpSet);
   };
   
+  /*
+    Device Events
+  */
   class DeviceEvent : public Event {
   private:
     std::string m_strDeviceName;
@@ -48,6 +54,9 @@ namespace detect {
     bool stateChangeRunning();
   };
   
+  /*
+    MAC Events
+  */
   class MACEvent : public DeviceEvent {
   private:
     std::string m_strMAC;
