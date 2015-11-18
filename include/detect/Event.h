@@ -12,7 +12,8 @@ namespace detect {
       DeviceAdded = 0,
       DeviceRemoved = 1,
       DeviceStateChanged = 2,
-      MACAddressDiscovered = 3
+      MACAddressDiscovered = 3,
+      MACAddressDisappeared = 4
     } EventType;
     
   private:

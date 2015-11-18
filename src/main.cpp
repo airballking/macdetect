@@ -61,6 +61,11 @@ int main(int argc, char** argv) {
 	detect::MACEvent* mvEvent = (detect::MACEvent*)evEvent;
 	std::cout << "MAC address discovered on device '" << mvEvent->deviceName() << "': '" << mvEvent->macAddress() << "'" << std::endl;
       } break;
+	
+      case detect::Event::MACAddressDisappeared: {
+	detect::MACEvent* mvEvent = (detect::MACEvent*)evEvent;
+	std::cout << "MAC address disappeared from device '" << mvEvent->deviceName() << "': '" << mvEvent->macAddress() << "'" << std::endl;
+      } break;
       }
     }
   }

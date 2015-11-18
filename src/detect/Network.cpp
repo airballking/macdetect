@@ -100,6 +100,21 @@ namespace detect {
     
     this->scheduleEvent(new DeviceEvent(Event::DeviceRemoved, strDeviceName));
     
+    bool bChanged = true;
+    while(bChanged) {
+      bChanged = false;
+      
+      for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
+	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	if((*itMAC).strDeviceName == strDeviceName) {
+	  this->removeMAC(strDeviceName, (*itMAC).strMAC);
+	  bChanged = true;
+	  
+	  break;
+	}
+      }
+    }
+    
     return bResult;
   }
   
@@ -314,11 +329,24 @@ namespace detect {
     }
   }
   
+  void Network::removeMAC(std::string strDeviceName, std::string strMAC) {
+    for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
+	itMAC != m_lstMACSeen.end(); itMAC++) {
+      if((*itMAC).strDeviceName == strDeviceName && (*itMAC).strMAC == strMAC) {
+	m_lstMACSeen.erase(itMAC);
+	
+	this->scheduleEvent(new MACEvent(Event::MACAddressDisappeared, strDeviceName, strMAC));
+	
+	break;
+      }
+    }
+  }
+  
   double Network::macLastSeen(std::string strMAC, std::string strDeviceName) {
     double dTime = -1;
     
     for(MACEntity meEntity : m_lstMACSeen) {
-      if(meEntity.strMAC == strMAC) {// && meEntity.strDeviceName == strDeviceName) {
+      if(meEntity.strMAC == strMAC && meEntity.strDeviceName == strDeviceName) {
 	dTime = meEntity.dLastSeen;
 	
 	break;

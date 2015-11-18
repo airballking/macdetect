@@ -79,6 +79,7 @@ namespace detect {
     
     void detectNetworkActivity();
     void addMAC(std::string strMACAddress, std::string strDeviceName);
+    void removeMAC(std::string strDeviceName, std::string strMAC);
     
     double macLastSeen(std::string strMAC, std::string strDeviceName);
   };
