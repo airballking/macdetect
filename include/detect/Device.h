@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include <detect/Wire.h>
+
 
 namespace detect {
   class Device {
@@ -20,6 +22,7 @@ namespace detect {
     bool m_bRunning;
     std::string m_strDeviceName;
     HardwareType m_hwtType;
+    Wire m_wrWire;
     
   protected:
   public:
@@ -34,6 +37,8 @@ namespace detect {
     
     bool up();
     bool running();
+    
+    unsigned char* read(int& nLengthRead);
     
     static bool systemDeviceExists(std::string strDeviceName);
   };

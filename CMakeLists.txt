@@ -18,7 +18,9 @@ add_executable(detect
 add_library(${PROJECT_NAME}
   src/detect/Network.cpp
   src/detect/Device.cpp
-  src/detect/Event.cpp)
+  src/detect/Event.cpp
+  src/detect/SocketReader.cpp
+  src/detect/Wire.cpp)
 
 target_link_libraries(detect
   ${PROJECT_NAME})

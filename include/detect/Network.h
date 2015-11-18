@@ -17,6 +17,7 @@
 
 #include <detect/Device.h>
 #include <detect/Event.h>
+#include <detect/Wire.h>
 
 
 namespace detect {
@@ -58,6 +59,8 @@ namespace detect {
     std::list<std::string> systemDeviceNames();
     
     std::list<Event*> events();
+    
+    void detectNetworkActivity();
   };
 }
 

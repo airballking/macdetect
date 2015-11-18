@@ -31,6 +31,8 @@ namespace detect {
     
     m_lstEvents.clear();
     
+    this->detectNetworkActivity();
+    
     m_lstSystemDeviceNames = this->systemDeviceNames();
     
     if(this->autoManageDevices()) {
@@ -241,5 +243,21 @@ namespace detect {
   
   std::list<Event*> Network::events() {
     return m_lstEvents;
+  }
+  
+  void Network::detectNetworkActivity() {
+    unsigned char* ucBuffer = NULL;
+    int nLengthRead;
+    
+    for(Device* dvDevice : this->knownDevices()) {
+      ucBuffer = dvDevice->read(nLengthRead);
+      
+      if(nLengthRead > 0) {
+	// TODO: Process the data here.
+	std::cout << "Received " << nLengthRead << " bytes on " << dvDevice->deviceName() << std::endl;
+      } else if(nLengthRead == -1) {
+	std::cerr << "Error on device read " << dvDevice->deviceName() << std::endl;
+      }
+    }
   }
 }
