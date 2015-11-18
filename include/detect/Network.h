@@ -54,6 +54,8 @@ namespace detect {
     Network();
     ~Network();
     
+    bool privilegesSuffice();
+    
     bool cycle();
     void shutdown();
     

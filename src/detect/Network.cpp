@@ -22,6 +22,13 @@ namespace detect {
     close(m_nSocketFDControl);
   }
   
+  bool Network::privilegesSuffice() {
+    Wire wrTest("", 1514);
+    bool bSuffices = (wrTest.socket() > -1);
+    
+    return bSuffices;
+  }
+  
   bool Network::cycle() {
     bool bResult = true;
     
