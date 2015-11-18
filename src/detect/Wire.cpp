@@ -18,7 +18,7 @@ namespace detect {
     memset(&socket_address, 0, sizeof(socket_address));
     socket_address.sll_family = AF_PACKET;
     socket_address.sll_ifindex = ifr.ifr_ifindex;
-    socket_address.sll_protocol = htons(0x0800);//htons(0x0003); // ETH_P_ALL
+    socket_address.sll_protocol = htons(0x0800);
     
     bind(this->socket(), (sockaddr*)&socket_address, sizeof(socket_address));
   }
@@ -28,9 +28,9 @@ namespace detect {
   
   bool Wire::write(unsigned char* ucBuffer, unsigned int unLength) {
     struct sockaddr_ll socket_address;
-    memset(&socket_address, 0, 1514);//sizeof(socket_address));
+    memset(&socket_address, 0, this->defaultReadingLength());
     socket_address.sll_family = AF_PACKET;
-    socket_address.sll_protocol = htons(0x0003); // ETH_P_ALL
+    socket_address.sll_protocol = htons(0x0800);
     
     if(sendto(m_nSocket,
 	      ucBuffer,

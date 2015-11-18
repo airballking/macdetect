@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <linux/if_ether.h>
 
 #include <detect/Wire.h>
 #include <detect/Headers.h>

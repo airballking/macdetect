@@ -2,7 +2,7 @@
 
 
 namespace detect {
-  Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false), m_wrWire(strDeviceName, 1514) {//sizeof(EthernetFrameHeader)) {
+  Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false), m_wrWire(strDeviceName, ETH_FRAME_LEN) {
   }
   
   Device::~Device() {
@@ -34,7 +34,7 @@ namespace detect {
   
   unsigned char* Device::read(int& nLengthRead) {
     unsigned char* ucBuffer;
-    nLengthRead = 1514;//sizeof(EthernetFrameHeader);
+    nLengthRead = m_wrWire.defaultReadingLength();
     nLengthRead = m_wrWire.bufferedRead(&ucBuffer, nLengthRead);
     
     return ucBuffer;

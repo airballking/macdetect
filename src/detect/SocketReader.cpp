@@ -57,13 +57,6 @@ namespace detect {
     
     m_ucInternalBuffer = new unsigned char[nReadingLength]();
     int nReadBytes = this->read(m_ucInternalBuffer, nReadingLength);
-    
-    // if(nReadBytes != nReadingLength) {
-    //   delete[] m_ucInternalBuffer;
-    //   m_ucInternalBuffer = NULL;
-    // } else {
-    //   *ucBuffer = m_ucInternalBuffer;
-    // }
     *ucBuffer = m_ucInternalBuffer;
     
     return nReadBytes;
