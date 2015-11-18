@@ -2,7 +2,7 @@
 
 
 namespace detect {
-  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) {
+  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) : SocketReader(strDeviceName) {
     this->setSocket(::socket(AF_PACKET, SOCK_RAW, htons(0x0800)));
     this->setDefaultReadingLength(nDefaultReadingLength);
     

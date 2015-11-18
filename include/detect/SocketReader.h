@@ -10,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <linux/if.h>
 #include <netpacket/packet.h>
+#include <string.h>
 
 
 namespace detect {
@@ -17,12 +18,13 @@ namespace detect {
   private:
     int m_nDefaultReadingLength;
     unsigned char* m_ucInternalBuffer;
+    std::string m_strDeviceName;
     
   protected:
     int m_nSocket;
     
   public:
-    SocketReader();
+    SocketReader(std::string strDeviceName);
     ~SocketReader();
     
     int read(unsigned char* ucBuffer, unsigned int unLength);
