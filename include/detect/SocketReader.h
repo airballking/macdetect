@@ -18,13 +18,12 @@ namespace detect {
   private:
     int m_nDefaultReadingLength;
     unsigned char* m_ucInternalBuffer;
-    std::string m_strDeviceName;
     
   protected:
     int m_nSocket;
     
   public:
-    SocketReader(std::string strDeviceName);
+    SocketReader();
     ~SocketReader();
     
     int read(unsigned char* ucBuffer, unsigned int unLength);
