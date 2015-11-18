@@ -2,7 +2,7 @@
 
 
 namespace detect {
-  Network::Network() : m_bShouldRun(true) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0) {
     m_nSocketFDControl = socket(AF_INET, SOCK_STREAM, 0);
   }
   
@@ -62,6 +62,24 @@ namespace detect {
     
     for(Device* dvMaintain : m_lstDevices) {
       this->maintainDeviceStatus(dvMaintain);
+    }
+    
+    double dTime = this->time();
+    bool bChanged = true;
+    while(bChanged) {
+      bChanged = false;
+      
+      for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
+	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	if(dTime - (*itMAC).dLastSeen > m_dMaxMACAge) {
+	  this->scheduleEvent(new MACEvent(Event::MACAddressDisappeared, (*itMAC).strDeviceName, (*itMAC).strMAC));
+	  
+	  m_lstMACSeen.erase(itMAC);
+	  bChanged = true;
+	  
+	  break;
+	}
+      }
     }
     
     return (bResult && m_bShouldRun);
@@ -354,5 +372,13 @@ namespace detect {
     }
     
     return dTime;
+  }
+  
+  void Network::setMACMaxAge(double dMaxAge) {
+    m_dMaxMACAge = dMaxAge;
+  }
+  
+  double Network::macMaxAge() {
+    return m_dMaxMACAge;
   }
 }

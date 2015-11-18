@@ -43,6 +43,8 @@ namespace detect {
     std::list<Event*> m_lstEvents;
     std::list<MACEntity> m_lstMACSeen;
     
+    double m_dMaxMACAge;
+    
     bool m_bShouldRun;
     
   protected:
@@ -82,6 +84,9 @@ namespace detect {
     void removeMAC(std::string strDeviceName, std::string strMAC);
     
     double macLastSeen(std::string strMAC, std::string strDeviceName);
+    
+    void setMACMaxAge(double dMaxAge);
+    double macMaxAge();
   };
 }
 
