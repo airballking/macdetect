@@ -22,7 +22,7 @@ namespace detect {
   }
   
   bool Network::privilegesSuffice() {
-    Wire wrTest("", 1514);
+    Wire wrTest("", ETH_FRAME_LEN);
     bool bSuffices = (wrTest.socket() > -1);
     
     return bSuffices;
