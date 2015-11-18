@@ -5,6 +5,7 @@
 #include <string>
 
 #include <detect/Wire.h>
+#include <detect/Headers.h>
 
 
 namespace detect {

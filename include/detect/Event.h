@@ -11,7 +11,8 @@ namespace detect {
     typedef enum {
       DeviceAdded = 0,
       DeviceRemoved = 1,
-      DeviceStateChanged = 2
+      DeviceStateChanged = 2,
+      MACAddressDiscovered = 3
     } EventType;
     
   private:
@@ -44,6 +45,18 @@ namespace detect {
     
     bool stateChangeUp();
     bool stateChangeRunning();
+  };
+  
+  class MACEvent : public DeviceEvent {
+  private:
+    std::string m_strMAC;
+    
+  protected:
+  public:
+    MACEvent(EventType tpType, std::string strDeviceName, std::string strMAC);
+    ~MACEvent();
+    
+    std::string macAddress();
   };
 }
 

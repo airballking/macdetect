@@ -6,6 +6,8 @@
 #include <string>
 #include <list>
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -18,17 +20,28 @@
 #include <detect/Device.h>
 #include <detect/Event.h>
 #include <detect/Wire.h>
+#include <detect/Headers.h>
+
+
+#define NSEC_PER_SEC 1000000000L
 
 
 namespace detect {
   class Network {
   private:
+    typedef struct {
+      std::string strMAC;
+      std::string strDeviceName;
+      double dLastSeen;
+    } MACEntity;
+    
     int m_nSocketFDControl;
     bool m_bAutoManageDevices;
     std::list<Device*> m_lstDevices;
     std::list<std::string> m_lstSystemDeviceNames;
     
     std::list<Event*> m_lstEvents;
+    std::list<MACEntity> m_lstMACSeen;
     
     bool m_bShouldRun;
     
@@ -60,7 +73,14 @@ namespace detect {
     
     std::list<Event*> events();
     
+    std::string mac(unsigned char* ucMAC);
+    
+    double time();
+    
     void detectNetworkActivity();
+    void addMAC(std::string strMACAddress, std::string strDeviceName);
+    
+    double macLastSeen(std::string strMAC, std::string strDeviceName);
   };
 }
 

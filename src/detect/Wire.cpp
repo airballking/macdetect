@@ -14,7 +14,7 @@ namespace detect {
   
   bool Wire::write(unsigned char* ucBuffer, unsigned int unLength) {
     struct sockaddr_ll socket_address;
-    memset(&socket_address, 0, sizeof(socket_address));
+    memset(&socket_address, 0, 1514);//sizeof(socket_address));
     socket_address.sll_family = AF_PACKET;
     socket_address.sll_protocol = htons(0x0003); // ETH_P_ALL
     

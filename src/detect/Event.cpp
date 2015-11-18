@@ -43,4 +43,17 @@ namespace detect {
   std::string DeviceEvent::deviceName() {
     return m_strDeviceName;
   }
+  
+  /*
+    MAC related event class
+  */
+  MACEvent::MACEvent(EventType tpType, std::string strDeviceName, std::string strMAC) : m_strMAC(strMAC), DeviceEvent(tpType, strDeviceName) {
+  }
+  
+  MACEvent::~MACEvent() {
+  }
+  
+  std::string MACEvent::macAddress() {
+    return m_strMAC;
+  }
 }

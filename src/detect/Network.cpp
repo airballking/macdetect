@@ -245,6 +245,28 @@ namespace detect {
     return m_lstEvents;
   }
   
+  std::string Network::mac(unsigned char* ucMAC) {
+    std::stringstream sts;
+    
+    for(int nI = 0; nI < 6; nI++) {
+      int nByte = ucMAC[nI];
+      sts << std::setfill('0') << std::setw(2) << std::hex << nByte;
+	  
+      if(nI < 5) {
+	sts << ":";
+      }
+    }
+    
+    return sts.str();
+  }
+  
+  double Network::time() {
+    struct timespec tsTime;
+    clock_gettime(CLOCK_MONOTONIC, &tsTime);
+    
+    return tsTime.tv_sec + double(tsTime.tv_nsec) / NSEC_PER_SEC;
+  }
+  
   void Network::detectNetworkActivity() {
     unsigned char* ucBuffer = NULL;
     int nLengthRead;
@@ -252,12 +274,57 @@ namespace detect {
     for(Device* dvDevice : this->knownDevices()) {
       ucBuffer = dvDevice->read(nLengthRead);
       
-      if(nLengthRead > 0) {
-	// TODO: Process the data here.
-	std::cout << "Received " << nLengthRead << " bytes on " << dvDevice->deviceName() << std::endl;
+      if(nLengthRead >= sizeof(EthernetFrameHeader)) {
+	EthernetFrameHeader efhHeader;
+	memcpy(&efhHeader, ucBuffer, sizeof(efhHeader));
+	
+	// if(ntohs(efhHeader.usFrameType) == 0x0800) { // EtherType
+	//   IPHeader iphHeader;
+	//   memcpy(&iphHeader, &(ucBuffer[sizeof(EthernetFrameHeader)]), sizeof(IPHeader));
+	  
+	//   // Do something with IPv4 here?
+	// }
+	
+	this->addMAC(this->mac(efhHeader.ucSenderHW), dvDevice->deviceName());
+	this->addMAC(this->mac(efhHeader.ucReceiverHW), dvDevice->deviceName());
       } else if(nLengthRead == -1) {
-	std::cerr << "Error on device read " << dvDevice->deviceName() << std::endl;
+	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
       }
     }
+  }
+  
+  void Network::addMAC(std::string strMACAddress, std::string strDeviceName) {
+    if(strMACAddress != "00:00:00:00:00:00" && strMACAddress != "ff:ff:ff:ff:ff:ff") {
+      if(this->macLastSeen(strMACAddress, strDeviceName) == -1) {
+	this->scheduleEvent(new MACEvent(Event::MACAddressDiscovered, strDeviceName, strMACAddress));
+      }
+      
+      bool bWasPresent = false;
+      for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
+	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	if((*itMAC).strMAC == strMACAddress && (*itMAC).strDeviceName == strDeviceName) {
+	  (*itMAC).dLastSeen = this->time();
+	  bWasPresent = true;
+	}
+      }
+      
+      if(!bWasPresent) {
+	m_lstMACSeen.push_back({strMACAddress, strDeviceName, this->time()});
+      }
+    }
+  }
+  
+  double Network::macLastSeen(std::string strMAC, std::string strDeviceName) {
+    double dTime = -1;
+    
+    for(MACEntity meEntity : m_lstMACSeen) {
+      if(meEntity.strMAC == strMAC) {// && meEntity.strDeviceName == strDeviceName) {
+	dTime = meEntity.dLastSeen;
+	
+	break;
+      }
+    }
+    
+    return dTime;
   }
 }

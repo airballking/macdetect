@@ -56,6 +56,11 @@ int main(int argc, char** argv) {
 	  std::cout << "Device '" << devEvent->deviceName() << "' is now " << (dvDevice->running() ? "running" : "not running") << std::endl;
 	}
       } break;
+	
+      case detect::Event::MACAddressDiscovered: {
+	detect::MACEvent* mvEvent = (detect::MACEvent*)evEvent;
+	std::cout << "MAC address discovered on device '" << mvEvent->deviceName() << "': '" << mvEvent->macAddress() << "'" << std::endl;
+      } break;
       }
     }
   }
