@@ -386,23 +386,37 @@ namespace macdetect {
     for(Device* dvDevice : this->knownDevices()) {
       ucBuffer = dvDevice->read(nLengthRead);
       
-      if(nLengthRead >= sizeof(EthernetFrameHeader)) {
-	EthernetFrameHeader efhHeader;
+      if(nLengthRead >= sizeof(struct ethhdr)) {
+	struct ethhdr efhHeader;
 	memcpy(&efhHeader, ucBuffer, sizeof(efhHeader));
 	
-	// if(ntohs(efhHeader.usFrameType) == 0x0800) { // EtherType
-	//   IPHeader iphHeader;
-	//   memcpy(&iphHeader, &(ucBuffer[sizeof(EthernetFrameHeader)]), sizeof(IPHeader));
-	  
-	//   // Do something with IPv4 here?
-	// }
-	
-	this->addMAC(this->mac(efhHeader.ucSenderHW), dvDevice->deviceName());
-	//this->addMAC(this->mac(efhHeader.ucReceiverHW), dvDevice->deviceName());
+	if(this->addMAC(this->mac(efhHeader.h_source), dvDevice->deviceName())) {
+	  if(ntohs(efhHeader.h_proto) == 0x0800) { // EtherType
+	    struct iphdr iphHeader;
+	    memcpy(&iphHeader, &(ucBuffer[sizeof(ethhdr)]), sizeof(struct iphdr));
+	    
+	    std::string strSenderIP = inet_ntoa(((struct sockaddr_in*)&iphHeader.saddr)->sin_addr);
+	    
+	    if(this->ipAllowed(strSenderIP)) {
+	      // TODO: Fully implement IP address support.
+	    }
+	  }
+	}
       } else if(nLengthRead == -1) {
 	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
       }
     }
+  }
+  
+  bool Network::ipAllowed(std::string strIP) {
+    bool bAllowed = false;
+    
+    if(strIP != "255.255.255.255" &&
+       strIP.substr(0, 3) != "224") {
+      bAllowed = true;
+    }
+    
+    return bAllowed;
   }
   
   bool Network::macAllowed(std::string strMAC) {
@@ -425,7 +439,9 @@ namespace macdetect {
     return bAllowed;
   }
   
-  void Network::addMAC(std::string strMACAddress, std::string strDeviceName) {
+  bool Network::addMAC(std::string strMACAddress, std::string strDeviceName) {
+    bool bResult = false;
+    
     if(this->macAllowed(strMACAddress)) {
       if(this->macLastSeen(strMACAddress, strDeviceName) == -1) {
 	this->scheduleEvent(new MACEvent(Event::MACAddressDiscovered, strDeviceName, strMACAddress));
@@ -442,8 +458,11 @@ namespace macdetect {
       
       if(!bWasPresent) {
 	m_lstMACSeen.push_back({strMACAddress, strDeviceName, this->time()});
+	bResult = true;
       }
     }
+    
+    return bResult;
   }
   
   void Network::removeMAC(std::string strDeviceName, std::string strMAC) {

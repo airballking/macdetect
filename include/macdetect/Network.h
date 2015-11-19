@@ -34,12 +34,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <regex>
+#include <netinet/ip.h>
+#include <netinet/if_ether.h>
 
 // Detect
 #include <macdetect/Device.h>
 #include <macdetect/Event.h>
 #include <macdetect/Wire.h>
-#include <macdetect/Headers.h>
 #include <macdetect/Data.h>
 
 
@@ -122,8 +123,9 @@ namespace macdetect {
     
     void detectNetworkActivity();
     
+    bool ipAllowed(std::string strIP);
     bool macAllowed(std::string strMAC);
-    void addMAC(std::string strMACAddress, std::string strDeviceName);
+    bool addMAC(std::string strMACAddress, std::string strDeviceName);
     void removeMAC(std::string strDeviceName, std::string strMAC);
     
     double macLastSeen(std::string strMAC, std::string strDeviceName);

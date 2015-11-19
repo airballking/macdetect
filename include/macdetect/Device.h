@@ -25,7 +25,6 @@
 
 // Detect
 #include <macdetect/Wire.h>
-#include <macdetect/Headers.h>
 
 
 namespace macdetect {
