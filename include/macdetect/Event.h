@@ -34,7 +34,8 @@ namespace macdetect {
       DeviceRemoved = 1,
       DeviceStateChanged = 2,
       MACAddressDiscovered = 3,
-      MACAddressDisappeared = 4
+      MACAddressDisappeared = 4,
+      DeviceEvidenceChanged = 5
     } EventType;
     
   private:
@@ -57,6 +58,9 @@ namespace macdetect {
     std::string m_strDeviceName;
     bool m_bStateChangeUp;
     bool m_bStateChangeRunning;
+    std::string m_strEvidenceField;
+    std::string m_strEvidenceValue;
+    std::string m_strEvidenceValueFormer;
     
   protected:
   public:
@@ -70,6 +74,14 @@ namespace macdetect {
     
     bool stateChangeUp();
     bool stateChangeRunning();
+    
+    void setEvidence(std::string strField, std::string strValue, std::string strValueFormer);
+    void setEvidenceField(std::string strField);
+    std::string evidenceField();
+    void setEvidenceValue(std::string strValue);
+    std::string evidenceValue();
+    void setEvidenceValueFormer(std::string strValue);
+    std::string evidenceValueFormer();
   };
   
   /*

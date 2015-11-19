@@ -61,6 +61,36 @@ namespace macdetect {
     return m_strDeviceName;
   }
   
+  void DeviceEvent::setEvidence(std::string strField, std::string strValue, std::string strValueFormer) {
+    this->setEvidenceField(strField);
+    this->setEvidenceValue(strValue);
+    this->setEvidenceValueFormer(strValueFormer);
+  }
+  
+  void DeviceEvent::setEvidenceField(std::string strField) {
+    m_strEvidenceField = strField;
+  }
+  
+  std::string DeviceEvent::evidenceField() {
+    return m_strEvidenceField;
+  }
+  
+  void DeviceEvent::setEvidenceValue(std::string strValue) {
+    m_strEvidenceValue = strValue;
+  }
+  
+  std::string DeviceEvent::evidenceValue() {
+    return m_strEvidenceValue;
+  }
+  
+  void DeviceEvent::setEvidenceValueFormer(std::string strValue) {
+    m_strEvidenceValueFormer = strValue;
+  }
+  
+  std::string DeviceEvent::evidenceValueFormer() {
+    return m_strEvidenceValueFormer;
+  }
+  
   /*
     MAC related event class
   */

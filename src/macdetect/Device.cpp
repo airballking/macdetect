@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false), m_wrWire(strDeviceName, ETH_FRAME_LEN) {
+  Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false), m_wrWire(strDeviceName, ETH_FRAME_LEN), m_strMAC("") {
   }
   
   Device::~Device() {
@@ -31,6 +31,35 @@ namespace macdetect {
   
   Device::HardwareType Device::hardwareType() {
     return m_hwtType;
+  }
+  
+  std::string Device::mac() {
+    if(m_strMAC == "") {
+      struct ifreq ifrTemp;
+      
+      memset(&ifrTemp, 0, sizeof(ifrTemp));
+      strcpy(ifrTemp.ifr_name, this->deviceName().c_str());
+      ioctl(m_wrWire.socket(), SIOCGIFHWADDR, &ifrTemp);
+      
+      std::string strDeviceMAC = "";
+      char carrBuffer[17];
+      int nOffset = 0;
+      for(int nI = 0; nI < 6; nI++) {
+	sprintf(&(carrBuffer[nI + nOffset]), "%.2x", (unsigned char)ifrTemp.ifr_hwaddr.sa_data[nI]);
+	nOffset++;
+	
+	if(nI < 5) {
+	  nOffset++;
+	  carrBuffer[nI + nOffset] = ':';
+	}
+      }
+      
+      strDeviceMAC = std::string(carrBuffer, 17);
+      
+      m_strMAC = strDeviceMAC;
+    }
+    
+    return m_strMAC;
   }
   
   void Device::setUp(bool bUp) {

@@ -157,10 +157,17 @@ namespace macdetect {
     if(this->deviceAllowed(strDeviceName)) {
       if(this->knownDevice(strDeviceName) == NULL) {
 	if(this->systemDeviceNameExists(strDeviceName)) {
-	  m_lstDevices.push_back(new Device(strDeviceName, this->deviceHardwareType(strDeviceName)));
+	  Device* dvNew = new Device(strDeviceName, this->deviceHardwareType(strDeviceName));
+	  m_lstDevices.push_back(dvNew);
+	  
+	  this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
+	  
+	  DeviceEvent* devEvidenceMAC = new DeviceEvent(Event::DeviceEvidenceChanged, strDeviceName);
+	  devEvidenceMAC->setEvidence("mac", dvNew->mac(), "");
+	  this->scheduleEvent(devEvidenceMAC);
+	  
+	  bResult = true;
 	}
-	
-	this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
       }
     }
     

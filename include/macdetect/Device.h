@@ -44,6 +44,7 @@ namespace macdetect {
     std::string m_strDeviceName;
     HardwareType m_hwtType;
     Wire m_wrWire;
+    std::string m_strMAC;
     
   protected:
   public:
@@ -55,6 +56,8 @@ namespace macdetect {
     
     void setUp(bool bUp);
     void setRunning(bool bRunning);
+    
+    std::string mac();
     
     bool up();
     bool running();
