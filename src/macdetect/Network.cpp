@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
     m_dtData.readVendors();
   }
   
@@ -44,6 +44,14 @@ namespace macdetect {
     bool bSuffices = (wrTest.socket() > -1);
     
     return bSuffices;
+  }
+  
+  void Network::setIgnoreDeviceMACs(bool bIgnore) {
+    m_bIgnoreDeviceMACs = bIgnore;
+  }
+  
+  bool Network::ignoreDeviceMACs() {
+    return m_bIgnoreDeviceMACs;
   }
   
   void Network::clearDeviceWhiteBlacklist() {
@@ -397,8 +405,28 @@ namespace macdetect {
     }
   }
   
+  bool Network::macAllowed(std::string strMAC) {
+    bool bAllowed = false;
+    
+    if(strMAC != "00:00:00:00:00:00" && strMAC != "ff:ff:ff:ff:ff:ff") {
+      bAllowed = true;
+      
+      if(m_bIgnoreDeviceMACs) {
+	for(Device* dvDevice : this->knownDevices()) {
+	  if(dvDevice->mac() == strMAC) {
+	    bAllowed = false;
+	    
+	    break;
+	  }
+	}
+      }
+    }
+    
+    return bAllowed;
+  }
+  
   void Network::addMAC(std::string strMACAddress, std::string strDeviceName) {
-    if(strMACAddress != "00:00:00:00:00:00" && strMACAddress != "ff:ff:ff:ff:ff:ff") {
+    if(this->macAllowed(strMACAddress)) {
       if(this->macLastSeen(strMACAddress, strDeviceName) == -1) {
 	this->scheduleEvent(new MACEvent(Event::MACAddressDiscovered, strDeviceName, strMACAddress));
       }

@@ -74,6 +74,7 @@ namespace macdetect {
     
     double m_dMaxMACAge;
     bool m_bShouldRun;
+    bool m_bIgnoreDeviceMACs;
     
     Data m_dtData;
     
@@ -90,6 +91,9 @@ namespace macdetect {
     void setDeviceWhiteBlacklistMode(WhiteBlackListMode wbmSet);
     void addDeviceWhiteBlacklistEntry(std::string strPattern);
     bool deviceAllowed(std::string strDeviceName);
+    
+    void setIgnoreDeviceMACs(bool bIgnore);
+    bool ignoreDeviceMACs();
     
     bool cycle();
     void shutdown();
@@ -117,6 +121,8 @@ namespace macdetect {
     double time();
     
     void detectNetworkActivity();
+    
+    bool macAllowed(std::string strMAC);
     void addMAC(std::string strMACAddress, std::string strDeviceName);
     void removeMAC(std::string strDeviceName, std::string strMAC);
     
