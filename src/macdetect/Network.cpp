@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist) {
     m_dtData.readVendors();
   }
   
@@ -44,6 +44,44 @@ namespace macdetect {
     bool bSuffices = (wrTest.socket() > -1);
     
     return bSuffices;
+  }
+  
+  void Network::clearDeviceWhiteBlacklist() {
+    m_lstDeviceWhiteBlackList.clear();
+  }
+  
+  void Network::setDeviceWhiteBlacklistMode(WhiteBlackListMode wbmSet) {
+    m_wbmDevices = wbmSet;
+  }
+  
+  void Network::addDeviceWhiteBlacklistEntry(std::string strPattern) {
+    m_lstDeviceWhiteBlackList.push_back(strPattern);
+    std::list<std::string> lstRemoveDevices;
+    
+    for(Device* dvDevice : this->knownDevices()) {
+      if(!this->deviceAllowed(dvDevice->deviceName())) {
+	lstRemoveDevices.push_back(dvDevice->deviceName());
+      }
+    }
+    
+    for(std::string strDeviceName : lstRemoveDevices) {
+      this->removeDevice(strDeviceName);
+    }
+  }
+  
+  bool Network::deviceAllowed(std::string strDeviceName) {
+    bool bDeviceInList = false;
+    
+    for(std::string strPattern : m_lstDeviceWhiteBlackList) {
+      std::regex rgxRegex(strPattern);
+      
+      if(std::regex_match(strDeviceName, rgxRegex)) {
+	bDeviceInList = true;
+      }
+    }
+    
+    return (m_wbmDevices == Whitelist && bDeviceInList) ||
+      (m_wbmDevices == Blacklist && !bDeviceInList);
   }
   
   bool Network::cycle() {
@@ -116,12 +154,14 @@ namespace macdetect {
   bool Network::addDevice(std::string strDeviceName) {
     bool bResult = false;
     
-    if(this->knownDevice(strDeviceName) == NULL) {
-      if(this->systemDeviceNameExists(strDeviceName)) {
-	m_lstDevices.push_back(new Device(strDeviceName, this->deviceHardwareType(strDeviceName)));
+    if(this->deviceAllowed(strDeviceName)) {
+      if(this->knownDevice(strDeviceName) == NULL) {
+	if(this->systemDeviceNameExists(strDeviceName)) {
+	  m_lstDevices.push_back(new Device(strDeviceName, this->deviceHardwareType(strDeviceName)));
+	}
+	
+	this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
       }
-      
-      this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
     }
     
     return bResult;

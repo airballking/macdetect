@@ -33,6 +33,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <regex>
 
 // Detect
 #include <macdetect/Device.h>
@@ -47,6 +48,12 @@
 
 namespace macdetect {
   class Network {
+  public:
+    typedef enum {
+      Whitelist = 0,
+      Blacklist = 1
+    } WhiteBlackListMode;
+    
   private:
     typedef struct {
       std::string strMAC;
@@ -62,6 +69,9 @@ namespace macdetect {
     std::list<Event*> m_lstEvents;
     std::list<MACEntity> m_lstMACSeen;
     
+    WhiteBlackListMode m_wbmDevices;
+    std::list<std::string> m_lstDeviceWhiteBlackList;
+    
     double m_dMaxMACAge;
     bool m_bShouldRun;
     
@@ -75,6 +85,11 @@ namespace macdetect {
     ~Network();
     
     bool privilegesSuffice();
+    
+    void clearDeviceWhiteBlacklist();
+    void setDeviceWhiteBlacklistMode(WhiteBlackListMode wbmSet);
+    void addDeviceWhiteBlacklistEntry(std::string strPattern);
+    bool deviceAllowed(std::string strDeviceName);
     
     bool cycle();
     void shutdown();
