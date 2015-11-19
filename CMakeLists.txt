@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Detect)
+project(MACDetect)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
@@ -7,12 +7,14 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(${PROJECT_NAME}_VERSION_MAJOR_0)
 set(${PROJECT_NAME}_VERSION_MINOR_1)
 
+set(EXECUTABLE_NAME macdetect)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 include_directories(
   include)
 
-add_executable(detect
+add_executable(${EXECUTABLE_NAME}
   src/main.cpp)
 
 add_library(${PROJECT_NAME}
@@ -22,5 +24,5 @@ add_library(${PROJECT_NAME}
   src/detect/SocketReader.cpp
   src/detect/Wire.cpp)
 
-target_link_libraries(detect
+target_link_libraries(${EXECUTABLE_NAME}
   ${PROJECT_NAME})
