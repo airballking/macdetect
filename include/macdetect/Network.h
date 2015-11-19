@@ -39,6 +39,7 @@
 #include <macdetect/Event.h>
 #include <macdetect/Wire.h>
 #include <macdetect/Headers.h>
+#include <macdetect/Data.h>
 
 
 #define NSEC_PER_SEC 1000000000L
@@ -62,8 +63,9 @@ namespace macdetect {
     std::list<MACEntity> m_lstMACSeen;
     
     double m_dMaxMACAge;
-    
     bool m_bShouldRun;
+    
+    Data m_dtData;
     
   protected:
     void scheduleEvent(Event* evSchedule);
@@ -107,6 +109,8 @@ namespace macdetect {
     
     void setMACMaxAge(double dMaxAge);
     double macMaxAge();
+    
+    std::string readableMACIdentifier(std::string strMAC);
   };
 }
 

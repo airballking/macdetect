@@ -95,12 +95,12 @@ int main(int argc, char** argv) {
 	
 	case macdetect::Event::MACAddressDiscovered: {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
-	  std::cout << "MAC address discovered on device '" << mvEvent->deviceName() << "': '" << mvEvent->macAddress() << "'" << std::endl;
+	  std::cout << "MAC address discovered on device '" << mvEvent->deviceName() << "': " << g_nwNetwork.readableMACIdentifier(mvEvent->macAddress()) << std::endl;
 	} break;
 	
 	case macdetect::Event::MACAddressDisappeared: {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
-	  std::cout << "MAC address disappeared from device '" << mvEvent->deviceName() << "': '" << mvEvent->macAddress() << "'" << std::endl;
+	  std::cout << "MAC address disappeared from device '" << mvEvent->deviceName() << "': " << g_nwNetwork.readableMACIdentifier(mvEvent->macAddress()) << std::endl;
 	} break;
 	}
       }

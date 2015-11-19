@@ -20,6 +20,7 @@
 
 namespace macdetect {
   Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)) {
+    m_dtData.readVendors();
   }
   
   Network::~Network() {
@@ -403,5 +404,18 @@ namespace macdetect {
   
   double Network::macMaxAge() {
     return m_dMaxMACAge;
+  }
+  
+  std::string Network::readableMACIdentifier(std::string strMAC) {
+    std::string strReturn = "";
+    Data::Vendor vdVendor = m_dtData.vendorForMAC(strMAC);
+    
+    if(!vdVendor.bValid) {
+      strReturn = strMAC;
+    } else {
+      strReturn = "\"" + vdVendor.strVendor + "\"" + strMAC.substr(8);
+    }
+    
+    return strReturn;
   }
 }
