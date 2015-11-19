@@ -398,7 +398,7 @@ namespace macdetect {
 	// }
 	
 	this->addMAC(this->mac(efhHeader.ucSenderHW), dvDevice->deviceName());
-	this->addMAC(this->mac(efhHeader.ucReceiverHW), dvDevice->deviceName());
+	//this->addMAC(this->mac(efhHeader.ucReceiverHW), dvDevice->deviceName());
       } else if(nLengthRead == -1) {
 	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
       }
