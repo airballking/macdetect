@@ -19,11 +19,11 @@
 #define __EVENT_H__
 
 
-// Detect
-#include <detect/Device.h>
+// System
+#include <string>
 
 
-namespace detect {
+namespace macdetect {
   /*
     Base Events
   */

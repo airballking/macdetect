@@ -15,10 +15,10 @@
 /** \author Jan Winkler */
 
 
-#include <detect/Network.h>
+#include <macdetect/Network.h>
 
 
-namespace detect {
+namespace macdetect {
   Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)) {
   }
   

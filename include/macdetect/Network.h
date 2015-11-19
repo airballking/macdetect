@@ -35,16 +35,16 @@
 #include <unistd.h>
 
 // Detect
-#include <detect/Device.h>
-#include <detect/Event.h>
-#include <detect/Wire.h>
-#include <detect/Headers.h>
+#include <macdetect/Device.h>
+#include <macdetect/Event.h>
+#include <macdetect/Wire.h>
+#include <macdetect/Headers.h>
 
 
 #define NSEC_PER_SEC 1000000000L
 
 
-namespace detect {
+namespace macdetect {
   class Network {
   private:
     typedef struct {

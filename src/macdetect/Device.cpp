@@ -15,10 +15,10 @@
 /** \author Jan Winkler */
 
 
-#include <detect/Device.h>
+#include <macdetect/Device.h>
 
 
-namespace detect {
+namespace macdetect {
   Device::Device(std::string strDeviceName, HardwareType hwtType) : m_strDeviceName(strDeviceName), m_hwtType(hwtType), m_bUp(false), m_bRunning(false), m_wrWire(strDeviceName, ETH_FRAME_LEN) {
   }
   

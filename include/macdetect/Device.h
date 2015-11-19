@@ -24,11 +24,11 @@
 #include <linux/if_ether.h>
 
 // Detect
-#include <detect/Wire.h>
-#include <detect/Headers.h>
+#include <macdetect/Wire.h>
+#include <macdetect/Headers.h>
 
 
-namespace detect {
+namespace macdetect {
   class Device {
   public:
     typedef enum {

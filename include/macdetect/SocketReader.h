@@ -31,7 +31,7 @@
 #include <string.h>
 
 
-namespace detect {
+namespace macdetect {
   class SocketReader {
   private:
     int m_nDefaultReadingLength;

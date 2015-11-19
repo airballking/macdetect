@@ -15,10 +15,10 @@
 /** \author Jan Winkler */
 
 
-#include <detect/Event.h>
+#include <macdetect/Event.h>
 
 
-namespace detect {
+namespace macdetect {
   /*
     Base event class
   */

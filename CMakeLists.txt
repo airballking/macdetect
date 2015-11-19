@@ -18,11 +18,11 @@ add_executable(${EXECUTABLE_NAME}
   src/main.cpp)
 
 add_library(${PROJECT_NAME}
-  src/detect/Network.cpp
-  src/detect/Device.cpp
-  src/detect/Event.cpp
-  src/detect/SocketReader.cpp
-  src/detect/Wire.cpp)
+  src/macdetect/Network.cpp
+  src/macdetect/Device.cpp
+  src/macdetect/Event.cpp
+  src/macdetect/SocketReader.cpp
+  src/macdetect/Wire.cpp)
 
 target_link_libraries(${EXECUTABLE_NAME}
   ${PROJECT_NAME})

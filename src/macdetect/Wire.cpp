@@ -15,10 +15,10 @@
 /** \author Jan Winkler */
 
 
-#include <detect/Wire.h>
+#include <macdetect/Wire.h>
 
 
-namespace detect {
+namespace macdetect {
   Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) {
     this->setSocket(::socket(AF_PACKET, SOCK_RAW, htons(0x0800)));
     this->setDefaultReadingLength(nDefaultReadingLength);

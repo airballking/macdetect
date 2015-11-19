@@ -15,10 +15,10 @@
 /** \author Jan Winkler */
 
 
-#include <detect/SocketReader.h>
+#include <macdetect/SocketReader.h>
 
 
-namespace detect {
+namespace macdetect {
   SocketReader::SocketReader() : m_ucInternalBuffer(NULL) {
   }
   
