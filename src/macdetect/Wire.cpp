@@ -43,14 +43,14 @@ namespace macdetect {
   Wire::~Wire() {
   }
   
-  bool Wire::write(unsigned char* ucBuffer, unsigned int unLength) {
+  bool Wire::write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol) {
     struct sockaddr_ll socket_address;
     memset(&socket_address, 0, this->defaultReadingLength());
     socket_address.sll_family = AF_PACKET;
-    socket_address.sll_protocol = htons(0x0800);
+    socket_address.sll_protocol = htons(usProtocol);
     
     if(sendto(m_nSocket,
-	      ucBuffer,
+	      vdBuffer,
 	      unLength,
 	      0,
 	      (struct sockaddr*)&socket_address,

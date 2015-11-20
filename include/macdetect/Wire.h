@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-// Detect
+// MAC Detect
 #include <macdetect/SocketReader.h>
 
 
@@ -38,7 +38,7 @@ namespace macdetect {
     Wire(std::string strDeviceName, int nDefaultReadingLength);
     ~Wire();
     
-    bool write(unsigned char* ucBuffer, unsigned int unLength);
+    bool write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol = 0x0800);
   };
 }
 
