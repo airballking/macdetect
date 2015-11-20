@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
     g_nwNetwork.setAutoManageDevices(true);
     g_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
     g_nwNetwork.addDeviceWhiteBlacklistEntry("(wlan)(.*)");
+    g_nwNetwork.addDeviceWhiteBlacklistEntry("(eth)(.*)");
   
     while(g_nwNetwork.cycle()) {
       std::list<macdetect::Event*> lstEvents = g_nwNetwork.events();
