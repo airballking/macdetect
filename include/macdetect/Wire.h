@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <netinet/ether.h>
 
 // MAC Detect
 #include <macdetect/SocketReader.h>
@@ -34,11 +35,15 @@
 namespace macdetect {
   class Wire : public SocketReader {
   private:
+    std::string m_strDeviceName;
+    
   public:
     Wire(std::string strDeviceName, int nDefaultReadingLength);
     ~Wire();
     
-    bool write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol = 0x0800);
+    static int wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer);
+    
+    bool write(void* vdBuffer, unsigned int unLength);
   };
 }
 

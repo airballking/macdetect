@@ -405,16 +405,15 @@ namespace macdetect {
 	  } break;
 	    
 	  case 0x8035: { // RARP
+	    std::cout << "Received RARP packet" << std::endl;
 	  } break;
 	    
 	  default: {
 	  } break;
 	  }
 	  
-	  //std::cout << "Sent RARP request to '" << strMAC << "'" << std::endl;
 	  m_rpRARP.requestIP(strMAC, dvDevice);
 	}
-	
       } else if(nLengthRead == -1) {
 	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
       }

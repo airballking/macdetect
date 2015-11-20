@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) {
+  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) : m_strDeviceName(strDeviceName) {
     this->setSocket(::socket(AF_PACKET, SOCK_RAW, htons(0x0800)));
     this->setDefaultReadingLength(nDefaultReadingLength);
     
@@ -35,7 +35,7 @@ namespace macdetect {
     memset(&socket_address, 0, sizeof(socket_address));
     socket_address.sll_family = AF_PACKET;
     socket_address.sll_ifindex = ifr.ifr_ifindex;
-    socket_address.sll_protocol = htons(0x0800);
+    socket_address.sll_protocol = htons(0x0003);
     
     bind(this->socket(), (sockaddr*)&socket_address, sizeof(socket_address));
   }
@@ -43,21 +43,34 @@ namespace macdetect {
   Wire::~Wire() {
   }
   
-  bool Wire::write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol) {
-    struct sockaddr_ll socket_address;
-    memset(&socket_address, 0, this->defaultReadingLength());
-    socket_address.sll_family = AF_PACKET;
-    socket_address.sll_protocol = htons(usProtocol);
+  int Wire::wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer) {
+    int nBytes = sizeof(struct ethhdr) + unPayloadLength + 4 /* FCS */;
     
-    if(sendto(m_nSocket,
-	      vdBuffer,
-	      unLength,
-	      0,
-	      (struct sockaddr*)&socket_address,
-	      sizeof(socket_address)) == -1) {
-      std::cout << "Fail (length " << unLength << "): " << strerror(errno) << std::endl;
+    struct ethhdr ehFrame;
+    unsigned short usEtherTypeN = htons(usEtherType);
+    memcpy(&(ehFrame.h_proto), &usEtherTypeN, 2);
+    
+    memset(vdBuffer, 0, nBytes);
+    struct ether_addr* eaSource = ether_aton(strSourceMAC.c_str());
+    memcpy(ehFrame.h_source, eaSource, sizeof(struct ether_addr));
+    struct ether_addr* eaDestination = ether_aton(strDestinationMAC.c_str());
+    memcpy(ehFrame.h_dest, eaDestination, sizeof(struct ether_addr));
+    
+    memcpy(vdBuffer, &ehFrame, sizeof(struct ethhdr));
+    memcpy(&(((unsigned char*)vdBuffer)[sizeof(struct ethhdr)]), vdPayload, unPayloadLength);
+    
+    // TODO: Calculate and set the FCS; right now, nulling it out.
+    memset(&(((unsigned char*)vdBuffer)[sizeof(struct ethhdr) + unPayloadLength]), 0, 4);
+    
+    return nBytes;
+  }
+  
+  bool Wire::write(void* vdBuffer, unsigned int unLength) {
+    int nWritten = 0;
+    
+    if((nWritten = ::write(m_nSocket, vdBuffer, unLength)) == -1) {
+      std::cerr << "Failure: " << strerror(errno) << std::endl;
       
-      m_nSocket = -1;
       return false;
     }
     
