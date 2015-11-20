@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 	
 	case macdetect::Event::DeviceRemoved: {
 	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
-	  std::cout << "Device removed: '" << devEvent->deviceName() << std::endl;
+	  std::cout << "Device removed: '" << devEvent->deviceName() << "'" << std::endl;
 	} break;
 	
 	case macdetect::Event::DeviceStateChanged: {

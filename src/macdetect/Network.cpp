@@ -391,9 +391,9 @@ namespace macdetect {
 	memcpy(&efhHeader, ucBuffer, sizeof(efhHeader));
 	std::string strMAC = this->mac(efhHeader.h_source);
 	
-	if(this->addMAC(strMAC, dvDevice->deviceName())) {
-	  switch(ntohs(efhHeader.h_proto)) {
-	  case 0x0800: { // EtherType
+	switch(ntohs(efhHeader.h_proto)) {
+	case 0x0800: { // EtherType
+	  if(this->addMAC(strMAC, dvDevice->deviceName())) {
 	    struct iphdr iphHeader;
 	    memcpy(&iphHeader, &(ucBuffer[sizeof(ethhdr)]), sizeof(struct iphdr));
 	    
@@ -402,17 +402,17 @@ namespace macdetect {
 	    if(this->ipAllowed(strSenderIP)) {
 	      // TODO: Fully implement IP address support.
 	    }
-	  } break;
 	    
-	  case 0x8035: { // RARP
-	    std::cout << "Received RARP packet" << std::endl;
-	  } break;
-	    
-	  default: {
-	  } break;
+	    m_rpRARP.requestIP(strMAC, dvDevice);
 	  }
+	} break;
 	  
-	  m_rpRARP.requestIP(strMAC, dvDevice);
+	case 0x8035: { // RARP
+	  std::cout << "Received RARP packet" << std::endl;
+	} break;
+	  
+	default: {
+	} break;
 	}
       } else if(nLengthRead == -1) {
 	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
