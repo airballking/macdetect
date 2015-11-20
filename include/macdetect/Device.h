@@ -63,6 +63,8 @@ namespace macdetect {
     
     unsigned char* read(int& nLengthRead);
     
+    Wire* wire();
+    
     static bool systemDeviceExists(std::string strDeviceName);
   };
 }

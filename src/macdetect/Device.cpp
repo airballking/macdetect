@@ -85,4 +85,8 @@ namespace macdetect {
     
     return ucBuffer;
   }
+  
+  Wire* Device::wire() {
+    return &m_wrWire;
+  }
 }
