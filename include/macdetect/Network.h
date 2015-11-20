@@ -37,11 +37,12 @@
 #include <netinet/ip.h>
 #include <netinet/if_ether.h>
 
-// Detect
+// MAC Detect
 #include <macdetect/Device.h>
 #include <macdetect/Event.h>
 #include <macdetect/Wire.h>
 #include <macdetect/Data.h>
+#include <macdetect/RARP.h>
 
 
 #define NSEC_PER_SEC 1000000000L
@@ -78,6 +79,7 @@ namespace macdetect {
     bool m_bIgnoreDeviceMACs;
     
     Data m_dtData;
+    RARP m_rpRARP;
     
   protected:
     void scheduleEvent(Event* evSchedule);

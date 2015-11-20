@@ -23,7 +23,8 @@ add_library(${PROJECT_NAME}
   src/macdetect/Event.cpp
   src/macdetect/SocketReader.cpp
   src/macdetect/Wire.cpp
-  src/macdetect/Data.cpp)
+  src/macdetect/Data.cpp
+  src/macdetect/RARP.cpp)
 
 target_link_libraries(${EXECUTABLE_NAME}
   ${PROJECT_NAME})
