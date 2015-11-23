@@ -8,6 +8,7 @@ set(${PROJECT_NAME}_VERSION_MAJOR_0)
 set(${PROJECT_NAME}_VERSION_MINOR_1)
 
 set(EXECUTABLE_NAME macdetect)
+set(DAEMON_NAME macdetectd)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
@@ -16,6 +17,11 @@ include_directories(
 
 add_executable(${EXECUTABLE_NAME}
   src/main.cpp)
+
+add_executable(${DAEMON_NAME}
+  src/daemon.cpp
+  src/macdetect/Server.cpp
+  src/macdetect/Client.cpp)
 
 add_library(${PROJECT_NAME}
   src/macdetect/Network.cpp
