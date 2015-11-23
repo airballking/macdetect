@@ -152,7 +152,7 @@ namespace macdetect {
       icmpICMP.icmp_rtime = 0;
       icmpICMP.icmp_ttime = 0;
       
-      icmpICMP.icmp_cksum = this->in_cksum((unsigned short*)&icmpICMP, 12 + 8);
+      icmpICMP.icmp_cksum = this->icmpHeaderChecksum((unsigned short*)&icmpICMP, 12 + 8);
       
       int nLen = sizeof(struct iphdr) + 12 + 8;
       unsigned char carrBufferPre[nLen];
@@ -174,35 +174,29 @@ namespace macdetect {
     return &m_wrWire;
   }
   
-  unsigned short Device::in_cksum(u_short *addr, int len) {
-    int nleft = len;
-    u_short *w = addr;
+  unsigned short Device::icmpHeaderChecksum(unsigned short* usData, int nLength) {
+    int nleft = nLength;
+    unsigned short* w = usData;
     int sum = 0;
     u_short answer = 0;
-
-    /*
-     * Our algorithm is simple, using a 32 bit accumulator (sum), we add
-     * sequential 16 bit words to it, and at the end, fold back all the
-     * carry bits from the top 16 bits into the lower 16 bits.
-     */
-    while (nleft > 1)  {
+    
+    while(nleft > 1)  {
       sum += *w++;
       nleft -= 2;
     }
-
-    /* mop up an odd byte, if necessary */
-    if (nleft == 1) {
-      *(u_char *)(&answer) = *(u_char *)w ;
+    
+    if(nleft == 1) {
+      *(unsigned char*)(&answer) = *(unsigned char*)w ;
       sum += answer;
     }
-
-    /* add back carry outs from top 16 bits to low 16 bits */
-    sum = (sum >> 16) + (sum & 0xffff);/* add hi 16 to low 16 */
-    sum += (sum >> 16);/* add carry */
-    answer = ~sum;/* truncate to 16 bits */
-    return(answer);
+    
+    sum = (sum >> 16) + (sum & 0xffff);
+    sum += (sum >> 16);
+    answer = ~sum;
+    
+    return answer;
   }
-
+  
   uint16_t Device::ipHeaderChecksum(void* vdData, int nLength) {
     char* carrData = (char*)vdData;
     
