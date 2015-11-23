@@ -134,38 +134,35 @@ namespace macdetect {
       iphHeader.check = this->ipHeaderChecksum(&iphHeader, sizeof(struct iphdr));
       
       // ICMP
-      struct icmphdr icmphHeader;
-      memset(&icmphHeader, 0, sizeof(struct icmphdr));
+      struct icmp icmpICMP;
+      memset(&icmpICMP, 0, sizeof(struct icmp));
       
-      icmphHeader.type = ICMP_ECHO;
-      icmphHeader.code = 0;
-      icmphHeader.checksum = 0;
-      icmphHeader.un.echo.id = 0xb60b;
-      icmphHeader.un.echo.sequence = 0x0100;
+      icmpICMP.icmp_type = ICMP_ECHO;
+      icmpICMP.icmp_code = 0;
+      icmpICMP.icmp_cksum = 0;
+      icmpICMP.icmp_seq = 12345;
+      icmpICMP.icmp_id = getpid();
       
-      icmphHeader.checksum = this->icmpHeaderChecksum((uint16_t*)&icmphHeader, sizeof(struct icmphdr));
+      struct timeval tvorig;
+      long tsorig;
+      gettimeofday(&tvorig, (struct timezone *)NULL);
+      tsorig = (tvorig.tv_sec % (24*60*60)) * 1000 + tvorig.tv_usec / 1000;
       
-      // struct timeval tvorig;
-      // long tsorig;
-      // long tsdiff;
-      // gettimeofday(&tvorig, (struct timezone *)NULL);
-      // tsorig = (tvorig.tv_sec % (24*60*60)) * 1000 + tvorig.tv_usec / 1000;
+      icmpICMP.icmp_otime = htonl(tsorig);
+      icmpICMP.icmp_rtime = 0;
+      icmpICMP.icmp_ttime = 0;
       
-      // icmphHeader.icmp_otime = htonl(tsorig);
+      icmpICMP.icmp_cksum = this->in_cksum((unsigned short*)&icmpICMP, 12 + 8);
       
-      int nLen = sizeof(struct iphdr) + sizeof(struct icmphdr) + 48;
+      int nLen = sizeof(struct iphdr) + 12 + 8;
       unsigned char carrBufferPre[nLen];
       memcpy(carrBufferPre, &iphHeader, sizeof(struct iphdr));
-      memcpy(&(carrBufferPre[sizeof(struct iphdr)]), &icmphHeader, sizeof(struct icmphdr));
-      
-      for(int nI = sizeof(struct iphdr) + sizeof(struct icmphdr); nI < nLen; nI++) {
-	carrBufferPre[nI] = 'Z';
-      }
+      memcpy(&(carrBufferPre[sizeof(struct iphdr)]), &icmpICMP, sizeof(struct icmp));
       
       int nLength = nLen + sizeof(struct ethhdr);
       unsigned char carrBuffer[nLength];
       
-      int nL = m_wrWire.wrapInEthernetFrame(this->mac(), strDestinationMAC, ETH_P_IP, carrBufferPre, sizeof(struct icmphdr) + sizeof(struct iphdr) + 48, carrBuffer);
+      int nL = m_wrWire.wrapInEthernetFrame(this->mac(), strDestinationMAC, ETH_P_IP, carrBufferPre, 12 + 8 + sizeof(struct iphdr), carrBuffer);
       
       return m_wrWire.write(carrBuffer, nL);
     }
@@ -177,23 +174,35 @@ namespace macdetect {
     return &m_wrWire;
   }
   
-  uint16_t Device::icmpHeaderChecksum(uint16_t* buffer, uint32_t size) 
-  {
-    unsigned long cksum=0;
-    while(size >1) 
-      {
-	cksum+=*buffer++;
-	size -= sizeof(unsigned short);
-      }
-    if(size ) 
-      {
-	cksum += *(unsigned char*)buffer;
-      }
-    cksum = (cksum >> 16) + (cksum & 0xffff);
-    cksum += (cksum >>16);
-    return (uint16_t)(~cksum);
+  unsigned short Device::in_cksum(u_short *addr, int len) {
+    int nleft = len;
+    u_short *w = addr;
+    int sum = 0;
+    u_short answer = 0;
+
+    /*
+     * Our algorithm is simple, using a 32 bit accumulator (sum), we add
+     * sequential 16 bit words to it, and at the end, fold back all the
+     * carry bits from the top 16 bits into the lower 16 bits.
+     */
+    while (nleft > 1)  {
+      sum += *w++;
+      nleft -= 2;
+    }
+
+    /* mop up an odd byte, if necessary */
+    if (nleft == 1) {
+      *(u_char *)(&answer) = *(u_char *)w ;
+      sum += answer;
+    }
+
+    /* add back carry outs from top 16 bits to low 16 bits */
+    sum = (sum >> 16) + (sum & 0xffff);/* add hi 16 to low 16 */
+    sum += (sum >> 16);/* add carry */
+    answer = ~sum;/* truncate to 16 bits */
+    return(answer);
   }
-  
+
   uint16_t Device::ipHeaderChecksum(void* vdData, int nLength) {
     char* carrData = (char*)vdData;
     

@@ -76,7 +76,7 @@ namespace macdetect {
     bool sendPingBroadcast(double dTime, double dInterval);
     bool sendPing(std::string strDestinationIP, std::string strDestinationMAC);
     
-    uint16_t icmpHeaderChecksum(uint16_t* buffer, uint32_t size);
+    unsigned short in_cksum(u_short *addr, int len);
     uint16_t ipHeaderChecksum(void* vdData, int nLength);
     
     static bool systemDeviceExists(std::string strDeviceName);
