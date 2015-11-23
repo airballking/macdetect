@@ -21,7 +21,8 @@
 
 // System
 #include <string>
-#include <linux/if_ether.h>
+#include <netinet/ip_icmp.h>
+#include <sys/time.h>
 
 // Detect
 #include <macdetect/Wire.h>
@@ -44,6 +45,9 @@ namespace macdetect {
     HardwareType m_hwtType;
     Wire m_wrWire;
     std::string m_strMAC;
+    std::string m_strIP;
+    std::string m_strBroadcastIP;
+    double m_dPingBroadcastLastSent;
     
   protected:
   public:
@@ -57,6 +61,10 @@ namespace macdetect {
     void setRunning(bool bRunning);
     
     std::string mac();
+    void setIP(std::string strIP);
+    std::string ip();
+    void setBroadcastIP(std::string strIP);
+    std::string broadcastIP();
     
     bool up();
     bool running();
@@ -64,6 +72,12 @@ namespace macdetect {
     unsigned char* read(int& nLengthRead);
     
     Wire* wire();
+    
+    bool sendPingBroadcast(double dTime, double dInterval);
+    bool sendPing(std::string strDestinationIP, std::string strDestinationMAC);
+    
+    uint16_t icmpHeaderChecksum(uint16_t* buffer, uint32_t size);
+    uint16_t ipHeaderChecksum(void* vdData, int nLength);
     
     static bool systemDeviceExists(std::string strDeviceName);
   };

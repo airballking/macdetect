@@ -28,14 +28,11 @@
 #include <sstream>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #include <linux/wireless.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <regex>
-#include <netinet/ip.h>
-#include <netinet/if_ether.h>
 
 // MAC Detect
 #include <macdetect/Device.h>
@@ -75,6 +72,7 @@ namespace macdetect {
     std::list<std::string> m_lstDeviceWhiteBlackList;
     
     double m_dMaxMACAge;
+    double m_dPingBroadcastInterval;
     bool m_bShouldRun;
     bool m_bIgnoreDeviceMACs;
     

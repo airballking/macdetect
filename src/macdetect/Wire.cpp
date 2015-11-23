@@ -19,32 +19,16 @@
 
 
 namespace macdetect {
-  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength) : m_strDeviceName(strDeviceName) {
-    this->setSocket(::socket(AF_PACKET, SOCK_RAW, htons(0x0800)));
+  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol) : m_strDeviceName(strDeviceName), m_usProtocol(usProtocol) {
+    this->setSocket(this->createSocket(strDeviceName, usProtocol));
     this->setDefaultReadingLength(nDefaultReadingLength);
-    
-    struct ifreq ifr;
-    memset(&ifr, 0, sizeof(ifr));
-    
-    strncpy(ifr.ifr_name, strDeviceName.c_str(), sizeof(ifr.ifr_name) - 1);
-    ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
-    
-    ioctl(m_nSocket, SIOCGIFINDEX, &ifr);
-    
-    struct sockaddr_ll socket_address;
-    memset(&socket_address, 0, sizeof(socket_address));
-    socket_address.sll_family = AF_PACKET;
-    socket_address.sll_ifindex = ifr.ifr_ifindex;
-    socket_address.sll_protocol = htons(0x0003);
-    
-    bind(this->socket(), (sockaddr*)&socket_address, sizeof(socket_address));
   }
   
   Wire::~Wire() {
   }
   
   int Wire::wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer) {
-    int nBytes = sizeof(struct ethhdr) + unPayloadLength + 4 /* FCS */;
+    int nBytes = sizeof(struct ethhdr) + unPayloadLength /*+ 4*/ /* FCS */;
     
     struct ethhdr ehFrame;
     unsigned short usEtherTypeN = htons(usEtherType);
@@ -60,20 +44,100 @@ namespace macdetect {
     memcpy(&(((unsigned char*)vdBuffer)[sizeof(struct ethhdr)]), vdPayload, unPayloadLength);
     
     // TODO: Calculate and set the FCS; right now, nulling it out.
-    memset(&(((unsigned char*)vdBuffer)[sizeof(struct ethhdr) + unPayloadLength]), 0, 4);
+    // NOTE: Just leave it out for now.
+    //memset(&(((unsigned char*)vdBuffer)[sizeof(struct ethhdr) + unPayloadLength]), 0, 4);
     
     return nBytes;
   }
   
-  bool Wire::write(void* vdBuffer, unsigned int unLength) {
-    int nWritten = 0;
+  int Wire::createSocket(std::string strDeviceName, unsigned short usProtocol) {
+    int nSocket = ::socket(PF_PACKET, SOCK_RAW, htons(usProtocol));
     
-    if((nWritten = ::write(m_nSocket, vdBuffer, unLength)) == -1) {
-      std::cerr << "Failure: " << strerror(errno) << std::endl;
+    if(nSocket > -1 && strDeviceName != "") {
+      struct ifreq ifr;
+      memset(&ifr, 0, sizeof(ifr));
       
-      return false;
+      strncpy(ifr.ifr_name, strDeviceName.c_str(), sizeof(ifr.ifr_name) - 1);
+      ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
+      
+      if(ioctl(nSocket, SIOCGIFINDEX, &ifr) > -1) {
+	struct sockaddr_ll socket_address;
+	memset(&socket_address, 0, sizeof(socket_address));
+	socket_address.sll_family = AF_PACKET;
+	socket_address.sll_ifindex = ifr.ifr_ifindex;
+	socket_address.sll_protocol = htons(usProtocol);
+	socket_address.sll_halen = ETH_ALEN;
+      
+	struct ifreq ifrTemp;
+	memset(&ifrTemp, 0, sizeof(ifrTemp));
+	strcpy(ifrTemp.ifr_name, strDeviceName.c_str());
+      
+	if(ioctl(nSocket, SIOCGIFHWADDR, &ifrTemp) > -1) {
+	  std::string strDeviceMAC = "";
+	  char carrBuffer[17];
+	  int nOffset = 0;
+    
+	  for(int nI = 0; nI < 6; nI++) {
+	    sprintf(&(carrBuffer[nI + nOffset]), "%.2x", (unsigned char)ifrTemp.ifr_hwaddr.sa_data[nI]);
+	    nOffset++;
+      
+	    if(nI < 5) {
+	      nOffset++;
+	      carrBuffer[nI + nOffset] = ':';
+	    }
+	  }
+      
+	  strDeviceMAC = std::string(carrBuffer, 17);
+      
+	  struct ether_addr* eaSource = ether_aton(strDeviceMAC.c_str());
+	  memcpy(socket_address.sll_addr, eaSource, sizeof(struct ether_addr));
+	  
+	  if(bind(nSocket, (sockaddr*)&socket_address, sizeof(socket_address)) == -1) {
+	    ::close(nSocket);
+	    nSocket = -1;
+	  }
+	} else {
+	  ::close(nSocket);
+	  nSocket = -1;
+	}
+      } else {
+	::close(nSocket);
+	nSocket = -1;
+      }
     }
     
-    return true;
+    if(nSocket == -1) {
+      std::cout << "Error while creating socket (device " << strDeviceName << "): " << strerror(errno) << std::endl;
+    }
+    
+    return nSocket;
+  }
+  
+  bool Wire::write(void* vdBuffer, unsigned int unLength) {
+    return this->write(vdBuffer, unLength, m_usProtocol);
+  }
+  
+  bool Wire::write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol) {
+    bool bSuccess = true;
+    
+    int nWritten = 0;
+    int nSocket = m_nSocket;
+    
+    if(usProtocol != m_usProtocol) {
+      nSocket = this->createSocket(m_strDeviceName, usProtocol);
+      std::cout << "Sending to non-default protocol 0x" << std::hex << usProtocol << std::endl;
+    }
+    
+    if((nWritten = ::write(nSocket, vdBuffer, unLength)) == -1) {
+      std::cerr << "Failure: " << strerror(errno) << std::endl;
+      
+      bSuccess = false;
+    }
+    
+    if(usProtocol != m_usProtocol) {
+      ::close(nSocket);
+    }
+    
+    return bSuccess;
   }
 }

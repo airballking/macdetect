@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_dPingBroadcastInterval(10.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
     m_dtData.readVendors();
   }
   
@@ -94,6 +94,7 @@ namespace macdetect {
   
   bool Network::cycle() {
     bool bResult = true;
+    double dTime = this->time();
     
     for(Event* evDelete : m_lstEvents) {
       delete evDelete;
@@ -134,7 +135,6 @@ namespace macdetect {
       this->maintainDeviceStatus(dvMaintain);
     }
     
-    double dTime = this->time();
     bool bChanged = true;
     while(bChanged) {
       bChanged = false;
@@ -150,6 +150,11 @@ namespace macdetect {
 	  break;
 	}
       }
+    }
+    
+    // Send broadcasts
+    for(Device* dvCurrent : m_lstDevices) {
+      dvCurrent->sendPingBroadcast(dTime, m_dPingBroadcastInterval);
     }
     
     return (bResult && m_bShouldRun);
@@ -300,6 +305,40 @@ namespace macdetect {
       
       dvMaintain->setUp(bUp);
       dvMaintain->setRunning(bRunning);
+      
+      // Check IP address
+      memset(&ifrTemp, 0, sizeof(struct ifreq));
+      memcpy(ifrTemp.ifr_name, dvMaintain->deviceName().c_str(), dvMaintain->deviceName().length());
+      ifrTemp.ifr_name[dvMaintain->deviceName().length()] = 0;
+      
+      ioctl(dvMaintain->wire()->socket(), SIOCGIFADDR, &ifrTemp);
+      
+      std::string strIP = inet_ntoa(((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr);
+      
+      if(strIP != dvMaintain->ip()) {
+	DeviceEvent* devEvidenceIP = new DeviceEvent(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
+	devEvidenceIP->setEvidence("ip", strIP, dvMaintain->ip());
+	this->scheduleEvent(devEvidenceIP);
+	
+	dvMaintain->setIP(strIP);
+      }
+      
+      // Check Broadcast IP address
+      memset(&ifrTemp, 0, sizeof(struct ifreq));
+      memcpy(ifrTemp.ifr_name, dvMaintain->deviceName().c_str(), dvMaintain->deviceName().length());
+      ifrTemp.ifr_name[dvMaintain->deviceName().length()] = 0;
+      
+      ioctl(dvMaintain->wire()->socket(), SIOCGIFBRDADDR, &ifrTemp);
+      
+      strIP = inet_ntoa(((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr);
+      
+      if(strIP != dvMaintain->broadcastIP()) {
+	DeviceEvent* devEvidenceIP = new DeviceEvent(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
+	devEvidenceIP->setEvidence("broadcast-ip", strIP, dvMaintain->broadcastIP());
+	this->scheduleEvent(devEvidenceIP);
+	
+	dvMaintain->setBroadcastIP(strIP);
+      }
     }
   }
   
@@ -391,20 +430,28 @@ namespace macdetect {
 	memcpy(&efhHeader, ucBuffer, sizeof(efhHeader));
 	std::string strMAC = this->mac(efhHeader.h_source);
 	
+	// TEST
+	//dvDevice->sendPingBroadcast
+	//this->sendPing(dvDevice, "255.255.255.255");
+	
+	this->addMAC(strMAC, dvDevice->deviceName());
+	
 	switch(ntohs(efhHeader.h_proto)) {
-	case 0x0800: { // EtherType
-	  if(this->addMAC(strMAC, dvDevice->deviceName())) {
-	    struct iphdr iphHeader;
-	    memcpy(&iphHeader, &(ucBuffer[sizeof(ethhdr)]), sizeof(struct iphdr));
-	    
-	    std::string strSenderIP = inet_ntoa(((struct sockaddr_in*)&iphHeader.saddr)->sin_addr);
-	    
-	    if(this->ipAllowed(strSenderIP)) {
-	      // TODO: Fully implement IP address support.
-	    }
-	    
-	    m_rpRARP.requestIP(strMAC, dvDevice);
+	case 0x0800: { // IP
+	  struct iphdr iphHeader;
+	  memcpy(&iphHeader, &(ucBuffer[sizeof(ethhdr)]), sizeof(struct iphdr));
+	  
+	  std::string strSenderIP = inet_ntoa(((struct sockaddr_in*)&iphHeader.saddr)->sin_addr);
+	  
+	  if(this->ipAllowed(strSenderIP)) {
+	    // TODO: Fully implement IP address support.
 	  }
+	  
+	  if(iphHeader.protocol == 0x1) { // ICMP
+	    // TODO: Received a ping. Do something?
+	  }
+	  
+	  //m_rpRARP.requestIP(strMAC, dvDevice);
 	} break;
 	  
 	case 0x8035: { // RARP

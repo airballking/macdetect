@@ -36,14 +36,18 @@ namespace macdetect {
   class Wire : public SocketReader {
   private:
     std::string m_strDeviceName;
+    unsigned short m_usProtocol;
     
   public:
-    Wire(std::string strDeviceName, int nDefaultReadingLength);
+    Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol = 0x0003);//0x0800);
     ~Wire();
     
     static int wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer);
     
+    int createSocket(std::string strDeviceName, unsigned short usProtocol);
+    
     bool write(void* vdBuffer, unsigned int unLength);
+    bool write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol);
   };
 }
 
