@@ -9,7 +9,7 @@ namespace macdetect {
     
   protected:
   public:
-    Served();
+    Served(int nSocketFD);
     ~Served();
   };
 }

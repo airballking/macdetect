@@ -21,6 +21,7 @@ add_executable(${EXECUTABLE_NAME}
 add_executable(${DAEMON_NAME}
   src/daemon.cpp
   src/macdetect/Server.cpp
+  src/macdetect/Served.cpp
   src/macdetect/Client.cpp)
 
 add_library(${PROJECT_NAME}

@@ -15,16 +15,16 @@ namespace macdetect {
   
   bool Server::serve(std::string strDeviceName, unsigned short usPort) {
     bool bResult = false;
-    bool bPreset = false;
+    bool bPresent = false;
     
     for(Serving srvServing : m_lstServings) {
       if(srvServing.strDeviceName == strDeviceName &&
 	 srvServing.usPort == usPort) {
-	bPreset = true;
+	bPresent = true;
       }
     }
     
-    if(!bPreset) {
+    if(!bPresent) {
       Serving srvServing;
       srvServing.nSocketFD = ::socket(AF_INET, SOCK_STREAM, 0);
       
@@ -41,14 +41,16 @@ namespace macdetect {
 	
 	struct sockaddr_in sinAddress;
 	memset(&sinAddress, 0, sizeof(struct sockaddr_in));
-      
+	
 	sinAddress.sin_family = AF_INET;
 	sinAddress.sin_port = htons(usPort);
 	inet_pton(AF_INET, strIP.c_str(), &(sinAddress.sin_addr));
 	
 	if(::bind(srvServing.nSocketFD, (struct sockaddr*)&sinAddress, sizeof(struct sockaddr)) == 0) {
+	  srvServing.stStatus = Serving::Stopped;
 	  srvServing.strDeviceName = strDeviceName;
 	  srvServing.usPort = usPort;
+	  srvServing.nID = this->freeServingID();
 	  
 	  m_lstServings.push_back(srvServing);
 	  
@@ -64,7 +66,44 @@ namespace macdetect {
     bool bReturn = m_bRun;
     
     if(m_bRun) {
-      // TODO: Implement main cycle function.
+      for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); itServing++) {
+	if((*itServing).stStatus == Serving::Stopped) {
+	  if(::listen((*itServing).nSocketFD, 3) == 0) {
+	    (*itServing).stStatus = Serving::Started;
+	  } else {
+	    (*itServing).stStatus = Serving::Invalid;
+	  }
+	}
+	
+	struct sockaddr saAddress;
+	socklen_t slLength = sizeof(struct sockaddr);
+	int nSocketFDAccepted = ::accept4((*itServing).nSocketFD, &saAddress, &slLength, SOCK_NONBLOCK);
+	
+	if(nSocketFDAccepted == -1) {
+	  if(nSocketFDAccepted != EAGAIN) {
+	    std::cout << strerror(errno) << std::endl;
+	    (*itServing).stStatus = Serving::Invalid;
+	  }
+	} else {
+	  m_lstServed.push_back(std::make_pair(new Served(nSocketFDAccepted), (*itServing).nID));
+	}
+      }
+      
+      bool bChanged = true;
+      while(bChanged) {
+	bChanged = false;
+	
+	for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); itServing++) {
+	  if((*itServing).stStatus == Serving::Invalid || (*itServing).stStatus == Serving::Stopped) {
+	    ::close((*itServing).nSocketFD);
+	    m_lstServings.erase(itServing);
+	    
+	    bChanged = true;
+	    
+	    break;
+	  }
+	}
+      }
     }
     
     return bReturn;
@@ -97,5 +136,35 @@ namespace macdetect {
     }
     
     return lstDevices;
+  }
+  
+  int Server::freeServingID() {
+    int nID = -1;
+    bool bFound;
+    
+    do {
+      bFound = false;
+      nID++;
+      
+      for(Serving srvServing : m_lstServings) {
+	if(srvServing.nID == nID) {
+	  bFound = true;
+	  
+	  break;
+	}
+      }
+    } while(bFound);
+    
+    return nID;
+  }
+  
+  Server::Serving Server::servingByID(int nID) {
+    for(Serving srvServing : m_lstServings) {
+      if(srvServing.nID == nID) {
+	return srvServing;
+      }
+    }
+    
+    return {Serving::Invalid, -1, -1, "", 0};
   }
 }
