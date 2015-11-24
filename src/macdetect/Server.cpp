@@ -206,6 +206,9 @@ namespace macdetect {
   }
   
   std::list<Server::QueuedPacket> Server::queuedPackets() {
-    return m_lstPacketQueue;
+    std::list<QueuedPacket> lstPackets = m_lstPacketQueue;
+    m_lstPacketQueue.clear();
+    
+    return lstPackets;
   }
 }
