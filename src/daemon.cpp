@@ -22,10 +22,12 @@
 // Detect
 #include <macdetect/Network.h>
 #include <macdetect/Server.h>
+#include <macdetect/Daemon.h>
 
 
 //macdetect::Network g_nwNetwork;
-macdetect::Server g_srvServer;
+//macdetect::Server g_srvServer;
+macdetect::Daemon g_dmDaemon;
 
 
 void catchHandler(int nSignum) {
@@ -33,7 +35,8 @@ void catchHandler(int nSignum) {
   case SIGTERM:
   case SIGINT: {
     //g_nwNetwork.shutdown();
-    g_srvServer.shutdown();
+    //g_srvServer.shutdown();
+    g_dmDaemon.shutdown();
   } break;
     
   default:
@@ -49,19 +52,23 @@ int main(int argc, char** argv) {
   sigaction(SIGTERM, &action, NULL);
   sigaction(SIGINT, &action, NULL);
   
-  unsigned short usPort = 7090;
-  std::list<std::string> lstSystemDeviceNames = g_srvServer.systemDeviceNames();
-  
-  for(std::string strSystemDeviceName : lstSystemDeviceNames) {
-    std::cout << "Serving on " << strSystemDeviceName << ":" << usPort << std::endl;
-    
-    g_srvServer.serve(strSystemDeviceName, usPort);
-  }
-  
-  while(g_srvServer.cycle()) {
+  while(g_dmDaemon.cycle()) {
     usleep(10);
-    // ...
   }
+  
+  // unsigned short usPort = 7090;
+  // std::list<std::string> lstSystemDeviceNames = g_srvServer.systemDeviceNames();
+  
+  // for(std::string strSystemDeviceName : lstSystemDeviceNames) {
+  //   std::cout << "Serving on " << strSystemDeviceName << ":" << usPort << std::endl;
+    
+  //   g_srvServer.serve(strSystemDeviceName, usPort);
+  // }
+  
+  // while(g_srvServer.cycle()) {
+  //   usleep(10);
+  //   // ...
+  // }
   
   std::cout << "\rExiting gracefully." << std::endl;
   

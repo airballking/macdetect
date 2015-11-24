@@ -21,6 +21,15 @@ add_executable(${EXECUTABLE_NAME}
 
 add_executable(${DAEMON_NAME}
   src/daemon.cpp
+  src/macdetect/Network.cpp
+  src/macdetect/Device.cpp
+  src/macdetect/Event.cpp
+  src/macdetect/SocketReader.cpp
+  src/macdetect/Wire.cpp
+  src/macdetect/Data.cpp
+  src/macdetect/RARP.cpp
+  src/macdetect/protocols/IP.cpp
+  src/macdetect/Daemon.cpp
   src/macdetect/Server.cpp
   src/macdetect/Served.cpp
   src/macdetect/Packet.cpp
