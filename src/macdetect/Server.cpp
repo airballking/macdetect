@@ -202,17 +202,10 @@ namespace macdetect {
   }
   
   void Server::handlePacket(Served* svrServed, int nServingID, Packet* pktReceived) {
-    if(pktReceived->key() == "request") {
-      if(pktReceived->value() == "list-system-devices") {
-	Packet* pktDevices = new Packet("response", "list-system-devices");
-	
-	for(std::string strDevice : this->systemDeviceNames()) {
-	  pktDevices->add(new Packet("device-name", strDevice));
-	}
-	
-	svrServed->sendPacket(pktDevices);
-	delete pktDevices;
-      }
-    }
+    m_lstPacketQueue.push_back({pktReceived, svrServed, nServingID});
+  }
+  
+  std::list<Server::QueuedPacket> Server::queuedPackets() {
+    return m_lstPacketQueue;
   }
 }

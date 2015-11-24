@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include <iostream>
 
-// MAC Detect
+// MAC detect
 #include <macdetect/Served.h>
 
 
@@ -35,11 +35,19 @@ namespace macdetect {
       unsigned short usPort;
     } Serving;
     
+    typedef struct {
+      Packet* pktPacket;
+      Served* svrServed;
+      int nServingID;
+    } QueuedPacket;
+    
   private:
     int m_nSocketFDControl;
     bool m_bRun;
     std::list<Serving> m_lstServings;
     std::list< std::pair<Served*, int> > m_lstServed;
+    
+    std::list<QueuedPacket> m_lstPacketQueue;
     
   protected:
   public:
@@ -57,6 +65,7 @@ namespace macdetect {
     Server::Serving servingByID(int nID);
     
     void handlePacket(Served* svrServed, int nServingID, Packet* pktReceived);
+    std::list<QueuedPacket> queuedPackets();
   };
 }
 
