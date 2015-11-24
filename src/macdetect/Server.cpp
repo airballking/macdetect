@@ -85,6 +85,7 @@ namespace macdetect {
 	    (*itServing).stStatus = Serving::Invalid;
 	  }
 	} else {
+	  fcntl(nSocketFDAccepted, F_SETFL, O_NONBLOCK);
 	  m_lstServed.push_back(std::make_pair(new Served(nSocketFDAccepted), (*itServing).nID));
 	}
       }
@@ -103,6 +104,13 @@ namespace macdetect {
 	    break;
 	  }
 	}
+      }
+      
+      for(std::pair<Served*, int> prServed : m_lstServed) {
+	Served* svrServed = prServed.first;
+	//Serving srvServing = this->servingByID(prServed.second);
+	
+	//this->serve(svrServed);
       }
     }
     
