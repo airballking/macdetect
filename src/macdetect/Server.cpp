@@ -86,7 +86,11 @@ namespace macdetect {
 	  }
 	} else {
 	  fcntl(nSocketFDAccepted, F_SETFL, O_NONBLOCK);
-	  m_lstServed.push_back(std::make_pair(new Served(nSocketFDAccepted), (*itServing).nID));
+	  Served* svrServed = new Served(nSocketFDAccepted);
+	  
+	  // Initialize connection?
+	  
+	  m_lstServed.push_back(std::make_pair(svrServed, (*itServing).nID));
 	}
       }
       
@@ -106,11 +110,32 @@ namespace macdetect {
 	}
       }
       
+      std::list<Served*> lstRemoveServed;
+      
       for(std::pair<Served*, int> prServed : m_lstServed) {
 	Served* svrServed = prServed.first;
-	//Serving srvServing = this->servingByID(prServed.second);
+	Packet* pktReceived = svrServed->receivePacket();
 	
-	//this->serve(svrServed);
+	if(pktReceived) {
+	  this->handlePacket(svrServed, prServed.second, pktReceived);
+	  
+	  delete pktReceived;
+	} else {
+	  if(svrServed->failureState()) {
+	    lstRemoveServed.push_back(svrServed);
+	  }
+	}
+      }
+      
+      for(Served* svrRemove : lstRemoveServed) {
+	for(std::list< std::pair<Served*, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
+	  if((*itServed).first == svrRemove) {
+	    delete svrRemove;
+	    m_lstServed.erase(itServed);
+	    
+	    break;
+	  }
+	}
       }
     }
     
@@ -174,5 +199,20 @@ namespace macdetect {
     }
     
     return {Serving::Invalid, -1, -1, "", 0};
+  }
+  
+  void Server::handlePacket(Served* svrServed, int nServingID, Packet* pktReceived) {
+    if(pktReceived->key() == "request") {
+      if(pktReceived->value() == "list-system-devices") {
+	Packet* pktDevices = new Packet("response", "list-system-devices");
+	
+	for(std::string strDevice : this->systemDeviceNames()) {
+	  pktDevices->add(new Packet("device-name", strDevice));
+	}
+	
+	svrServed->sendPacket(pktDevices);
+	delete pktDevices;
+      }
+    }
   }
 }

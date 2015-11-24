@@ -55,6 +55,8 @@ namespace macdetect {
     
     int freeServingID();
     Server::Serving servingByID(int nID);
+    
+    void handlePacket(Served* svrServed, int nServingID, Packet* pktReceived);
   };
 }
 

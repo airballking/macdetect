@@ -2,11 +2,17 @@
 #define __SERVED_H__
 
 
+// System
+#include <unistd.h>
+#include <iostream>
+
+// MAC Detect
+#include <macdetect/PacketEntity.h>
+
+
 namespace macdetect {
-  class Served {
+  class Served : public PacketEntity {
   private:
-    int m_nSocketFD;
-    
   protected:
   public:
     Served(int nSocketFD);

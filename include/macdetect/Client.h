@@ -9,12 +9,13 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+// MAC detect
+#include <macdetect/PacketEntity.h>
+
 
 namespace macdetect {
-  class Client {
+  class Client : public PacketEntity {
   private:
-    int m_nSocketFD;
-    
   protected:
   public:
     Client();

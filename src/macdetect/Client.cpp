@@ -2,7 +2,7 @@
 
 
 namespace macdetect {
-  Client::Client() : m_nSocketFD(-1) {
+  Client::Client() : PacketEntity(-1) {
   }
   
   Client::~Client() {

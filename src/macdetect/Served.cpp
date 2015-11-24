@@ -2,7 +2,7 @@
 
 
 namespace macdetect {
-  Served::Served(int nSocketFD) : m_nSocketFD(nSocketFD) {
+  Served::Served(int nSocketFD) : PacketEntity(nSocketFD) {
   }
   
   Served::~Served() {

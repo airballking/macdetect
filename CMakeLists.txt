@@ -9,6 +9,7 @@ set(${PROJECT_NAME}_VERSION_MINOR_1)
 
 set(EXECUTABLE_NAME macdetect)
 set(DAEMON_NAME macdetectd)
+set(CLI_NAME macdetect-cli)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
@@ -22,7 +23,14 @@ add_executable(${DAEMON_NAME}
   src/daemon.cpp
   src/macdetect/Server.cpp
   src/macdetect/Served.cpp
-  src/macdetect/Client.cpp)
+  src/macdetect/Packet.cpp
+  src/macdetect/PacketEntity.cpp)
+
+add_executable(${CLI_NAME}
+  src/cli.cpp
+  src/macdetect/Client.cpp
+  src/macdetect/Packet.cpp
+  src/macdetect/PacketEntity.cpp)
 
 add_library(${PROJECT_NAME}
   src/macdetect/Network.cpp
