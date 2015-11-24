@@ -118,8 +118,6 @@ namespace macdetect {
 	
 	if(pktReceived) {
 	  this->handlePacket(svrServed, prServed.second, pktReceived);
-	  
-	  delete pktReceived;
 	} else {
 	  if(svrServed->failureState()) {
 	    lstRemoveServed.push_back(svrServed);
@@ -210,5 +208,11 @@ namespace macdetect {
     m_lstPacketQueue.clear();
     
     return lstPackets;
+  }
+  
+  void Server::distributeStreamPacket(Packet* pktStream) {
+    for(std::pair<Served*, int> prServed : m_lstServed) {
+      prServed.first->sendPacket(pktStream);
+    }
   }
 }

@@ -28,6 +28,8 @@ namespace macdetect {
     unsigned int serialize(void* vdBuffer, unsigned int unLength);
     unsigned int deserialize(void* vdBuffer, unsigned int unLength);
     
+    void set(std::string strKey, std::string strValue);
+    
     std::list<Packet*> subPackets();
     std::string key();
     std::string value();

@@ -107,4 +107,9 @@ namespace macdetect {
       pktSub->print(unIndent + 1);
     }
   }
+  
+  void Packet::set(std::string strKey, std::string strValue) {
+    m_strKey = strKey;
+    m_strValue = strValue;
+  }
 }
