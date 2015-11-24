@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
   }
   
   while(g_srvServer.cycle()) {
-    usleep(10000);
+    usleep(10);
     // ...
   }
   

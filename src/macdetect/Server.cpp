@@ -36,6 +36,7 @@ namespace macdetect {
 	ifrTemp.ifr_name[strDeviceName.length()] = 0;
 	
 	ioctl(srvServing.nSocketFD, SIOCGIFADDR, &ifrTemp);
+	fcntl(srvServing.nSocketFD, F_SETFL, O_NONBLOCK);
 	
 	std::string strIP = inet_ntoa(((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr);
 	
@@ -80,8 +81,7 @@ namespace macdetect {
 	int nSocketFDAccepted = ::accept4((*itServing).nSocketFD, &saAddress, &slLength, SOCK_NONBLOCK);
 	
 	if(nSocketFDAccepted == -1) {
-	  if(nSocketFDAccepted != EAGAIN) {
-	    std::cout << strerror(errno) << std::endl;
+	  if(errno != EAGAIN && errno != EWOULDBLOCK) {
 	    (*itServing).stStatus = Serving::Invalid;
 	  }
 	} else {
