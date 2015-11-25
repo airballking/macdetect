@@ -10,7 +10,8 @@ int main(int argc, char** argv) {
   macdetect::Client cliClient;
   
   if(cliClient.connect("127.0.0.1")) {
-    macdetect::Packet* pktPacket = new macdetect::Packet("request", "devices-list");
+    //macdetect::Packet* pktPacket = new macdetect::Packet("request", "devices-list");
+    macdetect::Packet* pktPacket = new macdetect::Packet("request", "known-mac-addresses");
     cliClient.sendPacket(pktPacket);
     
     bool bGoon = true;
@@ -20,7 +21,6 @@ int main(int argc, char** argv) {
       if(pktReceived) {
 	pktReceived->print();
 	
-	//bGoon = false;
 	delete pktReceived;
       }
     }

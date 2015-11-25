@@ -53,13 +53,14 @@ namespace macdetect {
       Blacklist = 1
     } WhiteBlackListMode;
     
-  private:
     typedef struct {
       std::string strMAC;
       std::string strDeviceName;
+      double dFirstSeen;
       double dLastSeen;
     } MACEntity;
     
+  private:
     int m_nSocketFDControl;
     bool m_bAutoManageDevices;
     std::list<Device*> m_lstDevices;
@@ -129,6 +130,7 @@ namespace macdetect {
     void removeMAC(std::string strDeviceName, std::string strMAC);
     
     double macLastSeen(std::string strMAC, std::string strDeviceName);
+    std::list<Network::MACEntity> knownMACs();
     
     void setMACMaxAge(double dMaxAge);
     double macMaxAge();

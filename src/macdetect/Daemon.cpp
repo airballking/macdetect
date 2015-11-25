@@ -27,18 +27,36 @@ namespace macdetect {
 	  if(pktPacket->value() == "devices-list") {
 	    std::list<Device*> lstDevices = m_nwNetwork.knownDevices();
 	    
-	    Packet* pktDevices = new Packet("response", "devices-list");
+	    Packet pktDevices("response", "devices-list");
 	    for(Device* dvDevice : lstDevices) {
 	      Packet* pktDevice = new Packet("device", dvDevice->deviceName());
 	      pktDevice->add(new Packet("mac", dvDevice->mac()));
 	      pktDevice->add(new Packet("ip", dvDevice->ip()));
 	      pktDevice->add(new Packet("broadcast-ip", dvDevice->broadcastIP()));
 	      
-	      pktDevices->add(pktDevice);
+	      pktDevices.add(pktDevice);
 	    }
 	    
-	    qpPacket.svrServed->sendPacket(pktDevices);
-	    delete pktDevices;
+	    qpPacket.svrServed->sendPacket(&pktDevices);
+	  } else if(pktPacket->value() == "known-mac-addresses") {
+	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
+	    
+	    Packet pktMACs("response", "known-mac-addresses");
+	    for(Network::MACEntity meMAC : lstMACs) {
+	      Packet* pktMAC = new Packet("mac", meMAC.strMAC);
+	      pktMAC->add(new Packet("device-name", meMAC.strDeviceName));
+	      
+	      std::stringstream sts;
+	      sts << meMAC.dLastSeen;
+	      pktMAC->add(new Packet("last-seen", sts.str()));
+	      sts.str("");
+	      sts << meMAC.dFirstSeen;
+	      pktMAC->add(new Packet("first-seen", sts.str()));
+	      
+	      pktMACs.add(pktMAC);
+	    }
+	    
+	    qpPacket.svrServed->sendPacket(&pktMACs);
 	  }
 	}
 	

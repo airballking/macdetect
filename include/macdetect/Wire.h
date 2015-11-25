@@ -39,7 +39,7 @@ namespace macdetect {
     unsigned short m_usProtocol;
     
   public:
-    Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol = 0x0003);//0x0800);
+    Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol = ETH_P_ALL);
     ~Wire();
     
     static int wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer);

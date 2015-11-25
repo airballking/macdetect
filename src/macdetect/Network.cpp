@@ -516,7 +516,8 @@ namespace macdetect {
       }
       
       if(!bWasPresent) {
-	m_lstMACSeen.push_back({strMACAddress, strDeviceName, this->time()});
+	double dTime = this->time();
+	m_lstMACSeen.push_back({strMACAddress, strDeviceName, dTime, dTime});
 	bResult = true;
       }
     }
@@ -570,5 +571,9 @@ namespace macdetect {
     }
     
     return strReturn;
+  }
+  
+  std::list<Network::MACEntity> Network::knownMACs() {
+    return m_lstMACSeen;
   }
 }
