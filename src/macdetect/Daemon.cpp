@@ -39,7 +39,7 @@ namespace macdetect {
 	    if((*itStream).svrServed == svrServed) {
 	      m_lstStreams.erase(itStream);
 	      bChanged = true;
-	      std::cout << "Disconnected." << std::endl;
+	      
 	      break;
 	    }
 	  }
@@ -95,6 +95,7 @@ namespace macdetect {
 	      
 	      if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
 		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-enabled"}});
+		pktResponse->add(new Packet("device-name", strDeviceName));
 		qpPacket.svrServed->sendPacket(pktResponse);
 		
 		delete pktResponse;
@@ -102,6 +103,7 @@ namespace macdetect {
 		this->enableStream(qpPacket.svrServed, sviServing.strDeviceName);
 		
 		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+		pktResponse->add(new Packet("device-name", strDeviceName));
 		qpPacket.svrServed->sendPacket(pktResponse);
 		
 		delete pktResponse;
@@ -122,11 +124,13 @@ namespace macdetect {
 		this->disableStream(qpPacket.svrServed, sviServing.strDeviceName);
 		
 		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+		pktResponse->add(new Packet("device-name", strDeviceName));
 		qpPacket.svrServed->sendPacket(pktResponse);
 		
 		delete pktResponse;
 	      } else {
 		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-disabled"}});
+		pktResponse->add(new Packet("device-name", strDeviceName));
 		qpPacket.svrServed->sendPacket(pktResponse);
 		
 		delete pktResponse;
@@ -143,6 +147,7 @@ namespace macdetect {
 	delete qpPacket.pktPacket;
       }
       
+      // Handle network events
       std::list<Event*> lstEvents = m_nwNetwork.events();
       
       for(Event* evEvent : lstEvents) {
@@ -151,18 +156,47 @@ namespace macdetect {
 	
 	switch(evEvent->type()) {
 	case Event::DeviceAdded: {
+	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  
 	  pktSend->set("info", "device-added");
+	  pktSend->add(new Packet("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceRemoved: {
+	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  
+	  bool bChanged = true;
+	  while(bChanged) {
+	    bChanged = false;
+	    
+	    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+	      if((*itStream).strDeviceName == devEvent->deviceName()) {
+		Packet* pktDisabled = new Packet("info", "stream-disabled");
+		pktDisabled->add(new Packet("device-name", devEvent->deviceName()));
+		(*itStream).svrServed->sendPacket(pktDisabled);
+		delete pktDisabled;
+		
+		m_lstStreams.erase(itStream);
+		bChanged = true;
+		
+		break;
+	      }
+	    }
+	  }
+	  
 	  pktSend->set("info", "device-removed");
+	  pktSend->add(new Packet("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceStateChanged: {
+	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  
 	  pktSend->set("info", "device-state-changed");
 	} break;
 	  
 	case Event::DeviceEvidenceChanged: {
+	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  
 	  pktSend->set("info", "device-evidence-changed");
 	} break;
 	  
