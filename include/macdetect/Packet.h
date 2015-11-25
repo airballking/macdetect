@@ -20,7 +20,7 @@ namespace macdetect {
     
   protected:
   public:
-    Packet(std::string strKey = "", std::string strValue = "");
+    Packet(std::string strKey = "", std::string strValue = "", std::list< std::pair<std::string, std::string> > lstSubPackets = {});
     ~Packet();
     
     void add(Packet* pktAdd);
@@ -35,6 +35,8 @@ namespace macdetect {
     std::string value();
     
     void print(unsigned int unIndent = 0);
+    
+    Packet* copy();
   };
 }
 

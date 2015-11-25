@@ -20,6 +20,9 @@ namespace macdetect {
     Daemon();
     ~Daemon();
     
+    Packet* responsePacket(Packet* pktPacket);
+    Packet* confirmationPacket(Packet* pktPacket);
+    
     void shutdown();
     bool cycle();
   };

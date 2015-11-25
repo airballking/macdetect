@@ -2,7 +2,10 @@
 
 
 namespace macdetect {
-  Packet::Packet(std::string strKey, std::string strValue) : m_strKey(strKey), m_strValue(strValue) {
+  Packet::Packet(std::string strKey, std::string strValue, std::list< std::pair<std::string, std::string> > lstSubPackets) : m_strKey(strKey), m_strValue(strValue) {
+    for(std::pair<std::string, std::string> prPair : lstSubPackets) {
+      this->add(new Packet(prPair.first, prPair.second));
+    }
   }
   
   Packet::~Packet() {
@@ -111,5 +114,15 @@ namespace macdetect {
   void Packet::set(std::string strKey, std::string strValue) {
     m_strKey = strKey;
     m_strValue = strValue;
+  }
+  
+  Packet* Packet::copy() {
+    Packet* pktCopy = new Packet(m_strKey, m_strValue);
+    
+    for(Packet* pktSub : m_lstSubPackets) {
+      pktCopy->add(pktSub->copy());
+    }
+    
+    return pktCopy;
   }
 }

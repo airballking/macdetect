@@ -14,6 +14,23 @@ namespace macdetect {
   Daemon::~Daemon() {
   }
   
+  Packet* Daemon::responsePacket(Packet* pktPacket) {
+    Packet* pktResponse = NULL;
+    
+    if(pktPacket->key() == "request") {
+      pktResponse = new Packet("response", pktPacket->value());
+    }
+    
+    return pktResponse;
+  }
+  
+  Packet* Daemon::confirmationPacket(Packet* pktPacket) {
+    Packet* pktConfirmation = new Packet("info", "confirmation");
+    pktConfirmation->add(pktPacket->copy());
+    
+    return pktConfirmation;
+  }
+  
   bool Daemon::cycle() {
     bool bSuccess = false;
     
@@ -27,21 +44,20 @@ namespace macdetect {
 	  if(pktPacket->value() == "devices-list") {
 	    std::list<Device*> lstDevices = m_nwNetwork.knownDevices();
 	    
-	    Packet pktDevices("response", "devices-list");
+	    Packet* pktDevices = this->responsePacket(pktPacket);
 	    for(Device* dvDevice : lstDevices) {
-	      Packet* pktDevice = new Packet("device", dvDevice->deviceName());
-	      pktDevice->add(new Packet("mac", dvDevice->mac()));
-	      pktDevice->add(new Packet("ip", dvDevice->ip()));
-	      pktDevice->add(new Packet("broadcast-ip", dvDevice->broadcastIP()));
-	      
-	      pktDevices.add(pktDevice);
+	      pktDevices->add(new Packet("device", dvDevice->deviceName(),
+					 {{"mac", dvDevice->mac()},
+					  {"ip", dvDevice->ip()},
+					  {"broadcast-ip", dvDevice->broadcastIP()}}));
 	    }
 	    
-	    qpPacket.svrServed->sendPacket(&pktDevices);
+	    qpPacket.svrServed->sendPacket(pktDevices);
+	    delete pktDevices;
 	  } else if(pktPacket->value() == "known-mac-addresses") {
 	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
 	    
-	    Packet pktMACs("response", "known-mac-addresses");
+	    Packet* pktMACs = this->responsePacket(pktPacket);
 	    for(Network::MACEntity meMAC : lstMACs) {
 	      Packet* pktMAC = new Packet("mac", meMAC.strMAC);
 	      pktMAC->add(new Packet("device-name", meMAC.strDeviceName));
@@ -53,10 +69,15 @@ namespace macdetect {
 	      sts << meMAC.dFirstSeen;
 	      pktMAC->add(new Packet("first-seen", sts.str()));
 	      
-	      pktMACs.add(pktMAC);
+	      pktMACs->add(pktMAC);
 	    }
 	    
-	    qpPacket.svrServed->sendPacket(&pktMACs);
+	    qpPacket.svrServed->sendPacket(pktMACs);
+	    delete pktMACs;
+	  }
+	} else if(pktPacket->key() == "enable") {
+	  if(pktPacket->value() == "stream") {
+	    
 	  }
 	}
 	
