@@ -16,12 +16,12 @@ namespace macdetect {
     typedef struct {
       Served* svrServed;
       std::string strDeviceName;
-    } Streams;
+    } Stream;
     
     Server m_srvServer;
     Network m_nwNetwork;
     
-    std::list<Streams> m_lstStreams;
+    std::list<Stream> m_lstStreams;
     
   protected:
   public:

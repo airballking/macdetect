@@ -130,6 +130,7 @@ namespace macdetect {
 	  if((*itServed).first == svrRemove) {
 	    delete svrRemove;
 	    m_lstServed.erase(itServed);
+	    m_lstRemoved.push_back((*itServed).first);
 	    
 	    break;
 	  }
@@ -218,5 +219,12 @@ namespace macdetect {
     for(std::pair<Served*, int> prServed : m_lstServed) {
       prServed.first->sendPacket(pktStream);
     }
+  }
+  
+  std::list<Served*> Server::removed() {
+    std::list<Served*> lstReturn = m_lstRemoved;
+    m_lstRemoved.clear();
+    
+    return lstReturn;
   }
 }

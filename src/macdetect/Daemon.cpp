@@ -28,6 +28,25 @@ namespace macdetect {
     bool bSuccess = false;
     
     if(m_nwNetwork.cycle() && m_srvServer.cycle()) {
+      // First, handle removed Served instances.
+      std::list<Served*> lstRemovedServed = m_srvServer.removed();
+      for(Served* svrServed : lstRemovedServed) {
+	bool bChanged = true;
+	while(bChanged) {
+	  bChanged = false;
+	  
+	  for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+	    if((*itStream).svrServed == svrServed) {
+	      m_lstStreams.erase(itStream);
+	      bChanged = true;
+	      std::cout << "Disconnected." << std::endl;
+	      break;
+	    }
+	  }
+	}
+      }
+      
+      // Handle queued data packets.
       std::list<Server::QueuedPacket> lstPackets = m_srvServer.queuedPackets();
       
       for(Server::QueuedPacket qpPacket : lstPackets) {
@@ -203,7 +222,7 @@ namespace macdetect {
   bool Daemon::disableStream(Served* svrServed, std::string strDeviceName) {
     bool bResult = false;
     
-    for(std::list<Streams>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
       if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
 	m_lstStreams.erase(itStream);
 	bResult = true;
@@ -218,7 +237,7 @@ namespace macdetect {
   bool Daemon::streamEnabled(Served* svrServed, std::string strDeviceName) {
     bool bResult = false;
     
-    for(std::list<Streams>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
       if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
 	bResult = true;
 	

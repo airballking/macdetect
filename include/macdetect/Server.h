@@ -48,6 +48,7 @@ namespace macdetect {
     std::list< std::pair<Served*, int> > m_lstServed;
     
     std::list<QueuedPacket> m_lstPacketQueue;
+    std::list<Served*> m_lstRemoved;
     
   protected:
   public:
@@ -69,6 +70,8 @@ namespace macdetect {
     
     std::list< std::pair<Served*, int> > served();
     void distributeStreamPacket(Packet* pktStream);
+    
+    std::list<Served*> removed();
   };
 }
 
