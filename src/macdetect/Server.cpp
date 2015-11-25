@@ -128,9 +128,10 @@ namespace macdetect {
       for(Served* svrRemove : lstRemoveServed) {
 	for(std::list< std::pair<Served*, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
 	  if((*itServed).first == svrRemove) {
+	    m_lstRemoved.push_back((*itServed).first);
+	    
 	    delete svrRemove;
 	    m_lstServed.erase(itServed);
-	    m_lstRemoved.push_back((*itServed).first);
 	    
 	    break;
 	  }

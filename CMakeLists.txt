@@ -37,6 +37,7 @@ add_executable(${DAEMON_NAME}
 
 add_executable(${CLI_NAME}
   src/cli.cpp
+  src/macdetect-client/MDClient.cpp
   src/macdetect/Client.cpp
   src/macdetect/Packet.cpp
   src/macdetect/PacketEntity.cpp)

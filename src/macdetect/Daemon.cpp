@@ -32,6 +32,7 @@ namespace macdetect {
       std::list<Served*> lstRemovedServed = m_srvServer.removed();
       for(Served* svrServed : lstRemovedServed) {
 	bool bChanged = true;
+	
 	while(bChanged) {
 	  bChanged = false;
 	  
