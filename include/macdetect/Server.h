@@ -67,6 +67,7 @@ namespace macdetect {
     void handlePacket(Served* svrServed, int nServingID, Packet* pktReceived);
     std::list<QueuedPacket> queuedPackets();
     
+    std::list< std::pair<Served*, int> > served();
     void distributeStreamPacket(Packet* pktStream);
   };
 }

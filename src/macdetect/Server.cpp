@@ -210,6 +210,10 @@ namespace macdetect {
     return lstPackets;
   }
   
+  std::list< std::pair<Served*, int> > Server::served() {
+    return m_lstServed;
+  }
+  
   void Server::distributeStreamPacket(Packet* pktStream) {
     for(std::pair<Served*, int> prServed : m_lstServed) {
       prServed.first->sendPacket(pktStream);

@@ -102,6 +102,7 @@ namespace macdetect {
       
       for(Event* evEvent : lstEvents) {
 	Packet* pktSend = new Packet();
+	std::string strDeviceName = "";
 	
 	switch(evEvent->type()) {
 	case Event::DeviceAdded: {
@@ -126,6 +127,8 @@ namespace macdetect {
 	  pktSend->set("info", "mac-address-discovered");
 	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
 	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
+	  
+	  strDeviceName = mvEvent->deviceName();
 	} break;
 	  
 	case Event::MACAddressDisappeared: {
@@ -134,6 +137,8 @@ namespace macdetect {
 	  pktSend->set("info", "mac-address-disappeared");
 	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
 	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
+	  
+	  strDeviceName = mvEvent->deviceName();
 	} break;
 	  
 	default: {
@@ -143,7 +148,16 @@ namespace macdetect {
 	}
 	
 	if(pktSend) {
-	  m_srvServer.distributeStreamPacket(pktSend);
+	  std::list< std::pair<Served*, int> > lstServed = m_srvServer.served();
+	  
+	  for(std::pair<Served*, int> prServed : lstServed) {
+	    Served* svrServed = prServed.first;
+	    
+	    if(strDeviceName == "" || this->streamEnabled(svrServed, strDeviceName)) {
+	      svrServed->sendPacket(pktSend);
+	    }
+	  }
+	  
 	  delete pktSend;
 	}
       }
