@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   if(cliClient.connect("127.0.0.1")) {
     //macdetect::Packet* pktPacket = new macdetect::Packet("request", "devices-list");
     //macdetect::Packet* pktPacket = new macdetect::Packet("request", "known-mac-addresses");
-    macdetect::Packet* pktPacket = new macdetect::Packet("enable", "stream");
+    macdetect::Packet* pktPacket = new macdetect::Packet("request", "enable-stream");
     pktPacket->add(new macdetect::Packet("device-name", "lo"));
     
     cliClient.sendPacket(pktPacket);

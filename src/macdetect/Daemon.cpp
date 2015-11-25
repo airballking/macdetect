@@ -14,21 +14,14 @@ namespace macdetect {
   Daemon::~Daemon() {
   }
   
-  Packet* Daemon::responsePacket(Packet* pktPacket) {
+  Packet* Daemon::responsePacket(Packet* pktPacket, std::list< std::pair<std::string, std::string> > lstSubPackets) {
     Packet* pktResponse = NULL;
     
     if(pktPacket->key() == "request") {
-      pktResponse = new Packet("response", pktPacket->value());
+      pktResponse = new Packet("response", pktPacket->value(), lstSubPackets);
     }
     
     return pktResponse;
-  }
-  
-  Packet* Daemon::confirmationPacket(Packet* pktPacket) {
-    Packet* pktConfirmation = new Packet("info", "confirmation");
-    pktConfirmation->add(pktPacket->copy());
-    
-    return pktConfirmation;
   }
   
   bool Daemon::cycle() {
@@ -39,6 +32,7 @@ namespace macdetect {
       
       for(Server::QueuedPacket qpPacket : lstPackets) {
 	Packet* pktPacket = qpPacket.pktPacket;
+	Server::Serving sviServing = m_srvServer.servingByID(qpPacket.nServingID);
 	
 	if(pktPacket->key() == "request") {
 	  if(pktPacket->value() == "devices-list") {
@@ -74,10 +68,30 @@ namespace macdetect {
 	    
 	    qpPacket.svrServed->sendPacket(pktMACs);
 	    delete pktMACs;
-	  }
-	} else if(pktPacket->key() == "enable") {
-	  if(pktPacket->value() == "stream") {
-	    
+	  } else if(pktPacket->value() == "enable-stream") {
+	    if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-enabled"}});
+	      qpPacket.svrServed->sendPacket(pktResponse);
+	      delete pktResponse;
+	    } else {
+	      this->enableStream(qpPacket.svrServed, sviServing.strDeviceName);
+	      
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+	      qpPacket.svrServed->sendPacket(pktResponse);
+	      delete pktResponse;
+	    }
+	  } else if(pktPacket->value() == "disable-stream") {
+	    if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
+	      this->disableStream(qpPacket.svrServed, sviServing.strDeviceName);
+	      
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+	      qpPacket.svrServed->sendPacket(pktResponse);
+	      delete pktResponse;
+	    } else {
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-disabled"}});
+	      qpPacket.svrServed->sendPacket(pktResponse);
+	      delete pktResponse;
+	    }
 	  }
 	}
 	
@@ -107,11 +121,19 @@ namespace macdetect {
 	} break;
 	  
 	case Event::MACAddressDiscovered: {
+	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  
 	  pktSend->set("info", "mac-address-discovered");
+	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
+	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
 	} break;
 	  
 	case Event::MACAddressDisappeared: {
+	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  
 	  pktSend->set("info", "mac-address-disappeared");
+	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
+	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
 	} break;
 	  
 	default: {
@@ -122,6 +144,7 @@ namespace macdetect {
 	
 	if(pktSend) {
 	  m_srvServer.distributeStreamPacket(pktSend);
+	  delete pktSend;
 	}
       }
       
@@ -129,6 +152,41 @@ namespace macdetect {
     }
     
     return bSuccess;
+  }
+  
+  bool Daemon::enableStream(Served* svrServed, std::string strDeviceName) {
+    if(!this->streamEnabled(svrServed, strDeviceName)) {
+      m_lstStreams.push_back({svrServed, strDeviceName});
+    }
+  }
+  
+  bool Daemon::disableStream(Served* svrServed, std::string strDeviceName) {
+    bool bResult = false;
+    
+    for(std::list<Streams>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+      if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
+	m_lstStreams.erase(itStream);
+	bResult = true;
+	
+	break;
+      }
+    }
+    
+    return bResult;
+  }
+  
+  bool Daemon::streamEnabled(Served* svrServed, std::string strDeviceName) {
+    bool bResult = false;
+    
+    for(std::list<Streams>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+      if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
+	bResult = true;
+	
+	break;
+      }
+    }
+    
+    return bResult;
   }
   
   void Daemon::shutdown() {
