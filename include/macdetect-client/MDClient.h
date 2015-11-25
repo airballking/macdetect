@@ -25,7 +25,12 @@ namespace macdetect_client {
     
     bool connect(std::string strIP);
     
+    macdetect::Packet* requestResponse(std::string strRequest);
+    macdetect::Packet* requestResponse(macdetect::Packet* pktRequest, std::string strKey = "response");
+    
     std::list<std::string> deviceNames();
+    bool enableStream(std::string strDeviceName);
+    bool disableStream(std::string strDeviceName);
     
     macdetect::Packet* info();
   };

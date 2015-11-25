@@ -48,18 +48,71 @@ namespace macdetect_client {
     return m_cliClient.connect(strIP);
   }
   
+  macdetect::Packet* MDClient::requestResponse(std::string strRequest) {
+    macdetect::Packet* pktRequest = new macdetect::Packet("request", strRequest);
+    macdetect::Packet* pktResponse = this->requestResponse(pktRequest);
+    delete pktRequest;
+    
+    return pktResponse;
+  }
+  
+  macdetect::Packet* MDClient::requestResponse(macdetect::Packet* pktRequest, std::string strKey) {
+    m_cliClient.sendPacket(pktRequest);
+    
+    return this->getPacket(strKey, pktRequest->value());
+  }
+  
   std::list<std::string> MDClient::deviceNames() {
     std::list<std::string> lstDeviceNames;
+    macdetect::Packet* pktDevices = this->requestResponse("devices-list");
     
-    macdetect::Packet* pktSend = new macdetect::Packet("request", "devices-list");
-    m_cliClient.sendPacket(pktSend);
-    
-    macdetect::Packet* pktDevices = this->getPacket("response", "devices-list");
     for(macdetect::Packet* pktSub : pktDevices->subPackets()) {
       lstDeviceNames.push_back(pktSub->value());
     }
     
+    delete pktDevices;
+    
     return lstDeviceNames;
+  }
+  
+  bool MDClient::enableStream(std::string strDeviceName) {
+    bool bSuccess = false;
+    
+    macdetect::Packet* pktRequest = new macdetect::Packet("request", "enable-stream");
+    pktRequest->add(new macdetect::Packet("device-name", strDeviceName));
+    
+    macdetect::Packet* pktResult = this->requestResponse(pktRequest);
+    delete pktRequest;
+    
+    if(pktResult->sub("result")) {
+      if(pktResult->sub("result")->value() == "success") {
+	bSuccess = true;
+      }
+    }
+    
+    delete pktResult;
+    
+    return bSuccess;
+  }
+  
+  bool MDClient::disableStream(std::string strDeviceName) {
+    bool bSuccess = false;
+    
+    macdetect::Packet* pktRequest = new macdetect::Packet("request", "disable-stream");
+    pktRequest->add(new macdetect::Packet("device-name", strDeviceName));
+    
+    macdetect::Packet* pktResult = this->requestResponse(pktRequest);
+    delete pktRequest;
+    
+    if(pktResult->sub("result")) {
+      if(pktResult->sub("result")->value() == "success") {
+	bSuccess = true;
+      }
+    }
+    
+    delete pktResult;
+    
+    return bSuccess;
   }
   
   macdetect::Packet* MDClient::info() {

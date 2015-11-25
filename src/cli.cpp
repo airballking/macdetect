@@ -13,7 +13,12 @@ int main(int argc, char** argv) {
     std::list<std::string> lstDeviceNames = mdcClient.deviceNames();
     
     for(std::string strDeviceName : lstDeviceNames) {
-      std::cout << strDeviceName << std::endl;
+      std::cout << "Enabling stream for '" << strDeviceName << "'" << std::endl;
+      if(mdcClient.enableStream(strDeviceName)) {
+	std::cout << " - OK" << std::endl;
+      } else {
+	std::cout << " - Failed" << std::endl;
+      }
     }
     
     while(true) {
