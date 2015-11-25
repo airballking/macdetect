@@ -52,6 +52,7 @@ namespace macdetect {
   
   int Wire::createSocket(std::string strDeviceName, unsigned short usProtocol) {
     int nSocket = ::socket(PF_PACKET, SOCK_RAW, htons(usProtocol));
+    std::string strErrorSource = "socket";
     
     if(nSocket > -1 && strDeviceName != "") {
       struct ifreq ifr;
@@ -93,21 +94,27 @@ namespace macdetect {
 	  memcpy(socket_address.sll_addr, eaSource, sizeof(struct ether_addr));
 	  
 	  if(bind(nSocket, (sockaddr*)&socket_address, sizeof(socket_address)) == -1) {
+	    strErrorSource = "bind";
+	    
 	    ::close(nSocket);
 	    nSocket = -1;
 	  }
 	} else {
+	  strErrorSource = "ioctl/ifhwaddr";
+	  
 	  ::close(nSocket);
 	  nSocket = -1;
 	}
       } else {
+	strErrorSource = "ioctl/ifindex";
+	
 	::close(nSocket);
 	nSocket = -1;
       }
     }
     
     if(nSocket == -1) {
-      std::cout << "Error while creating socket (device " << strDeviceName << "): " << strerror(errno) << std::endl;
+      std::cout << "Error while creating socket (device '" << strDeviceName << "', source '" << strErrorSource << "'): " << strerror(errno) << std::endl;
     }
     
     return nSocket;
