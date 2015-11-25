@@ -125,4 +125,18 @@ namespace macdetect {
     
     return pktCopy;
   }
+  
+  Packet* Packet::sub(std::string strSubKey) {
+    Packet* pktReturn = NULL;
+    
+    for(Packet* pktSub : m_lstSubPackets) {
+      if(pktSub->key() == strSubKey) {
+	pktReturn = pktSub;
+	
+	break;
+      }
+    }
+    
+    return pktReturn;
+  }
 }

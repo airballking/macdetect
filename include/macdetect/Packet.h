@@ -37,6 +37,8 @@ namespace macdetect {
     void print(unsigned int unIndent = 0);
     
     Packet* copy();
+    
+    Packet* sub(std::string strSubKey);
   };
 }
 

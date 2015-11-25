@@ -69,27 +69,53 @@ namespace macdetect {
 	    qpPacket.svrServed->sendPacket(pktMACs);
 	    delete pktMACs;
 	  } else if(pktPacket->value() == "enable-stream") {
-	    if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-enabled"}});
-	      qpPacket.svrServed->sendPacket(pktResponse);
-	      delete pktResponse;
-	    } else {
-	      this->enableStream(qpPacket.svrServed, sviServing.strDeviceName);
+	    Packet* pktDeviceName = pktPacket->sub("device-name");
+	    
+	    if(pktDeviceName) {
+	      std::string strDeviceName = pktDeviceName->value();
 	      
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+	      if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
+		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-enabled"}});
+		qpPacket.svrServed->sendPacket(pktResponse);
+		
+		delete pktResponse;
+	      } else {
+		this->enableStream(qpPacket.svrServed, sviServing.strDeviceName);
+		
+		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+		qpPacket.svrServed->sendPacket(pktResponse);
+		
+		delete pktResponse;
+	      }
+	    } else {
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "device-name-missing"}});
 	      qpPacket.svrServed->sendPacket(pktResponse);
+	      
 	      delete pktResponse;
 	    }
 	  } else if(pktPacket->value() == "disable-stream") {
-	    if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
-	      this->disableStream(qpPacket.svrServed, sviServing.strDeviceName);
+	    Packet* pktDeviceName = pktPacket->sub("device-name");
+	    
+	    if(pktDeviceName) {
+	      std::string strDeviceName = pktDeviceName->value();
 	      
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
-	      qpPacket.svrServed->sendPacket(pktResponse);
-	      delete pktResponse;
+	      if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
+		this->disableStream(qpPacket.svrServed, sviServing.strDeviceName);
+		
+		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
+		qpPacket.svrServed->sendPacket(pktResponse);
+		
+		delete pktResponse;
+	      } else {
+		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-disabled"}});
+		qpPacket.svrServed->sendPacket(pktResponse);
+		
+		delete pktResponse;
+	      }
 	    } else {
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-disabled"}});
+	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "device-name-missing"}});
 	      qpPacket.svrServed->sendPacket(pktResponse);
+	      
 	      delete pktResponse;
 	    }
 	  }
