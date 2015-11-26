@@ -16,7 +16,7 @@ include_directories(
 #  macdetect-client)
 
 add_custom_command(OUTPUT pymacdetect.so
-  COMMAND python "${PROJECT_SOURCE_DIR}/src/pymacdetect/setup.py" build --build-lib "${LIBRARY_OUTPUT_PATH}"
+  COMMAND python "${PROJECT_SOURCE_DIR}/src/pymacdetect/setup.py" build --build-lib "${LIBRARY_OUTPUT_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}"
   DEPENDS macdetect-client
   COMMENT "Compiling the PyMACDetect libraries")
 

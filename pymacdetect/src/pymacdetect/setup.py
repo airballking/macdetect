@@ -18,9 +18,13 @@
 from distutils.core import setup, Extension
 
 
+import sys
+local_cmake_dir = sys.argv[len(sys.argv) - 1]
+sys.argv = sys.argv[:-1]
+
 pymacdetect_module = Extension('pymacdetect',
-                               define_macros = [('MAJOR_VERSION', '1'),
-                                                ('MINOR_VERSION', '0')],
+                               define_macros = [('MAJOR_VERSION', '0'),
+                                                ('MINOR_VERSION', '1')],
                                include_dirs = ['/usr/local/include',
                                                '../../pymacdetect/include',
                                                '../../macdetect-client/include',
@@ -28,7 +32,7 @@ pymacdetect_module = Extension('pymacdetect',
                                libraries = ['macdetect-client', 'macdetect-utils'],
                                library_dirs = ['/usr/local/lib',
                                                '../../lib'],
-                               sources = ['../../pymacdetect/src/pymacdetect/PyMACDetect.cpp'])
+                               sources = [local_cmake_dir + '/src/pymacdetect/PyMACDetect.cpp'])
 
 setup(name = 'PyMACDetect',
       version = '1.0',
