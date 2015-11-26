@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(macdetectd)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
 set(${PROJECT_NAME}_VERSION_MAJOR_0)
 set(${PROJECT_NAME}_VERSION_MINOR_1)
 

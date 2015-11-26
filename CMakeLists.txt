@@ -9,8 +9,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 include_directories(
   macdetect-utils/include
   macdetectd/include
-  macdetect-client/include)
-  
+  macdetect-client/include
+  pymacdetect/include)
+
 add_subdirectory(macdetect-utils)
 add_subdirectory(macdetectd)
 add_subdirectory(macdetect-client)
+add_subdirectory(pymacdetect)
