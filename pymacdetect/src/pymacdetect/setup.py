@@ -3,9 +3,13 @@ from distutils.core import setup, Extension
 pymacdetect_module = Extension('pymacdetect',
                                define_macros = [('MAJOR_VERSION', '1'),
                                                 ('MINOR_VERSION', '0')],
-                               include_dirs = ['/usr/local/include', '../../pymacdetect/include'],
-                               libraries = [],
-                               library_dirs = ['/usr/local/lib'],
+                               include_dirs = ['/usr/local/include',
+                                               '../../pymacdetect/include',
+                                               '../../macdetect-client/include',
+                                               '../../macdetect-utils/include'],
+                               libraries = ['macdetect-client', 'macdetect-utils'],
+                               library_dirs = ['/usr/local/lib',
+                                               '../../lib'],
                                sources = ['../../pymacdetect/src/pymacdetect/PyMACDetect.cpp'])
 
 setup(name = 'PyMACDetect',
