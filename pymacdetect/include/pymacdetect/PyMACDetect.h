@@ -19,6 +19,10 @@
 #define __PYMACDETECT_H__
 
 
+// System
+#include <list>
+#include <string>
+
 // Python
 #include <python2.7/Python.h>
 
@@ -26,17 +30,29 @@
 #include <macdetect-client/MDClient.h>
 
 
+static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs);
+
 static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
+
+static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
+
+static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs);
 
 PyMODINIT_FUNC initpymacdetect(void);
 
 static PyObject* pyoMACDetectError;
+
 static PyMethodDef PyMACDetectMethods[] = {
   {"createClient", createMDClient, METH_VARARGS,
    "Create a MAC Detect client instance."},
   {"destroyClient", destroyMDClient, METH_VARARGS,
    "Destroy a MAC Detect client instance."},
+  {"connectClient", connectMDClient, METH_VARARGS,
+   "Connects a MAC Detect client instance to a target IP."},
+  {"knownMACAddresses", knownMACAddresses, METH_VARARGS,
+   "Retrieves all known MAC addresses from a connected server."},
   {NULL, NULL, 0, NULL}
 };
 

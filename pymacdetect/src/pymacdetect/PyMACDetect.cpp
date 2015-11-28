@@ -18,6 +18,19 @@
 #include <pymacdetect/PyMACDetect.h>
 
 
+static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs) {
+  PyObject* pyoClient = NULL;
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "O", &pyoClient);
+  
+  if(nOK == 1) {
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+  }
+  
+  return mdcClient;
+}
+
+
 static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   
@@ -32,19 +45,68 @@ static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
 
 static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
-  PyObject* pyoClient = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
   
-  int nOK = PyArg_ParseTuple(pyoArgs, "O", &pyoClient);
+  if(mdcClient) {
+    delete mdcClient;
+    
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
+  }
+  
+  return pyoResult;
+}
+
+static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  PyObject* pyoClient = NULL;
+  char carrIP[1024];
+  
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient);
   
   if(nOK == 1) {
-    macdetect_client::MDClient* mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
     
     if(mdcClient) {
-      delete mdcClient;
-      
+      std::string strIP(carrIP);
+      if(mdcClient->connect(carrIP)) {
+	Py_INCREF(Py_True);
+	pyoResult = Py_True;
+      } else {
+	Py_INCREF(Py_False);
+	pyoResult = Py_False;
+      }
+    } else {
       Py_INCREF(Py_None);
       pyoResult = Py_None;
     }
+  }
+  
+  return pyoResult;
+}
+
+static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    std::list<std::string> lstAddresses = mdcClient->knownMACAddresses();
+    pyoResult = PyList_New(lstAddresses.size());
+    
+    unsigned int unIndex = 0;
+    for(std::list<std::string>::iterator itItem = lstAddresses.begin();
+	itItem != lstAddresses.end(); itItem++) {
+      std::string strItem = *itItem;
+      
+      PyObject* pyoItem = Py_BuildValue("z#", strItem.c_str(), strItem.length());
+      PyList_SetItem(pyoResult, unIndex, pyoItem);
+      
+      unIndex++;
+    }
+  } else {
+    Py_INCREF(Py_False);
+    pyoResult = Py_False;
   }
   
   return pyoResult;
