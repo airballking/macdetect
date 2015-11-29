@@ -51,6 +51,8 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Destroy a MAC Detect client instance."},
   {"connectClient", connectMDClient, METH_VARARGS,
    "Connects a MAC Detect client instance to a target IP."},
+  {"disconnectClient", disconnectMDClient, METH_VARARGS,
+   "Disconnects a MAC Detect client instance from its current server."},
   {"knownMACAddresses", knownMACAddresses, METH_VARARGS,
    "Retrieves all known MAC addresses from a connected server."},
   {NULL, NULL, 0, NULL}

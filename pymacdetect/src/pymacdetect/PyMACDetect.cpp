@@ -86,6 +86,23 @@ static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
+static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    // Disconnect here.
+    
+    Py_INCREF(Py_True);
+    pyoResult = Py_True;
+  } else {
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
+  }
+  
+  return pyoResult;
+}
+
 static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
