@@ -133,7 +133,8 @@ PyMODINIT_FUNC initpymacdetect(void) {
   PyObject* pyoM = Py_InitModule("pymacdetect", PyMACDetectMethods);
   
   if(pyoM) { // Error
-    pyoMACDetectError = PyErr_NewException("pymacdetect.error", NULL, NULL);
+    char cError[] = "pymacdetect.error";
+    pyoMACDetectError = PyErr_NewException(cError, NULL, NULL);
     Py_INCREF(pyoMACDetectError);
     PyModule_AddObject(pyoM, "error", pyoMACDetectError);
   }
