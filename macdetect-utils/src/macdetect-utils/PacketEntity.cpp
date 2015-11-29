@@ -31,6 +31,8 @@ namespace macdetect {
   }
   
   bool PacketEntity::sendPacket(Packet* pktSend) {
+    std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
+    
     unsigned char ucarrBuffer[2048];
     unsigned int unLength = pktSend->serialize(ucarrBuffer, 2048);
     
@@ -40,6 +42,8 @@ namespace macdetect {
   }
   
   Packet* PacketEntity::receivePacket() {
+    std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
+    
     Packet* pktReceived = NULL;
     
     unsigned char ucarrBuffer[2048];

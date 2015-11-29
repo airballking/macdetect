@@ -22,6 +22,7 @@
 // System
 #include <unistd.h>
 #include <sys/socket.h>
+#include <mutex>
 
 // MAC detect
 #include <macdetect-utils/Packet.h>
@@ -33,6 +34,7 @@ namespace macdetect {
   protected:
     int m_nSocketFD;
     bool m_bFailureState;
+    std::mutex m_mtxSocketAccess;
     
   public:
     PacketEntity(int nSocketFD);
