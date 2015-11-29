@@ -41,6 +41,7 @@ namespace macdetect_client {
     ~MDClient();
     
     bool connect(std::string strIP);
+    bool disconnect();
     
     macdetect::Packet* requestResponse(std::string strRequest);
     macdetect::Packet* requestResponse(macdetect::Packet* pktRequest, std::string strKey = "response");
