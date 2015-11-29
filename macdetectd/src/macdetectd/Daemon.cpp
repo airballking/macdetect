@@ -24,6 +24,8 @@ namespace macdetect {
     
     m_nwNetwork.setAutoManageDevices(true);
     m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
+    
+    // TODO: This is too narrow; re-specify
     m_nwNetwork.addDeviceWhiteBlacklistEntry("(wlan)(.*)");
     m_nwNetwork.addDeviceWhiteBlacklistEntry("(eth)(.*)");
   }
@@ -99,6 +101,7 @@ namespace macdetect {
 	      sts.str("");
 	      sts << meMAC.dFirstSeen;
 	      pktMAC->add(new Packet("first-seen", sts.str()));
+	      pktMAC->add(new Packet("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
 	      
 	      pktMACs->add(pktMAC);
 	    }

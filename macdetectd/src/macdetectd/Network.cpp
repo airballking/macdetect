@@ -560,12 +560,14 @@ namespace macdetect {
     return m_dMaxMACAge;
   }
   
-  std::string Network::readableMACIdentifier(std::string strMAC) {
+  std::string Network::readableMACIdentifier(std::string strMAC, bool bDefaultToMAC) {
     std::string strReturn = "";
     Data::Vendor vdVendor = m_dtData.vendorForMAC(strMAC);
     
     if(!vdVendor.bValid) {
-      strReturn = strMAC;
+      if(bDefaultToMAC) {
+	strReturn = strMAC;
+      }
     } else {
       strReturn = "\"" + vdVendor.strVendor + "\"" + strMAC.substr(8);
     }
