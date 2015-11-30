@@ -40,8 +40,8 @@ namespace macdetect {
     PacketEntity(int nSocketFD);
     ~PacketEntity();
     
-    bool send(Value* valSend);
-    Value* receive();
+    bool send(std::shared_ptr<Value> valSend);
+    std::shared_ptr<Value> receive();
     
     int socket();
     bool failureState();

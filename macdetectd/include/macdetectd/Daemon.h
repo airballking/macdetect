@@ -45,7 +45,7 @@ namespace macdetect {
     Daemon();
     ~Daemon();
     
-    Value* response(Value* valValue, std::list< std::pair<std::string, std::string> > lstSubValues = {});
+    std::shared_ptr<Value> response(std::shared_ptr<Value> valValue, std::list< std::pair<std::string, std::string> > lstSubValues = {});
     
     bool enableStream(Served* svrServed, std::string strDeviceName);
     bool disableStream(Served* svrServed, std::string strDeviceName);

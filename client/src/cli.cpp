@@ -43,11 +43,7 @@ int main(int argc, char** argv) {
     }
     
     while(true) {
-      macdetect::Value* valInfo = mdcClient.info();
-      
-      if(valInfo) {
-	delete valInfo;
-      }
+      std::shared_ptr<macdetect::Value> valInfo = mdcClient.info();
     }
     
     return EXIT_SUCCESS;

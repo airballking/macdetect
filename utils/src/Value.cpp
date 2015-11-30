@@ -21,18 +21,19 @@
 namespace macdetect {
   Value::Value(std::string strKey, std::string strContent, std::list< std::pair<std::string, std::string> > lstSubValues) : m_strKey(strKey), m_strContent(strContent) {
     for(std::pair<std::string, std::string> prPair : lstSubValues) {
-      this->add(new Value(prPair.first, prPair.second));
+      this->add(std::make_shared<Value>(prPair.first, prPair.second));
     }
   }
   
   Value::~Value() {
-    for(Value* valDelete : m_lstSubValues) {
-      delete valDelete;
-    }
   }
   
-  void Value::add(Value* valAdd) {
+  void Value::add(std::shared_ptr<Value> valAdd) {
     m_lstSubValues.push_back(valAdd);
+  }
+  
+  void Value::add(std::string strKey, std::string strContent) {
+    this->add(std::make_shared<Value>(strKey, strContent));
   }
   
   unsigned int Value::serialize(void* vdBuffer, unsigned int unLength) {
@@ -60,7 +61,7 @@ namespace macdetect {
     memcpy(&(ucData[unOffset]), &unSubValueCount, sizeof(unsigned int));
     unOffset += sizeof(unsigned int);
     
-    for(Value* valSerialize : m_lstSubValues) {
+    for(std::shared_ptr<Value> valSerialize : m_lstSubValues) {
       unOffset += valSerialize->serialize(&(ucData[unOffset]), unLength - unOffset);
     }
     
@@ -94,7 +95,7 @@ namespace macdetect {
     unOffset += sizeof(unsigned int);
     
     for(unsigned int unI = 0; unI < unSubValueCount; unI++) {
-      Value* valSub = new Value();
+      std::shared_ptr<Value> valSub = std::make_shared<Value>();
       unOffset += valSub->deserialize(&(ucBuffer[unOffset]), unLength - unOffset);
       
       m_lstSubValues.push_back(valSub);
@@ -103,7 +104,7 @@ namespace macdetect {
     return unOffset;
   }
   
-  std::list<Value*> Value::subValues() {
+  std::list< std::shared_ptr<Value> > Value::subValues() {
     return m_lstSubValues;
   }
   
@@ -123,7 +124,7 @@ namespace macdetect {
     
     std::cout << strIndentation << " - " << m_strKey << " = " << m_strContent << std::endl;
     
-    for(Value* valSub : m_lstSubValues) {
+    for(std::shared_ptr<Value> valSub : m_lstSubValues) {
       valSub->print(unIndent + 1);
     }
   }
@@ -133,20 +134,20 @@ namespace macdetect {
     m_strContent = strContent;
   }
   
-  Value* Value::copy() {
-    Value* valCopy = new Value(m_strKey, m_strContent);
+  std::shared_ptr<Value> Value::copy() {
+    std::shared_ptr<Value> valCopy(new Value(m_strKey, m_strContent));
     
-    for(Value* valSub : m_lstSubValues) {
+    for(std::shared_ptr<Value> valSub : m_lstSubValues) {
       valCopy->add(valSub->copy());
     }
     
     return valCopy;
   }
   
-  Value* Value::sub(std::string strSubKey) {
-    Value* valReturn = NULL;
+  std::shared_ptr<Value> Value::sub(std::string strSubKey) {
+    std::shared_ptr<Value> valReturn = NULL;
     
-    for(Value* valSub : m_lstSubValues) {
+    for(std::shared_ptr<Value> valSub : m_lstSubValues) {
       if(valSub->key() == strSubKey) {
 	valReturn = valSub;
 	

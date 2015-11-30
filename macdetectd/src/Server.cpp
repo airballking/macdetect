@@ -131,7 +131,7 @@ namespace macdetect {
       
       for(std::pair<Served*, int> prServed : m_lstServed) {
 	Served* svrServed = prServed.first;
-	Value* valReceived = svrServed->receive();
+	std::shared_ptr<Value> valReceived = svrServed->receive();
 	
 	if(valReceived) {
 	  this->handleValue(svrServed, prServed.second, valReceived);
@@ -218,7 +218,7 @@ namespace macdetect {
     return {Serving::Invalid, -1, -1, "", 0};
   }
   
-  void Server::handleValue(Served* svrServed, int nServingID, Value* valReceived) {
+  void Server::handleValue(Served* svrServed, int nServingID, std::shared_ptr<Value> valReceived) {
     m_lstValueQueue.push_back({valReceived, svrServed, nServingID});
   }
   
@@ -233,7 +233,7 @@ namespace macdetect {
     return m_lstServed;
   }
   
-  void Server::distributeStreamValue(Value* valStream) {
+  void Server::distributeStreamValue(std::shared_ptr<Value> valStream) {
     for(std::pair<Served*, int> prServed : m_lstServed) {
       prServed.first->send(valStream);
     }

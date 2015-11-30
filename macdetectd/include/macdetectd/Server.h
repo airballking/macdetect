@@ -53,7 +53,7 @@ namespace macdetect {
     } Serving;
     
     typedef struct {
-      Value* valValue;
+      std::shared_ptr<Value> valValue;
       Served* svrServed;
       int nServingID;
     } QueuedValue;
@@ -82,11 +82,11 @@ namespace macdetect {
     int freeServingID();
     Server::Serving servingByID(int nID);
     
-    void handleValue(Served* svrServed, int nServingID, Value* valReceived);
+    void handleValue(Served* svrServed, int nServingID, std::shared_ptr<Value> valReceived);
     std::list<QueuedValue> queuedValues();
     
     std::list< std::pair<Served*, int> > served();
-    void distributeStreamValue(Value* valStream);
+    void distributeStreamValue(std::shared_ptr<Value> valStream);
     
     std::list<Served*> removed();
   };

@@ -33,11 +33,12 @@ namespace macdetect {
   Daemon::~Daemon() {
   }
   
-  Value* Daemon::response(Value* valValue, std::list< std::pair<std::string, std::string> > lstSubValues) {
-    Value* valResponse = NULL;
+  std::shared_ptr<Value> Daemon::response(std::shared_ptr<Value> valValue, std::list< std::pair<std::string, std::string> > lstSubValues) {
+    std::shared_ptr<Value> valResponse = NULL;
     
     if(valValue->key() == "request") {
-      valResponse = new Value("response", valValue->content(), lstSubValues);
+      std::shared_ptr<Value> valPre(std::make_shared<Value>("response", valValue->content(), lstSubValues));
+      valResponse = std::move(valPre);
     }
     
     return valResponse;
@@ -70,73 +71,67 @@ namespace macdetect {
       std::list<Server::QueuedValue> lstValues = m_srvServer.queuedValues();
       
       for(Server::QueuedValue qvValue : lstValues) {
-	Value* valValue = qvValue.valValue;
+	std::shared_ptr<Value> valValue = qvValue.valValue;
 	Server::Serving sviServing = m_srvServer.servingByID(qvValue.nServingID);
 	
 	if(valValue->key() == "request") {
 	  if(valValue->content() == "devices-list") {
 	    std::list<Device*> lstDevices = m_nwNetwork.knownDevices();
 	    
-	    Value* valDevices = this->response(valValue);
+	    std::shared_ptr<Value> valDevices = this->response(valValue);
 	    for(Device* dvDevice : lstDevices) {
-	      valDevices->add(new Value("device", dvDevice->deviceName(),
-				        {{"mac", dvDevice->mac()},
-				         {"ip", dvDevice->ip()},
-					 {"broadcast-ip", dvDevice->broadcastIP()}}));
+	      std::shared_ptr<Value> valAdd = std::make_shared<Value>("device", dvDevice->deviceName());
+	      valAdd->add("mac", dvDevice->mac());
+	      valAdd->add("ip", dvDevice->ip());
+	      valAdd->add("broadcast-ip", dvDevice->broadcastIP());
+	      
+	      valDevices->add(valAdd);
 	    }
 	    
 	    qvValue.svrServed->send(valDevices);
-	    delete valDevices;
 	  } else if(valValue->content() == "known-mac-addresses") {
 	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
 	    
-	    Value* valMACs = this->response(valValue);
+	    std::shared_ptr<Value> valMACs = this->response(valValue);
 	    for(Network::MACEntity meMAC : lstMACs) {
-	      Value* valMAC = new Value("mac", meMAC.strMAC);
-	      valMAC->add(new Value("device-name", meMAC.strDeviceName));
+	      std::shared_ptr<Value> valMAC = std::make_shared<Value>("mac", meMAC.strMAC);
+	      valMAC->add(std::make_shared<Value>("device-name", meMAC.strDeviceName));
 	      
 	      std::stringstream sts;
 	      sts << meMAC.dLastSeen;
-	      valMAC->add(new Value("last-seen", sts.str()));
+	      valMAC->add(std::make_shared<Value>("last-seen", sts.str()));
 	      sts.str("");
 	      sts << meMAC.dFirstSeen;
-	      valMAC->add(new Value("first-seen", sts.str()));
-	      valMAC->add(new Value("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
+	      valMAC->add(std::make_shared<Value>("first-seen", sts.str()));
+	      valMAC->add(std::make_shared<Value>("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
 	      
 	      valMACs->add(valMAC);
 	    }
 	    
 	    qvValue.svrServed->send(valMACs);
-	    delete valMACs;
 	  } else if(valValue->content() == "enable-stream") {
-	    Value* valDeviceName = valValue->sub("device-name");
+	    std::shared_ptr<Value> valDeviceName = valValue->sub("device-name");
 	    
 	    if(valDeviceName) {
 	      std::string strDeviceName = valDeviceName->content();
 	      
 	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
-		Value* valResponse = this->response(valValue, {{"result", "already-enabled"}});
-		valResponse->add(new Value("device-name", strDeviceName));
+		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "already-enabled"}});
+		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
 		qvValue.svrServed->send(valResponse);
-		
-		delete valResponse;
 	      } else {
 		this->enableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		Value* valResponse = this->response(valValue, {{"result", "success"}});
-		valResponse->add(new Value("device-name", strDeviceName));
+		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
 		qvValue.svrServed->send(valResponse);
-		
-		delete valResponse;
 	      }
 	    } else {
-	      Value* valResponse = this->response(valValue, {{"result", "device-name-missing"}});
+	      std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "device-name-missing"}});
 	      qvValue.svrServed->send(valResponse);
-	      
-	      delete valResponse;
 	    }
 	  } else if(valValue->content() == "disable-stream") {
-	    Value* valDeviceName = valValue->sub("device-name");
+	    std::shared_ptr<Value> valDeviceName = valValue->sub("device-name");
 	    
 	    if(valDeviceName) {
 	      std::string strDeviceName = valDeviceName->content();
@@ -144,35 +139,27 @@ namespace macdetect {
 	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
 		this->disableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		Value* valResponse = this->response(valValue, {{"result", "success"}});
-		valResponse->add(new Value("device-name", strDeviceName));
+		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
 		qvValue.svrServed->send(valResponse);
-		
-		delete valResponse;
 	      } else {
-		Value* valResponse = this->response(valValue, {{"result", "already-disabled"}});
-		valResponse->add(new Value("device-name", strDeviceName));
+		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "already-disabled"}});
+		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
 		qvValue.svrServed->send(valResponse);
-		
-		delete valResponse;
 	      }
 	    } else {
-	      Value* valResponse = this->response(valValue, {{"result", "device-name-missing"}});
+	      std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "device-name-missing"}});
 	      qvValue.svrServed->send(valResponse);
-	      
-	      delete valResponse;
 	    }
 	  }
 	}
-	
-	delete qvValue.valValue;
       }
       
       // Handle network events
       std::list<Event*> lstEvents = m_nwNetwork.events();
       
       for(Event* evEvent : lstEvents) {
-	Value* valSend = new Value();
+	std::shared_ptr<Value> valSend = std::make_shared<Value>();
 	std::string strDeviceName = "";
 	
 	switch(evEvent->type()) {
@@ -180,7 +167,7 @@ namespace macdetect {
 	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
 	  
 	  valSend->set("info", "device-added");
-	  valSend->add(new Value("device-name", devEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceRemoved: {
@@ -192,10 +179,9 @@ namespace macdetect {
 	    
 	    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
 	      if((*itStream).strDeviceName == devEvent->deviceName()) {
-		Value* valDisabled = new Value("info", "stream-disabled");
-		valDisabled->add(new Value("device-name", devEvent->deviceName()));
+		std::shared_ptr<Value> valDisabled = std::make_shared<Value>("info", "stream-disabled");
+		valDisabled->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
 		(*itStream).svrServed->send(valDisabled);
-		delete valDisabled;
 		
 		m_lstStreams.erase(itStream);
 		bChanged = true;
@@ -206,7 +192,7 @@ namespace macdetect {
 	  }
 	  
 	  valSend->set("info", "device-removed");
-	  valSend->add(new Value("device-name", devEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceStateChanged: {
@@ -225,8 +211,8 @@ namespace macdetect {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
 	  
 	  valSend->set("info", "mac-address-discovered");
-	  valSend->add(new Value("mac", mvEvent->macAddress()));
-	  valSend->add(new Value("device-name", mvEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
+	  valSend->add(std::make_shared<Value>("device-name", mvEvent->deviceName()));
 	  
 	  strDeviceName = mvEvent->deviceName();
 	} break;
@@ -235,14 +221,13 @@ namespace macdetect {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
 	  
 	  valSend->set("info", "mac-address-disappeared");
-	  valSend->add(new Value("mac", mvEvent->macAddress()));
-	  valSend->add(new Value("device-name", mvEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
+	  valSend->add(std::make_shared<Value>("device-name", mvEvent->deviceName()));
 	  
 	  strDeviceName = mvEvent->deviceName();
 	} break;
 	  
 	default: {
-	  delete valSend;
 	  valSend = NULL;
 	} break;
 	}
@@ -257,8 +242,6 @@ namespace macdetect {
 	      svrServed->send(valSend);
 	    }
 	  }
-	  
-	  delete valSend;
 	}
       }
       

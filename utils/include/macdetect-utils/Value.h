@@ -24,13 +24,14 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <memory>
 
 
 namespace macdetect {
   class Value {
   public:
   private:
-    std::list<Value*> m_lstSubValues;
+    std::list< std::shared_ptr<Value> > m_lstSubValues;
     
     std::string m_strKey;
     std::string m_strContent;
@@ -40,21 +41,22 @@ namespace macdetect {
     Value(std::string strKey = "", std::string strContent = "", std::list< std::pair<std::string, std::string> > lstSubValues = {});
     ~Value();
     
-    void add(Value* valAdd);
+    void add(std::shared_ptr<Value> valAdd);
+    void add(std::string strKey, std::string strContent);
     
     unsigned int serialize(void* vdBuffer, unsigned int unLength);
     unsigned int deserialize(void* vdBuffer, unsigned int unLength);
     
     void set(std::string strKey, std::string strContent);
     
-    std::list<Value*> subValues();
+    std::list< std::shared_ptr<Value> > subValues();
     std::string key();
     std::string content();
     
     void print(unsigned int unIndent = 0);
     
-    Value* copy();
-    Value* sub(std::string strSubKey);
+    std::shared_ptr<Value> copy();
+    std::shared_ptr<Value> sub(std::string strSubKey);
   };
 }
 

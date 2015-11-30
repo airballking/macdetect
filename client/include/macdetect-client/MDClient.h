@@ -30,11 +30,11 @@
 namespace macdetect_client {
   class MDClient {
   private:
-    std::list<macdetect::Value*> m_lstReceivedValues;
+    std::list< std::shared_ptr<macdetect::Value> > m_lstReceivedValues;
     macdetect::Client m_cliClient;
     
   protected:
-    macdetect::Value* get(std::string strKey, std::string strContent, bool bBlock = true);
+    std::shared_ptr<macdetect::Value> get(std::string strKey, std::string strContent, bool bBlock = true);
     
   public:
     MDClient();
@@ -43,18 +43,18 @@ namespace macdetect_client {
     bool connect(std::string strIP);
     bool disconnect();
     
-    macdetect::Value* requestResponse(std::string strRequest);
-    macdetect::Value* requestResponse(macdetect::Value* valRequest, std::string strKey = "response");
+    std::shared_ptr<macdetect::Value> requestResponse(std::string strRequest);
+    std::shared_ptr<macdetect::Value> requestResponse(std::shared_ptr<macdetect::Value> valRequest, std::string strKey = "response");
     
     std::list<std::string> knownMACAddresses();
     std::list<std::string> deviceNames();
     
-    std::list<macdetect::Value*> devicesList();
+    std::list< std::shared_ptr<macdetect::Value> > devicesList();
     
     bool enableStream(std::string strDeviceName);
     bool disableStream(std::string strDeviceName);
     
-    macdetect::Value* info();
+    std::shared_ptr<macdetect::Value> info();
   };
 }
 
