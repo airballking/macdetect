@@ -49,6 +49,8 @@ namespace macdetect_client {
     std::list<std::string> knownMACAddresses();
     std::list<std::string> deviceNames();
     
+    std::list<macdetect::Packet*> devicesList();
+    
     bool enableStream(std::string strDeviceName);
     bool disableStream(std::string strDeviceName);
     

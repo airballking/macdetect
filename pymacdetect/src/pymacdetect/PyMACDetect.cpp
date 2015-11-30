@@ -129,6 +129,32 @@ static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
+static PyObject* devicesList(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    std::list<macdetect::Packet*> lstDevices = mdcClient->devicesList();
+    pyoResult = PyList_New(lstDevices.size());
+    
+    unsigned int unIndex = 0;
+    for(std::list<macdetect::Packet*>::iterator itItem = lstDevices.begin();
+	itItem != lstDevices.end(); itItem++) {
+      macdetect::Packet* pktItem = *itItem;
+      
+      /*PyObject* pyoItem = Py_BuildValue("z#", strItem.c_str(), strItem.length());
+	PyList_SetItem(pyoResult, unIndex, pyoItem);*/
+      
+      unIndex++;
+    }
+  } else {
+    Py_INCREF(Py_False);
+    pyoResult = Py_False;
+  }
+  
+  return pyoResult;
+}
+
 PyMODINIT_FUNC initpymacdetect(void) {
   PyObject* pyoM = Py_InitModule("pymacdetect", PyMACDetectMethods);
   

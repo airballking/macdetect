@@ -96,6 +96,19 @@ namespace macdetect_client {
     return lstDeviceNames;
   }
   
+  std::list<macdetect::Packet*> MDClient::devicesList() {
+    std::list<macdetect::Packet*> lstDevices;
+    macdetect::Packet* pktResponse = this->requestResponse("devices-list");
+    
+    for(macdetect::Packet* pktDevice : pktResponse->subPackets()) {
+      if(pktDevice->key() == "device") {
+	lstDevices.push_back(pktDevice->copy());
+      }
+    }
+    
+    return lstDevices;
+  }
+  
   std::list<std::string> MDClient::knownMACAddresses() {
     std::list<std::string> lstMACAddresses;
     macdetect::Packet* pktMACAddresses = this->requestResponse("known-mac-addresses");
