@@ -25,40 +25,40 @@ namespace macdetect_client {
   MDClient::~MDClient() {
   }
   
-  macdetect::Packet* MDClient::getPacket(std::string strKey, std::string strValue, bool bBlock) {
-    macdetect::Packet* pktReturn = NULL;
+  macdetect::Value* MDClient::get(std::string strKey, std::string strValue, bool bBlock) {
+    macdetect::Value* valReturn = NULL;
     bool bReceived = false;
     
     while(!bReceived) {
-      while(m_lstReceivedPackets.size() == 0) {
-	macdetect::Packet* pktReceived = m_cliClient.receivePacket();
+      while(m_lstReceivedValues.size() == 0) {
+	macdetect::Value* valReceived = m_cliClient.receive();
 	
-	if(pktReceived) {
-	  m_lstReceivedPackets.push_back(pktReceived);
+	if(valReceived) {
+	  m_lstReceivedValues.push_back(valReceived);
 	}
       }
       
-      for(std::list<macdetect::Packet*>::iterator itPacket = m_lstReceivedPackets.begin(); itPacket != m_lstReceivedPackets.end(); itPacket++) {
-	macdetect::Packet* pktPacket = *itPacket;
+      for(std::list<macdetect::Value*>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
+	macdetect::Value* valValue = *itValue;
 	
-	if((strKey == "" || pktPacket->key() == strKey) &&
-	   (strValue == "" || pktPacket->value() == strValue)) {
-	  pktReturn = pktPacket;
+	if((strKey == "" || valValue->key() == strKey) &&
+	   (strValue == "" || valValue->content() == strValue)) {
+	  valReturn = valValue;
 	  bReceived = true;
-	  m_lstReceivedPackets.erase(itPacket);
+	  m_lstReceivedValues.erase(itValue);
 	  
 	  break;
 	}
       }
       
-      if(pktReturn == NULL) {
+      if(valReturn == NULL) {
 	if(!bBlock) {
 	  break;
 	}
       }
     }
     
-    return pktReturn;
+    return valReturn;
   }
   
   bool MDClient::connect(std::string strIP) {
@@ -69,26 +69,26 @@ namespace macdetect_client {
     return m_cliClient.disconnect();
   }
   
-  macdetect::Packet* MDClient::requestResponse(std::string strRequest) {
-    macdetect::Packet* pktRequest = new macdetect::Packet("request", strRequest);
-    macdetect::Packet* pktResponse = this->requestResponse(pktRequest);
+  macdetect::Value* MDClient::requestResponse(std::string strRequest) {
+    macdetect::Value* pktRequest = new macdetect::Value("request", strRequest);
+    macdetect::Value* pktResponse = this->requestResponse(pktRequest);
     delete pktRequest;
     
     return pktResponse;
   }
   
-  macdetect::Packet* MDClient::requestResponse(macdetect::Packet* pktRequest, std::string strKey) {
-    m_cliClient.sendPacket(pktRequest);
+  macdetect::Value* MDClient::requestResponse(macdetect::Value* pktRequest, std::string strKey) {
+    m_cliClient.send(pktRequest);
     
-    return this->getPacket(strKey, pktRequest->value());
+    return this->get(strKey, pktRequest->content());
   }
   
   std::list<std::string> MDClient::deviceNames() {
     std::list<std::string> lstDeviceNames;
-    macdetect::Packet* pktDevices = this->requestResponse("devices-list");
+    macdetect::Value* pktDevices = this->requestResponse("devices-list");
     
-    for(macdetect::Packet* pktSub : pktDevices->subPackets()) {
-      lstDeviceNames.push_back(pktSub->value());
+    for(macdetect::Value* pktSub : pktDevices->subValues()) {
+      lstDeviceNames.push_back(pktSub->content());
     }
     
     delete pktDevices;
@@ -96,11 +96,11 @@ namespace macdetect_client {
     return lstDeviceNames;
   }
   
-  std::list<macdetect::Packet*> MDClient::devicesList() {
-    std::list<macdetect::Packet*> lstDevices;
-    macdetect::Packet* pktResponse = this->requestResponse("devices-list");
+  std::list<macdetect::Value*> MDClient::devicesList() {
+    std::list<macdetect::Value*> lstDevices;
+    macdetect::Value* pktResponse = this->requestResponse("devices-list");
     
-    for(macdetect::Packet* pktDevice : pktResponse->subPackets()) {
+    for(macdetect::Value* pktDevice : pktResponse->subValues()) {
       if(pktDevice->key() == "device") {
 	lstDevices.push_back(pktDevice->copy());
       }
@@ -111,10 +111,10 @@ namespace macdetect_client {
   
   std::list<std::string> MDClient::knownMACAddresses() {
     std::list<std::string> lstMACAddresses;
-    macdetect::Packet* pktMACAddresses = this->requestResponse("known-mac-addresses");
+    macdetect::Value* pktMACAddresses = this->requestResponse("known-mac-addresses");
     
-    for(macdetect::Packet* pktSub : pktMACAddresses->subPackets()) {
-      lstMACAddresses.push_back(pktSub->value());
+    for(macdetect::Value* pktSub : pktMACAddresses->subValues()) {
+      lstMACAddresses.push_back(pktSub->content());
     }
     
     delete pktMACAddresses;
@@ -125,14 +125,14 @@ namespace macdetect_client {
   bool MDClient::enableStream(std::string strDeviceName) {
     bool bSuccess = false;
     
-    macdetect::Packet* pktRequest = new macdetect::Packet("request", "enable-stream");
-    pktRequest->add(new macdetect::Packet("device-name", strDeviceName));
+    macdetect::Value* pktRequest = new macdetect::Value("request", "enable-stream");
+    pktRequest->add(new macdetect::Value("device-name", strDeviceName));
     
-    macdetect::Packet* pktResult = this->requestResponse(pktRequest);
+    macdetect::Value* pktResult = this->requestResponse(pktRequest);
     delete pktRequest;
     
     if(pktResult->sub("result")) {
-      if(pktResult->sub("result")->value() == "success") {
+      if(pktResult->sub("result")->content() == "success") {
 	bSuccess = true;
       }
     }
@@ -145,14 +145,14 @@ namespace macdetect_client {
   bool MDClient::disableStream(std::string strDeviceName) {
     bool bSuccess = false;
     
-    macdetect::Packet* pktRequest = new macdetect::Packet("request", "disable-stream");
-    pktRequest->add(new macdetect::Packet("device-name", strDeviceName));
+    macdetect::Value* pktRequest = new macdetect::Value("request", "disable-stream");
+    pktRequest->add(new macdetect::Value("device-name", strDeviceName));
     
-    macdetect::Packet* pktResult = this->requestResponse(pktRequest);
+    macdetect::Value* pktResult = this->requestResponse(pktRequest);
     delete pktRequest;
     
     if(pktResult->sub("result")) {
-      if(pktResult->sub("result")->value() == "success") {
+      if(pktResult->sub("result")->content() == "success") {
 	bSuccess = true;
       }
     }
@@ -162,7 +162,7 @@ namespace macdetect_client {
     return bSuccess;
   }
   
-  macdetect::Packet* MDClient::info() {
-    return this->getPacket(""/*info*/, "", false);
+  macdetect::Value* MDClient::info() {
+    return this->get(""/*info*/, "", false);
   }
 }

@@ -131,10 +131,10 @@ namespace macdetect {
       
       for(std::pair<Served*, int> prServed : m_lstServed) {
 	Served* svrServed = prServed.first;
-	Packet* pktReceived = svrServed->receivePacket();
+	Value* valReceived = svrServed->receive();
 	
-	if(pktReceived) {
-	  this->handlePacket(svrServed, prServed.second, pktReceived);
+	if(valReceived) {
+	  this->handleValue(svrServed, prServed.second, valReceived);
 	} else {
 	  if(svrServed->failureState()) {
 	    lstRemoveServed.push_back(svrServed);
@@ -218,24 +218,24 @@ namespace macdetect {
     return {Serving::Invalid, -1, -1, "", 0};
   }
   
-  void Server::handlePacket(Served* svrServed, int nServingID, Packet* pktReceived) {
-    m_lstPacketQueue.push_back({pktReceived, svrServed, nServingID});
+  void Server::handleValue(Served* svrServed, int nServingID, Value* valReceived) {
+    m_lstValueQueue.push_back({valReceived, svrServed, nServingID});
   }
   
-  std::list<Server::QueuedPacket> Server::queuedPackets() {
-    std::list<QueuedPacket> lstPackets = m_lstPacketQueue;
-    m_lstPacketQueue.clear();
+  std::list<Server::QueuedValue> Server::queuedValues() {
+    std::list<QueuedValue> lstValues = m_lstValueQueue;
+    m_lstValueQueue.clear();
     
-    return lstPackets;
+    return lstValues;
   }
   
   std::list< std::pair<Served*, int> > Server::served() {
     return m_lstServed;
   }
   
-  void Server::distributeStreamPacket(Packet* pktStream) {
+  void Server::distributeStreamValue(Value* valStream) {
     for(std::pair<Served*, int> prServed : m_lstServed) {
-      prServed.first->sendPacket(pktStream);
+      prServed.first->send(valStream);
     }
   }
   

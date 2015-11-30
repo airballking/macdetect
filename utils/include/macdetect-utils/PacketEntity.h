@@ -25,7 +25,7 @@
 #include <mutex>
 
 // MAC detect
-#include <macdetect-utils/Packet.h>
+#include <macdetect-utils/Value.h>
 
 
 namespace macdetect {
@@ -40,8 +40,8 @@ namespace macdetect {
     PacketEntity(int nSocketFD);
     ~PacketEntity();
     
-    bool sendPacket(Packet* pktSend);
-    Packet* receivePacket();
+    bool send(Value* valSend);
+    Value* receive();
     
     int socket();
     bool failureState();

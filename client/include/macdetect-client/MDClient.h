@@ -30,11 +30,11 @@
 namespace macdetect_client {
   class MDClient {
   private:
-    std::list<macdetect::Packet*> m_lstReceivedPackets;
+    std::list<macdetect::Value*> m_lstReceivedValues;
     macdetect::Client m_cliClient;
     
   protected:
-    macdetect::Packet* getPacket(std::string strKey, std::string strValue, bool bBlock = true);
+    macdetect::Value* get(std::string strKey, std::string strContent, bool bBlock = true);
     
   public:
     MDClient();
@@ -43,18 +43,18 @@ namespace macdetect_client {
     bool connect(std::string strIP);
     bool disconnect();
     
-    macdetect::Packet* requestResponse(std::string strRequest);
-    macdetect::Packet* requestResponse(macdetect::Packet* pktRequest, std::string strKey = "response");
+    macdetect::Value* requestResponse(std::string strRequest);
+    macdetect::Value* requestResponse(macdetect::Value* valRequest, std::string strKey = "response");
     
     std::list<std::string> knownMACAddresses();
     std::list<std::string> deviceNames();
     
-    std::list<macdetect::Packet*> devicesList();
+    std::list<macdetect::Value*> devicesList();
     
     bool enableStream(std::string strDeviceName);
     bool disableStream(std::string strDeviceName);
     
-    macdetect::Packet* info();
+    macdetect::Value* info();
   };
 }
 

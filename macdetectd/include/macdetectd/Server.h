@@ -53,10 +53,10 @@ namespace macdetect {
     } Serving;
     
     typedef struct {
-      Packet* pktPacket;
+      Value* valValue;
       Served* svrServed;
       int nServingID;
-    } QueuedPacket;
+    } QueuedValue;
     
   private:
     int m_nSocketFDControl;
@@ -64,7 +64,7 @@ namespace macdetect {
     std::list<Serving> m_lstServings;
     std::list< std::pair<Served*, int> > m_lstServed;
     
-    std::list<QueuedPacket> m_lstPacketQueue;
+    std::list<QueuedValue> m_lstValueQueue;
     std::list<Served*> m_lstRemoved;
     
   protected:
@@ -82,11 +82,11 @@ namespace macdetect {
     int freeServingID();
     Server::Serving servingByID(int nID);
     
-    void handlePacket(Served* svrServed, int nServingID, Packet* pktReceived);
-    std::list<QueuedPacket> queuedPackets();
+    void handleValue(Served* svrServed, int nServingID, Value* valReceived);
+    std::list<QueuedValue> queuedValues();
     
     std::list< std::pair<Served*, int> > served();
-    void distributeStreamPacket(Packet* pktStream);
+    void distributeStreamValue(Value* valStream);
     
     std::list<Served*> removed();
   };

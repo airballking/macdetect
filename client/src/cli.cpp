@@ -43,10 +43,10 @@ int main(int argc, char** argv) {
     }
     
     while(true) {
-      macdetect::Packet* pktInfo = mdcClient.info();
+      macdetect::Value* valInfo = mdcClient.info();
       
-      if(pktInfo) {
-	delete pktInfo;
+      if(valInfo) {
+	delete valInfo;
       }
     }
     

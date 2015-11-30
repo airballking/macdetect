@@ -30,21 +30,21 @@ namespace macdetect {
     return m_nSocketFD;
   }
   
-  bool PacketEntity::sendPacket(Packet* pktSend) {
+  bool PacketEntity::send(Value* valSend) {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     
     unsigned char ucarrBuffer[2048];
-    unsigned int unLength = pktSend->serialize(ucarrBuffer, 2048);
+    unsigned int unLength = valSend->serialize(ucarrBuffer, 2048);
     
     int nResult = ::write(m_nSocketFD, ucarrBuffer, unLength);
     
     return nResult == unLength;
   }
   
-  Packet* PacketEntity::receivePacket() {
+  Value* PacketEntity::receive() {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     
-    Packet* pktReceived = NULL;
+    Value* valReceived = NULL;
     
     unsigned char ucarrBuffer[2048];
     int nLength = ::read(m_nSocketFD, ucarrBuffer, 2048);
@@ -56,11 +56,11 @@ namespace macdetect {
     } else if(nLength == 0) {
       m_bFailureState = true;
     } else {
-      pktReceived = new Packet();
-      pktReceived->deserialize(ucarrBuffer, nLength);
+      valReceived = new Value();
+      valReceived->deserialize(ucarrBuffer, nLength);
     }
     
-    return pktReceived;
+    return valReceived;
   }
   
   bool PacketEntity::failureState() {

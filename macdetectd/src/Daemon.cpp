@@ -33,14 +33,14 @@ namespace macdetect {
   Daemon::~Daemon() {
   }
   
-  Packet* Daemon::responsePacket(Packet* pktPacket, std::list< std::pair<std::string, std::string> > lstSubPackets) {
-    Packet* pktResponse = NULL;
+  Value* Daemon::response(Value* valValue, std::list< std::pair<std::string, std::string> > lstSubValues) {
+    Value* valResponse = NULL;
     
-    if(pktPacket->key() == "request") {
-      pktResponse = new Packet("response", pktPacket->value(), lstSubPackets);
+    if(valValue->key() == "request") {
+      valResponse = new Value("response", valValue->content(), lstSubValues);
     }
     
-    return pktResponse;
+    return valResponse;
   }
   
   bool Daemon::cycle() {
@@ -67,120 +67,120 @@ namespace macdetect {
       }
       
       // Handle queued data packets.
-      std::list<Server::QueuedPacket> lstPackets = m_srvServer.queuedPackets();
+      std::list<Server::QueuedValue> lstValues = m_srvServer.queuedValues();
       
-      for(Server::QueuedPacket qpPacket : lstPackets) {
-	Packet* pktPacket = qpPacket.pktPacket;
-	Server::Serving sviServing = m_srvServer.servingByID(qpPacket.nServingID);
+      for(Server::QueuedValue qvValue : lstValues) {
+	Value* valValue = qvValue.valValue;
+	Server::Serving sviServing = m_srvServer.servingByID(qvValue.nServingID);
 	
-	if(pktPacket->key() == "request") {
-	  if(pktPacket->value() == "devices-list") {
+	if(valValue->key() == "request") {
+	  if(valValue->content() == "devices-list") {
 	    std::list<Device*> lstDevices = m_nwNetwork.knownDevices();
 	    
-	    Packet* pktDevices = this->responsePacket(pktPacket);
+	    Value* valDevices = this->response(valValue);
 	    for(Device* dvDevice : lstDevices) {
-	      pktDevices->add(new Packet("device", dvDevice->deviceName(),
-					 {{"mac", dvDevice->mac()},
-					  {"ip", dvDevice->ip()},
-					  {"broadcast-ip", dvDevice->broadcastIP()}}));
+	      valDevices->add(new Value("device", dvDevice->deviceName(),
+				        {{"mac", dvDevice->mac()},
+				         {"ip", dvDevice->ip()},
+					 {"broadcast-ip", dvDevice->broadcastIP()}}));
 	    }
 	    
-	    qpPacket.svrServed->sendPacket(pktDevices);
-	    delete pktDevices;
-	  } else if(pktPacket->value() == "known-mac-addresses") {
+	    qvValue.svrServed->send(valDevices);
+	    delete valDevices;
+	  } else if(valValue->content() == "known-mac-addresses") {
 	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
 	    
-	    Packet* pktMACs = this->responsePacket(pktPacket);
+	    Value* valMACs = this->response(valValue);
 	    for(Network::MACEntity meMAC : lstMACs) {
-	      Packet* pktMAC = new Packet("mac", meMAC.strMAC);
-	      pktMAC->add(new Packet("device-name", meMAC.strDeviceName));
+	      Value* valMAC = new Value("mac", meMAC.strMAC);
+	      valMAC->add(new Value("device-name", meMAC.strDeviceName));
 	      
 	      std::stringstream sts;
 	      sts << meMAC.dLastSeen;
-	      pktMAC->add(new Packet("last-seen", sts.str()));
+	      valMAC->add(new Value("last-seen", sts.str()));
 	      sts.str("");
 	      sts << meMAC.dFirstSeen;
-	      pktMAC->add(new Packet("first-seen", sts.str()));
-	      pktMAC->add(new Packet("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
+	      valMAC->add(new Value("first-seen", sts.str()));
+	      valMAC->add(new Value("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
 	      
-	      pktMACs->add(pktMAC);
+	      valMACs->add(valMAC);
 	    }
 	    
-	    qpPacket.svrServed->sendPacket(pktMACs);
-	    delete pktMACs;
-	  } else if(pktPacket->value() == "enable-stream") {
-	    Packet* pktDeviceName = pktPacket->sub("device-name");
+	    qvValue.svrServed->send(valMACs);
+	    delete valMACs;
+	  } else if(valValue->content() == "enable-stream") {
+	    Value* valDeviceName = valValue->sub("device-name");
 	    
-	    if(pktDeviceName) {
-	      std::string strDeviceName = pktDeviceName->value();
+	    if(valDeviceName) {
+	      std::string strDeviceName = valDeviceName->content();
 	      
-	      if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
-		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-enabled"}});
-		pktResponse->add(new Packet("device-name", strDeviceName));
-		qpPacket.svrServed->sendPacket(pktResponse);
+	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
+		Value* valResponse = this->response(valValue, {{"result", "already-enabled"}});
+		valResponse->add(new Value("device-name", strDeviceName));
+		qvValue.svrServed->send(valResponse);
 		
-		delete pktResponse;
+		delete valResponse;
 	      } else {
-		this->enableStream(qpPacket.svrServed, sviServing.strDeviceName);
+		this->enableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
-		pktResponse->add(new Packet("device-name", strDeviceName));
-		qpPacket.svrServed->sendPacket(pktResponse);
+		Value* valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->add(new Value("device-name", strDeviceName));
+		qvValue.svrServed->send(valResponse);
 		
-		delete pktResponse;
+		delete valResponse;
 	      }
 	    } else {
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "device-name-missing"}});
-	      qpPacket.svrServed->sendPacket(pktResponse);
+	      Value* valResponse = this->response(valValue, {{"result", "device-name-missing"}});
+	      qvValue.svrServed->send(valResponse);
 	      
-	      delete pktResponse;
+	      delete valResponse;
 	    }
-	  } else if(pktPacket->value() == "disable-stream") {
-	    Packet* pktDeviceName = pktPacket->sub("device-name");
+	  } else if(valValue->content() == "disable-stream") {
+	    Value* valDeviceName = valValue->sub("device-name");
 	    
-	    if(pktDeviceName) {
-	      std::string strDeviceName = pktDeviceName->value();
+	    if(valDeviceName) {
+	      std::string strDeviceName = valDeviceName->content();
 	      
-	      if(this->streamEnabled(qpPacket.svrServed, sviServing.strDeviceName)) {
-		this->disableStream(qpPacket.svrServed, sviServing.strDeviceName);
+	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
+		this->disableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "success"}});
-		pktResponse->add(new Packet("device-name", strDeviceName));
-		qpPacket.svrServed->sendPacket(pktResponse);
+		Value* valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->add(new Value("device-name", strDeviceName));
+		qvValue.svrServed->send(valResponse);
 		
-		delete pktResponse;
+		delete valResponse;
 	      } else {
-		Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "already-disabled"}});
-		pktResponse->add(new Packet("device-name", strDeviceName));
-		qpPacket.svrServed->sendPacket(pktResponse);
+		Value* valResponse = this->response(valValue, {{"result", "already-disabled"}});
+		valResponse->add(new Value("device-name", strDeviceName));
+		qvValue.svrServed->send(valResponse);
 		
-		delete pktResponse;
+		delete valResponse;
 	      }
 	    } else {
-	      Packet* pktResponse = this->responsePacket(pktPacket, {{"result", "device-name-missing"}});
-	      qpPacket.svrServed->sendPacket(pktResponse);
+	      Value* valResponse = this->response(valValue, {{"result", "device-name-missing"}});
+	      qvValue.svrServed->send(valResponse);
 	      
-	      delete pktResponse;
+	      delete valResponse;
 	    }
 	  }
 	}
 	
-	delete qpPacket.pktPacket;
+	delete qvValue.valValue;
       }
       
       // Handle network events
       std::list<Event*> lstEvents = m_nwNetwork.events();
       
       for(Event* evEvent : lstEvents) {
-	Packet* pktSend = new Packet();
+	Value* valSend = new Value();
 	std::string strDeviceName = "";
 	
 	switch(evEvent->type()) {
 	case Event::DeviceAdded: {
 	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
 	  
-	  pktSend->set("info", "device-added");
-	  pktSend->add(new Packet("device-name", devEvent->deviceName()));
+	  valSend->set("info", "device-added");
+	  valSend->add(new Value("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceRemoved: {
@@ -192,10 +192,10 @@ namespace macdetect {
 	    
 	    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
 	      if((*itStream).strDeviceName == devEvent->deviceName()) {
-		Packet* pktDisabled = new Packet("info", "stream-disabled");
-		pktDisabled->add(new Packet("device-name", devEvent->deviceName()));
-		(*itStream).svrServed->sendPacket(pktDisabled);
-		delete pktDisabled;
+		Value* valDisabled = new Value("info", "stream-disabled");
+		valDisabled->add(new Value("device-name", devEvent->deviceName()));
+		(*itStream).svrServed->send(valDisabled);
+		delete valDisabled;
 		
 		m_lstStreams.erase(itStream);
 		bChanged = true;
@@ -205,28 +205,28 @@ namespace macdetect {
 	    }
 	  }
 	  
-	  pktSend->set("info", "device-removed");
-	  pktSend->add(new Packet("device-name", devEvent->deviceName()));
+	  valSend->set("info", "device-removed");
+	  valSend->add(new Value("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceStateChanged: {
 	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
 	  
-	  pktSend->set("info", "device-state-changed");
+	  valSend->set("info", "device-state-changed");
 	} break;
 	  
 	case Event::DeviceEvidenceChanged: {
 	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
 	  
-	  pktSend->set("info", "device-evidence-changed");
+	  valSend->set("info", "device-evidence-changed");
 	} break;
 	  
 	case Event::MACAddressDiscovered: {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
 	  
-	  pktSend->set("info", "mac-address-discovered");
-	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
-	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
+	  valSend->set("info", "mac-address-discovered");
+	  valSend->add(new Value("mac", mvEvent->macAddress()));
+	  valSend->add(new Value("device-name", mvEvent->deviceName()));
 	  
 	  strDeviceName = mvEvent->deviceName();
 	} break;
@@ -234,31 +234,31 @@ namespace macdetect {
 	case Event::MACAddressDisappeared: {
 	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
 	  
-	  pktSend->set("info", "mac-address-disappeared");
-	  pktSend->add(new Packet("mac", mvEvent->macAddress()));
-	  pktSend->add(new Packet("device-name", mvEvent->deviceName()));
+	  valSend->set("info", "mac-address-disappeared");
+	  valSend->add(new Value("mac", mvEvent->macAddress()));
+	  valSend->add(new Value("device-name", mvEvent->deviceName()));
 	  
 	  strDeviceName = mvEvent->deviceName();
 	} break;
 	  
 	default: {
-	  delete pktSend;
-	  pktSend = NULL;
+	  delete valSend;
+	  valSend = NULL;
 	} break;
 	}
 	
-	if(pktSend) {
+	if(valSend) {
 	  std::list< std::pair<Served*, int> > lstServed = m_srvServer.served();
 	  
 	  for(std::pair<Served*, int> prServed : lstServed) {
 	    Served* svrServed = prServed.first;
 	    
 	    if(strDeviceName == "" || this->streamEnabled(svrServed, strDeviceName)) {
-	      svrServed->sendPacket(pktSend);
+	      svrServed->send(valSend);
 	    }
 	  }
 	  
-	  delete pktSend;
+	  delete valSend;
 	}
       }
       

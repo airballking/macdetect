@@ -134,13 +134,13 @@ static PyObject* devicesList(PyObject* pyoSelf, PyObject* pyoArgs) {
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
   
   if(mdcClient) {
-    std::list<macdetect::Packet*> lstDevices = mdcClient->devicesList();
+    std::list<macdetect::Value*> lstDevices = mdcClient->devicesList();
     pyoResult = PyList_New(lstDevices.size());
     
     unsigned int unIndex = 0;
-    for(std::list<macdetect::Packet*>::iterator itItem = lstDevices.begin();
+    for(std::list<macdetect::Value*>::iterator itItem = lstDevices.begin();
 	itItem != lstDevices.end(); itItem++) {
-      macdetect::Packet* pktItem = *itItem;
+      macdetect::Value* valItem = *itItem;
       
       /*PyObject* pyoItem = Py_BuildValue("z#", strItem.c_str(), strItem.length());
 	PyList_SetItem(pyoResult, unIndex, pyoItem);*/

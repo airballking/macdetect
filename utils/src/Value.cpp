@@ -15,27 +15,27 @@
 /** \author Jan Winkler */
 
 
-#include <macdetect-utils/Packet.h>
+#include <macdetect-utils/Value.h>
 
 
 namespace macdetect {
-  Packet::Packet(std::string strKey, std::string strValue, std::list< std::pair<std::string, std::string> > lstSubPackets) : m_strKey(strKey), m_strValue(strValue) {
-    for(std::pair<std::string, std::string> prPair : lstSubPackets) {
-      this->add(new Packet(prPair.first, prPair.second));
+  Value::Value(std::string strKey, std::string strContent, std::list< std::pair<std::string, std::string> > lstSubValues) : m_strKey(strKey), m_strContent(strContent) {
+    for(std::pair<std::string, std::string> prPair : lstSubValues) {
+      this->add(new Value(prPair.first, prPair.second));
     }
   }
   
-  Packet::~Packet() {
-    for(Packet* pktDelete : m_lstSubPackets) {
-      delete pktDelete;
+  Value::~Value() {
+    for(Value* valDelete : m_lstSubValues) {
+      delete valDelete;
     }
   }
   
-  void Packet::add(Packet* pktAdd) {
-    m_lstSubPackets.push_back(pktAdd);
+  void Value::add(Value* valAdd) {
+    m_lstSubValues.push_back(valAdd);
   }
   
-  unsigned int Packet::serialize(void* vdBuffer, unsigned int unLength) {
+  unsigned int Value::serialize(void* vdBuffer, unsigned int unLength) {
     unsigned int unOffset = 0;
     unsigned char* ucData = (unsigned char*)vdBuffer;
     
@@ -49,25 +49,25 @@ namespace macdetect {
     unOffset += unStringLength;
     
     // Add value
-    unStringLength = m_strValue.length();
+    unStringLength = m_strContent.length();
     memcpy(&(ucData[unOffset]), &unStringLength, sizeof(unsigned int));
     unOffset += sizeof(unsigned int);
-    memcpy(&(ucData[unOffset]), m_strValue.c_str(), unStringLength);
+    memcpy(&(ucData[unOffset]), m_strContent.c_str(), unStringLength);
     unOffset += unStringLength;
     
     // Add subpackets
-    unsigned int unSubPacketCount = m_lstSubPackets.size();
-    memcpy(&(ucData[unOffset]), &unSubPacketCount, sizeof(unsigned int));
+    unsigned int unSubValueCount = m_lstSubValues.size();
+    memcpy(&(ucData[unOffset]), &unSubValueCount, sizeof(unsigned int));
     unOffset += sizeof(unsigned int);
     
-    for(Packet* pktSerialize : m_lstSubPackets) {
-      unOffset += pktSerialize->serialize(&(ucData[unOffset]), unLength - unOffset);
+    for(Value* valSerialize : m_lstSubValues) {
+      unOffset += valSerialize->serialize(&(ucData[unOffset]), unLength - unOffset);
     }
     
     return unOffset;
   }
   
-  unsigned int Packet::deserialize(void* vdBuffer, unsigned int unLength) {
+  unsigned int Value::deserialize(void* vdBuffer, unsigned int unLength) {
     unsigned int unOffset = 0;
     unsigned int unStringLength;
     unsigned char* ucBuffer = (unsigned char*)vdBuffer;
@@ -85,75 +85,75 @@ namespace macdetect {
     unOffset += sizeof(unsigned int);
     unsigned char ucValue[unStringLength];
     memcpy(ucValue, &(ucBuffer[unOffset]), unStringLength);
-    m_strValue = std::string((char*)ucValue, unStringLength);
+    m_strContent = std::string((char*)ucValue, unStringLength);
     unOffset += unStringLength;
     
     // Get subpackets
-    unsigned int unSubPacketCount;
-    memcpy(&unSubPacketCount, &(ucBuffer[unOffset]), sizeof(unsigned int));
+    unsigned int unSubValueCount;
+    memcpy(&unSubValueCount, &(ucBuffer[unOffset]), sizeof(unsigned int));
     unOffset += sizeof(unsigned int);
     
-    for(unsigned int unI = 0; unI < unSubPacketCount; unI++) {
-      Packet* pktSub = new Packet();
-      unOffset += pktSub->deserialize(&(ucBuffer[unOffset]), unLength - unOffset);
+    for(unsigned int unI = 0; unI < unSubValueCount; unI++) {
+      Value* valSub = new Value();
+      unOffset += valSub->deserialize(&(ucBuffer[unOffset]), unLength - unOffset);
       
-      m_lstSubPackets.push_back(pktSub);
+      m_lstSubValues.push_back(valSub);
     }
     
     return unOffset;
   }
   
-  std::list<Packet*> Packet::subPackets() {
-    return m_lstSubPackets;
+  std::list<Value*> Value::subValues() {
+    return m_lstSubValues;
   }
   
-  std::string Packet::key() {
+  std::string Value::key() {
     return m_strKey;
   }
   
-  std::string Packet::value() {
-    return m_strValue;
+  std::string Value::content() {
+    return m_strContent;
   }
   
-  void Packet::print(unsigned int unIndent) {
+  void Value::print(unsigned int unIndent) {
     std::string strIndentation = "";
     for(unsigned int unI = 0; unI < unIndent; unI++) {
       strIndentation += "  ";
     }
     
-    std::cout << strIndentation << " - " << m_strKey << " = " << m_strValue << std::endl;
+    std::cout << strIndentation << " - " << m_strKey << " = " << m_strContent << std::endl;
     
-    for(Packet* pktSub : m_lstSubPackets) {
-      pktSub->print(unIndent + 1);
+    for(Value* valSub : m_lstSubValues) {
+      valSub->print(unIndent + 1);
     }
   }
   
-  void Packet::set(std::string strKey, std::string strValue) {
+  void Value::set(std::string strKey, std::string strContent) {
     m_strKey = strKey;
-    m_strValue = strValue;
+    m_strContent = strContent;
   }
   
-  Packet* Packet::copy() {
-    Packet* pktCopy = new Packet(m_strKey, m_strValue);
+  Value* Value::copy() {
+    Value* valCopy = new Value(m_strKey, m_strContent);
     
-    for(Packet* pktSub : m_lstSubPackets) {
-      pktCopy->add(pktSub->copy());
+    for(Value* valSub : m_lstSubValues) {
+      valCopy->add(valSub->copy());
     }
     
-    return pktCopy;
+    return valCopy;
   }
   
-  Packet* Packet::sub(std::string strSubKey) {
-    Packet* pktReturn = NULL;
+  Value* Value::sub(std::string strSubKey) {
+    Value* valReturn = NULL;
     
-    for(Packet* pktSub : m_lstSubPackets) {
-      if(pktSub->key() == strSubKey) {
-	pktReturn = pktSub;
+    for(Value* valSub : m_lstSubValues) {
+      if(valSub->key() == strSubKey) {
+	valReturn = valSub;
 	
 	break;
       }
     }
     
-    return pktReturn;
+    return valReturn;
   }
 }

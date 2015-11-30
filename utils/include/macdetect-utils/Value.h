@@ -15,8 +15,8 @@
 /** \author Jan Winkler */
 
 
-#ifndef __PACKET_H__
-#define __PACKET_H__
+#ifndef __VALUE_H__
+#define __VALUE_H__
 
 
 // System
@@ -27,37 +27,36 @@
 
 
 namespace macdetect {
-  class Packet {
+  class Value {
   public:
   private:
-    std::list<Packet*> m_lstSubPackets;
+    std::list<Value*> m_lstSubValues;
     
     std::string m_strKey;
-    std::string m_strValue;
+    std::string m_strContent;
     
   protected:
   public:
-    Packet(std::string strKey = "", std::string strValue = "", std::list< std::pair<std::string, std::string> > lstSubPackets = {});
-    ~Packet();
+    Value(std::string strKey = "", std::string strContent = "", std::list< std::pair<std::string, std::string> > lstSubValues = {});
+    ~Value();
     
-    void add(Packet* pktAdd);
+    void add(Value* valAdd);
     
     unsigned int serialize(void* vdBuffer, unsigned int unLength);
     unsigned int deserialize(void* vdBuffer, unsigned int unLength);
     
-    void set(std::string strKey, std::string strValue);
+    void set(std::string strKey, std::string strContent);
     
-    std::list<Packet*> subPackets();
+    std::list<Value*> subValues();
     std::string key();
-    std::string value();
+    std::string content();
     
     void print(unsigned int unIndent = 0);
     
-    Packet* copy();
-    
-    Packet* sub(std::string strSubKey);
+    Value* copy();
+    Value* sub(std::string strSubKey);
   };
 }
 
 
-#endif /* __PACKET_H__ */
+#endif /* __VALUE_H__ */
