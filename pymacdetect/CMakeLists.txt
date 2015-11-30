@@ -9,14 +9,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 include_directories(
   include)
 
-#add_library(${PROJECT_NAME}
-#  src/pymacdetect/PyMACDetect.cpp)
-
-#target_link_libraries(${PROJECT_NAME}
-#  macdetect-client)
-
 add_custom_command(OUTPUT pymacdetect.so
-  COMMAND python "${PROJECT_SOURCE_DIR}/src/pymacdetect/setup.py" build --build-lib "${LIBRARY_OUTPUT_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND python "${PROJECT_SOURCE_DIR}/src/setup.py" build --build-lib "${LIBRARY_OUTPUT_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}"
   DEPENDS macdetect-client
   COMMENT "Compiling the PyMACDetect libraries")
 

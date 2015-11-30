@@ -10,11 +10,11 @@ include_directories(
   include)
 
 add_library(${PROJECT_NAME}
-  src/macdetect-client/Client.cpp
-  src/macdetect-client/MDClient.cpp)
+  src/Client.cpp
+  src/MDClient.cpp)
 
 add_executable(macdetect-cli
-  src/macdetect-client/cli.cpp)
+  src/cli.cpp)
 
 target_link_libraries(${PROJECT_NAME}
   macdetect-utils)

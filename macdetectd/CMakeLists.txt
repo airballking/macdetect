@@ -10,17 +10,17 @@ include_directories(
   include)
 
 add_executable(${PROJECT_NAME}
-  src/macdetectd/daemon.cpp
-  src/macdetectd/Network.cpp
-  src/macdetectd/Device.cpp
-  src/macdetectd/Event.cpp
-  src/macdetectd/SocketReader.cpp
-  src/macdetectd/Wire.cpp
-  src/macdetectd/Data.cpp
-  src/macdetectd/RARP.cpp
-  src/macdetectd/Daemon.cpp
-  src/macdetectd/Server.cpp
-  src/macdetectd/Served.cpp)
+  src/daemon.cpp
+  src/Network.cpp
+  src/Device.cpp
+  src/Event.cpp
+  src/SocketReader.cpp
+  src/Wire.cpp
+  src/Data.cpp
+  src/RARP.cpp
+  src/Daemon.cpp
+  src/Server.cpp
+  src/Served.cpp)
 
 target_link_libraries(${PROJECT_NAME}
   macdetect-utils)

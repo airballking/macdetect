@@ -10,5 +10,5 @@ include_directories(
   include)
 
 add_library(${PROJECT_NAME}
-  src/macdetect-utils/Packet.cpp
-  src/macdetect-utils/PacketEntity.cpp)
+  src/Packet.cpp
+  src/PacketEntity.cpp)
