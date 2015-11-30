@@ -56,8 +56,11 @@ namespace macdetect {
     typedef struct {
       std::string strMAC;
       std::string strDeviceName;
+      std::string strHostName;
+      std::string strIP;
       double dFirstSeen;
       double dLastSeen;
+      double dLastUpdate;
     } MACEntity;
     
   private:
@@ -73,6 +76,7 @@ namespace macdetect {
     std::list<std::string> m_lstDeviceWhiteBlackList;
     
     double m_dMaxMACAge;
+    double m_dUpdateInterval;
     double m_dPingBroadcastInterval;
     bool m_bShouldRun;
     bool m_bIgnoreDeviceMACs;

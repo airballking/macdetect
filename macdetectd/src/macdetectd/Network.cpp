@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_dPingBroadcastInterval(10.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_dUpdateInterval(10.0), m_dPingBroadcastInterval(10.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
     m_dtData.readVendors();
   }
   
@@ -148,6 +148,17 @@ namespace macdetect {
 	  bChanged = true;
 	  
 	  break;
+	}
+      }
+    }
+    
+    // Try MAC entity update
+    for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
+	itMAC != m_lstMACSeen.end(); itMAC++) {
+      if((*itMAC).strHostName == "") {
+	if(dTime - (*itMAC).dLastUpdate > m_dUpdateInterval) {
+	  (*itMAC).dLastUpdate = dTime;
+	  // ...
 	}
       }
     }
@@ -517,7 +528,7 @@ namespace macdetect {
       
       if(!bWasPresent) {
 	double dTime = this->time();
-	m_lstMACSeen.push_back({strMACAddress, strDeviceName, dTime, dTime});
+	m_lstMACSeen.push_back({strMACAddress, strDeviceName, "", "", dTime, dTime, 0});
 	bResult = true;
       }
     }
