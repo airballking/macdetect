@@ -24,18 +24,6 @@ namespace macdetect {
   }
   
   Network::~Network() {
-    for(Device* dvDelete : m_lstDevices) {
-      delete dvDelete;
-    }
-    
-    m_lstDevices.clear();
-    
-    for(Event* evDelete : m_lstEvents) {
-      delete evDelete;
-    }
-    
-    m_lstEvents.clear();
-    
     close(m_nSocketFDControl);
   }
   
@@ -66,7 +54,7 @@ namespace macdetect {
     m_lstDeviceWhiteBlackList.push_back(strPattern);
     std::list<std::string> lstRemoveDevices;
     
-    for(Device* dvDevice : this->knownDevices()) {
+    for(std::shared_ptr<Device> dvDevice : this->knownDevices()) {
       if(!this->deviceAllowed(dvDevice->deviceName())) {
 	lstRemoveDevices.push_back(dvDevice->deviceName());
       }
@@ -96,10 +84,6 @@ namespace macdetect {
     bool bResult = true;
     double dTime = this->time();
     
-    for(Event* evDelete : m_lstEvents) {
-      delete evDelete;
-    }
-    
     m_lstEvents.clear();
     
     this->detectNetworkActivity();
@@ -116,7 +100,7 @@ namespace macdetect {
 	}
       }
       
-      for(Device* dvCurrent : this->knownDevices()) {
+      for(std::shared_ptr<Device> dvCurrent : this->knownDevices()) {
 	if(std::find(m_lstSystemDeviceNames.begin(), m_lstSystemDeviceNames.end(), dvCurrent->deviceName()) == m_lstSystemDeviceNames.end()) {
 	  lstRemovedDevices.push_back(dvCurrent->deviceName());
 	}
@@ -131,7 +115,7 @@ namespace macdetect {
       }
     }
     
-    for(Device* dvMaintain : m_lstDevices) {
+    for(std::shared_ptr<Device> dvMaintain : m_lstDevices) {
       this->maintainDeviceStatus(dvMaintain);
     }
     
@@ -142,7 +126,7 @@ namespace macdetect {
       for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
 	  itMAC != m_lstMACSeen.end(); itMAC++) {
 	if(dTime - (*itMAC).dLastSeen > m_dMaxMACAge) {
-	  this->scheduleEvent(new MACEvent(Event::MACAddressDisappeared, (*itMAC).strDeviceName, (*itMAC).strMAC));
+	  this->scheduleEvent(std::make_shared<MACEvent>(Event::MACAddressDisappeared, (*itMAC).strDeviceName, (*itMAC).strMAC));
 	  
 	  m_lstMACSeen.erase(itMAC);
 	  bChanged = true;
@@ -164,7 +148,7 @@ namespace macdetect {
     }
     
     // Send broadcasts
-    for(Device* dvCurrent : m_lstDevices) {
+    for(std::shared_ptr<Device> dvCurrent : m_lstDevices) {
       dvCurrent->sendPingBroadcast(dTime, m_dPingBroadcastInterval);
     }
     
@@ -181,12 +165,12 @@ namespace macdetect {
     if(this->deviceAllowed(strDeviceName)) {
       if(this->knownDevice(strDeviceName) == NULL) {
 	if(this->systemDeviceNameExists(strDeviceName)) {
-	  Device* dvNew = new Device(strDeviceName, this->deviceHardwareType(strDeviceName));
+	  std::shared_ptr<Device> dvNew = std::make_shared<Device>(strDeviceName, this->deviceHardwareType(strDeviceName));
 	  m_lstDevices.push_back(dvNew);
 	  
-	  this->scheduleEvent(new DeviceEvent(Event::DeviceAdded, strDeviceName));
+	  this->scheduleEvent(std::make_shared<DeviceEvent>(Event::DeviceAdded, strDeviceName));
 	  
-	  DeviceEvent* devEvidenceMAC = new DeviceEvent(Event::DeviceEvidenceChanged, strDeviceName);
+	  Devicestd::shared_ptr<Event> devEvidenceMAC = std::make_shared<DeviceEvent>(Event::DeviceEvidenceChanged, strDeviceName);
 	  devEvidenceMAC->setEvidence("mac", dvNew->mac(), "");
 	  this->scheduleEvent(devEvidenceMAC);
 	  
@@ -201,17 +185,16 @@ namespace macdetect {
   bool Network::removeDevice(std::string strDeviceName) {
     bool bResult = false;
     
-    for(std::list<Device*>::iterator itDevice = m_lstDevices.begin();
+    for(std::list< std::shared_ptr<Device> >::iterator itDevice = m_lstDevices.begin();
 	itDevice != m_lstDevices.end(); itDevice++) { 
       if((*itDevice)->deviceName() == strDeviceName) {
-	delete *itDevice;
 	m_lstDevices.erase(itDevice);
 	
 	break;
       }
     }
     
-    this->scheduleEvent(new DeviceEvent(Event::DeviceRemoved, strDeviceName));
+    this->scheduleEvent(std::make_shared<DeviceEvent>(Event::DeviceRemoved, strDeviceName));
     
     bool bChanged = true;
     while(bChanged) {
@@ -239,10 +222,10 @@ namespace macdetect {
     return m_bAutoManageDevices;
   }
   
-  Device* Network::knownDevice(std::string strDeviceName) {
-    Device* dvReturn = NULL;
+  std::shared_ptr<Device> Network::knownDevice(std::string strDeviceName) {
+    std::shared_ptr<Device> dvReturn = NULL;
     
-    for(Device* dvCurrent : m_lstDevices) {
+    for(std::shared_ptr<Device> dvCurrent : m_lstDevices) {
       if(dvCurrent->deviceName() == strDeviceName) {
 	dvReturn = dvCurrent;
 	break;
@@ -252,7 +235,7 @@ namespace macdetect {
     return dvReturn;
   }
   
-  std::list<Device*> Network::knownDevices() {
+  std::list< std::shared_ptr<Device> > Network::knownDevices() {
     return m_lstDevices;
   }
   
@@ -285,7 +268,7 @@ namespace macdetect {
     return lstDevices;
   }
   
-  void Network::maintainDeviceStatus(Device* dvMaintain) {
+  void Network::maintainDeviceStatus(std::shared_ptr<Device> dvMaintain) {
     if(m_nSocketFDControl >= 0) {
       struct ifreq ifrTemp;
       
@@ -301,14 +284,14 @@ namespace macdetect {
       bool bRunning = ifrTemp.ifr_flags & IFF_RUNNING;
       
       if(dvMaintain->up() != bUp) {
-	DeviceEvent* evUp = new DeviceEvent(Event::DeviceStateChanged, dvMaintain->deviceName());
+	std::shared_ptr<DeviceEvent> evUp = std::make_shared<DeviceEvent>(Event::DeviceStateChanged, dvMaintain->deviceName());
 	evUp->setStateChangeUp(true);
 	
 	this->scheduleEvent(evUp);
       }
       
       if(dvMaintain->running() != bRunning) {
-	DeviceEvent* evRunning = new DeviceEvent(Event::DeviceStateChanged, dvMaintain->deviceName());
+	std::shared_ptr<DeviceEvent> evRunning = std::make_shared<DeviceEvent>(Event::DeviceStateChanged, dvMaintain->deviceName());
 	evRunning->setStateChangeRunning(true);
 	
 	this->scheduleEvent(evRunning);
@@ -327,7 +310,7 @@ namespace macdetect {
       std::string strIP = inet_ntoa(((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr);
       
       if(strIP != dvMaintain->ip()) {
-	DeviceEvent* devEvidenceIP = new DeviceEvent(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
+	std::shared_ptr<DeviceEvent> devEvidenceIP = std::make_shared<DeviceEvent>(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
 	devEvidenceIP->setEvidence("ip", strIP, dvMaintain->ip());
 	this->scheduleEvent(devEvidenceIP);
 	
@@ -344,7 +327,7 @@ namespace macdetect {
       strIP = inet_ntoa(((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr);
       
       if(strIP != dvMaintain->broadcastIP()) {
-	DeviceEvent* devEvidenceIP = new DeviceEvent(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
+	std::shared_ptr<DeviceEvent> devEvidenceIP = std::make_shared<DeviceEvent>(Event::DeviceEvidenceChanged, dvMaintain->deviceName());
 	devEvidenceIP->setEvidence("broadcast-ip", strIP, dvMaintain->broadcastIP());
 	this->scheduleEvent(devEvidenceIP);
 	
@@ -356,7 +339,7 @@ namespace macdetect {
   Device::HardwareType Network::deviceHardwareType(std::string strDeviceName) {
     Device::HardwareType hwtReturn;
     
-    Device* dvDevice = this->knownDevice(strDeviceName);
+    std::shared_ptr<Device> dvDevice = this->knownDevice(strDeviceName);
     
     if(dvDevice) {
       hwtReturn = dvDevice->hardwareType();
@@ -399,11 +382,11 @@ namespace macdetect {
     return hwtReturn;
   }
   
-  void Network::scheduleEvent(Event* evSchedule) {
+  void Network::scheduleEvent(std::shared_ptr<Event> evSchedule) {
     m_lstEvents.push_back(evSchedule);
   }
   
-  std::list<Event*> Network::events() {
+  std::list< std::shared_ptr<Event> > Network::events() {
     return m_lstEvents;
   }
   
@@ -433,7 +416,7 @@ namespace macdetect {
     unsigned char* ucBuffer = NULL;
     int nLengthRead;
     
-    for(Device* dvDevice : this->knownDevices()) {
+    for(std::shared_ptr<Device> dvDevice : this->knownDevices()) {
       ucBuffer = dvDevice->read(nLengthRead);
       
       if(nLengthRead >= sizeof(struct ethhdr)) {
@@ -496,7 +479,7 @@ namespace macdetect {
       bAllowed = true;
       
       if(m_bIgnoreDeviceMACs) {
-	for(Device* dvDevice : this->knownDevices()) {
+	for(std::shared_ptr<Device> dvDevice : this->knownDevices()) {
 	  if(dvDevice->mac() == strMAC) {
 	    bAllowed = false;
 	    
@@ -514,7 +497,7 @@ namespace macdetect {
     
     if(this->macAllowed(strMACAddress)) {
       if(this->macLastSeen(strMACAddress, strDeviceName) == -1) {
-	this->scheduleEvent(new MACEvent(Event::MACAddressDiscovered, strDeviceName, strMACAddress));
+	this->scheduleEvent(std::make_shared<MACEvent>(Event::MACAddressDiscovered, strDeviceName, strMACAddress));
       }
       
       bool bWasPresent = false;
@@ -542,7 +525,7 @@ namespace macdetect {
       if((*itMAC).strDeviceName == strDeviceName && (*itMAC).strMAC == strMAC) {
 	m_lstMACSeen.erase(itMAC);
 	
-	this->scheduleEvent(new MACEvent(Event::MACAddressDisappeared, strDeviceName, strMAC));
+	this->scheduleEvent(std::make_shared<MACEvent>(Event::MACAddressDisappeared, strDeviceName, strMAC));
 	
 	break;
       }

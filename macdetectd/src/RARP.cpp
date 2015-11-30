@@ -25,7 +25,7 @@ namespace macdetect {
   RARP::~RARP() {
   }
   
-  void RARP::requestIP(std::string strMAC, Device* dvDevice) {
+  void RARP::requestIP(std::string strMAC, std::shared_ptr<Device> dvDevice) {
     // TODO: Send request for IP
     RARPPacket rpRequest;
     rpRequest.un16HardwareType = 0x0100; // Ethernet

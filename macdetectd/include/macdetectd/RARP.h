@@ -48,7 +48,7 @@ namespace macdetect {
     RARP();
     ~RARP();
     
-    void requestIP(std::string strMAC, Device* dvDevice);
+    void requestIP(std::string strMAC, std::shared_ptr<Device> dvDevice);
     std::string ipFromResponse(RARPPacket rpResponse);
   };
 }

@@ -76,10 +76,10 @@ namespace macdetect {
 	
 	if(valValue->key() == "request") {
 	  if(valValue->content() == "devices-list") {
-	    std::list<Device*> lstDevices = m_nwNetwork.knownDevices();
+	    std::list< std::shared_ptr<Device> > lstDevices = m_nwNetwork.knownDevices();
 	    
 	    std::shared_ptr<Value> valDevices = this->response(valValue);
-	    for(Device* dvDevice : lstDevices) {
+	    for(std::shared_ptr<Device> dvDevice : lstDevices) {
 	      std::shared_ptr<Value> valAdd = std::make_shared<Value>("device", dvDevice->deviceName());
 	      valAdd->add("mac", dvDevice->mac());
 	      valAdd->add("ip", dvDevice->ip());
@@ -156,22 +156,22 @@ namespace macdetect {
       }
       
       // Handle network events
-      std::list<Event*> lstEvents = m_nwNetwork.events();
+      std::list< std::shared_ptr<Event> > lstEvents = m_nwNetwork.events();
       
-      for(Event* evEvent : lstEvents) {
+      for(std::shared_ptr<Event> evEvent : lstEvents) {
 	std::shared_ptr<Value> valSend = std::make_shared<Value>();
 	std::string strDeviceName = "";
 	
 	switch(evEvent->type()) {
 	case Event::DeviceAdded: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  
 	  valSend->set("info", "device-added");
 	  valSend->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceRemoved: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  
 	  bool bChanged = true;
 	  while(bChanged) {
@@ -196,19 +196,19 @@ namespace macdetect {
 	} break;
 	  
 	case Event::DeviceStateChanged: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  
 	  valSend->set("info", "device-state-changed");
 	} break;
 	  
 	case Event::DeviceEvidenceChanged: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  
 	  valSend->set("info", "device-evidence-changed");
 	} break;
 	  
 	case Event::MACAddressDiscovered: {
-	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = (std::shared_ptr<macdetect::MACEvent>)evEvent;
 	  
 	  valSend->set("info", "mac-address-discovered");
 	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
@@ -218,7 +218,7 @@ namespace macdetect {
 	} break;
 	  
 	case Event::MACAddressDisappeared: {
-	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = (std::shared_ptr<macdetect::MACEvent>)evEvent;
 	  
 	  valSend->set("info", "mac-address-disappeared");
 	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));

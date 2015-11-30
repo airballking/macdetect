@@ -53,12 +53,12 @@ int main(int argc, char** argv) {
     g_nwNetwork.addDeviceWhiteBlacklistEntry("(eth)(.*)");
   
     while(g_nwNetwork.cycle()) {
-      std::list<macdetect::Event*> lstEvents = g_nwNetwork.events();
+      std::list< std::shared_ptr<macdetect::Event> > lstEvents = g_nwNetwork.events();
     
-      for(macdetect::Event* evEvent : lstEvents) {
+      for(std::shared_ptr<macdetect::Event> evEvent : lstEvents) {
 	switch(evEvent->type()) {
 	case macdetect::Event::DeviceAdded: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_pre<macdetect::DeviceEvent>)evEvent;
 	  std::cout << "Device added: '" << devEvent->deviceName() << "' (";
 	  
 	  switch(g_nwNetwork.knownDevice(devEvent->deviceName())->hardwareType()) {
@@ -79,13 +79,13 @@ int main(int argc, char** argv) {
 	} break;
 	
 	case macdetect::Event::DeviceRemoved: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  std::cout << "Device removed: '" << devEvent->deviceName() << "'" << std::endl;
 	} break;
 	
 	case macdetect::Event::DeviceStateChanged: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
-	  macdetect::Device* dvDevice = g_nwNetwork.knownDevice(devEvent->deviceName());
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
+	  std::shared_ptr<macdetect::Device> dvDevice = g_nwNetwork.knownDevice(devEvent->deviceName());
 	
 	  if(devEvent->stateChangeUp()) {
 	    std::cout << "Device '" << devEvent->deviceName() << "' is now " << (dvDevice->up() ? "up" : "down") << std::endl;
@@ -97,18 +97,18 @@ int main(int argc, char** argv) {
 	} break;
 	  
 	case macdetect::Event::DeviceEvidenceChanged: {
-	  macdetect::DeviceEvent* devEvent = (macdetect::DeviceEvent*)evEvent;
+	  std::shared_prt<macdetect::DeviceEvent> devEvent = (std::shared_ptr<macdetect::DeviceEvent>)evEvent;
 	  
 	  std::cout << "Device evidence changed: '" << devEvent->evidenceField() << "': '" << devEvent->evidenceValueFormer() << "' -> '" << devEvent->evidenceValue() << "'" << std::endl;
 	} break;
 	  
 	case macdetect::Event::MACAddressDiscovered: {
-	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = (std::shared_ptr<macdetect::MACEvent>)evEvent;
 	  std::cout << "MAC address discovered on device '" << mvEvent->deviceName() << "': " << g_nwNetwork.readableMACIdentifier(mvEvent->macAddress()) << std::endl;
 	} break;
 	
 	case macdetect::Event::MACAddressDisappeared: {
-	  macdetect::MACEvent* mvEvent = (macdetect::MACEvent*)evEvent;
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = (std::shared_ptr<macdetect::MACEvent>)evEvent;
 	  std::cout << "MAC address disappeared from device '" << mvEvent->deviceName() << "': " << g_nwNetwork.readableMACIdentifier(mvEvent->macAddress()) << std::endl;
 	} break;
 	}

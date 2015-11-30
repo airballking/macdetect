@@ -66,10 +66,10 @@ namespace macdetect {
   private:
     int m_nSocketFDControl;
     bool m_bAutoManageDevices;
-    std::list<Device*> m_lstDevices;
+    std::list< std::shared_ptr<Device> > m_lstDevices;
     std::list<std::string> m_lstSystemDeviceNames;
     
-    std::list<Event*> m_lstEvents;
+    std::list< std::shared_ptr<Event> > m_lstEvents;
     std::list<MACEntity> m_lstMACSeen;
     
     WhiteBlackListMode m_wbmDevices;
@@ -85,7 +85,7 @@ namespace macdetect {
     RARP m_rpRARP;
     
   protected:
-    void scheduleEvent(Event* evSchedule);
+    void scheduleEvent(std::shared_ptr<Event> evSchedule);
     
   public:
     Network();
@@ -110,17 +110,17 @@ namespace macdetect {
     void setAutoManageDevices(bool bAutoManageDevices);
     bool autoManageDevices();
     
-    Device* knownDevice(std::string strDeviceName);
-    std::list<Device*> knownDevices();
+    std::shared_ptr<Device> knownDevice(std::string strDeviceName);
+    std::list< std::shared_ptr<Device> > knownDevices();
     
     Device::HardwareType deviceHardwareType(std::string strDeviceName);
     
-    void maintainDeviceStatus(Device* dvMaintain);
+    void maintainDeviceStatus(std::shared_ptr<Device> dvMaintain);
     
     bool systemDeviceNameExists(std::string strDeviceName);
     std::list<std::string> systemDeviceNames();
     
-    std::list<Event*> events();
+    std::list< std::shared_ptr<Event> > events();
     
     std::string mac(unsigned char* ucMAC);
     
