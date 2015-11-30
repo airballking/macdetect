@@ -22,6 +22,7 @@
 // System
 #include <net/ethernet.h>
 #include <netinet/ether.h>
+#include <memory>
 
 // MAC Detect
 #include <macdetectd/Device.h>

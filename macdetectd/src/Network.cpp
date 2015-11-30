@@ -170,7 +170,7 @@ namespace macdetect {
 	  
 	  this->scheduleEvent(std::make_shared<DeviceEvent>(Event::DeviceAdded, strDeviceName));
 	  
-	  Devicestd::shared_ptr<Event> devEvidenceMAC = std::make_shared<DeviceEvent>(Event::DeviceEvidenceChanged, strDeviceName);
+	  std::shared_ptr<DeviceEvent> devEvidenceMAC = std::make_shared<DeviceEvent>(Event::DeviceEvidenceChanged, strDeviceName);
 	  devEvidenceMAC->setEvidence("mac", dvNew->mac(), "");
 	  this->scheduleEvent(devEvidenceMAC);
 	  
