@@ -49,8 +49,8 @@ namespace macdetect {
     
     if(m_nwNetwork.cycle() && m_srvServer.cycle()) {
       // First, handle removed Served instances.
-      std::list<Served*> lstRemovedServed = m_srvServer.removed();
-      for(Served* svrServed : lstRemovedServed) {
+      std::list< std::shared_ptr<Served> > lstRemovedServed = m_srvServer.removed();
+      for(std::shared_ptr<Served> svrServed : lstRemovedServed) {
 	bool bChanged = true;
 	
 	while(bChanged) {
@@ -233,10 +233,10 @@ namespace macdetect {
 	}
 	
 	if(valSend) {
-	  std::list< std::pair<Served*, int> > lstServed = m_srvServer.served();
+	  std::list< std::pair< std::shared_ptr<Served>, int> > lstServed = m_srvServer.served();
 	  
-	  for(std::pair<Served*, int> prServed : lstServed) {
-	    Served* svrServed = prServed.first;
+	  for(std::pair< std::shared_ptr<Served>, int> prServed : lstServed) {
+	    std::shared_ptr<Served> svrServed = prServed.first;
 	    
 	    if(strDeviceName == "" || this->streamEnabled(svrServed, strDeviceName)) {
 	      svrServed->send(valSend);
@@ -251,13 +251,13 @@ namespace macdetect {
     return bSuccess;
   }
   
-  bool Daemon::enableStream(Served* svrServed, std::string strDeviceName) {
+  bool Daemon::enableStream(std::shared_ptr<Served> svrServed, std::string strDeviceName) {
     if(!this->streamEnabled(svrServed, strDeviceName)) {
       m_lstStreams.push_back({svrServed, strDeviceName});
     }
   }
   
-  bool Daemon::disableStream(Served* svrServed, std::string strDeviceName) {
+  bool Daemon::disableStream(std::shared_ptr<Served> svrServed, std::string strDeviceName) {
     bool bResult = false;
     
     for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
@@ -272,7 +272,7 @@ namespace macdetect {
     return bResult;
   }
   
-  bool Daemon::streamEnabled(Served* svrServed, std::string strDeviceName) {
+  bool Daemon::streamEnabled(std::shared_ptr<Served> svrServed, std::string strDeviceName) {
     bool bResult = false;
     
     for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {

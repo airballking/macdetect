@@ -31,7 +31,7 @@ namespace macdetect {
   class Daemon {
   private:
     typedef struct {
-      Served* svrServed;
+      std::shared_ptr<Served> svrServed;
       std::string strDeviceName;
     } Stream;
     
@@ -47,9 +47,9 @@ namespace macdetect {
     
     std::shared_ptr<Value> response(std::shared_ptr<Value> valValue, std::list< std::pair<std::string, std::string> > lstSubValues = {});
     
-    bool enableStream(Served* svrServed, std::string strDeviceName);
-    bool disableStream(Served* svrServed, std::string strDeviceName);
-    bool streamEnabled(Served* svrServed, std::string strDeviceName);
+    bool enableStream(std::shared_ptr<Served> svrServed, std::string strDeviceName);
+    bool disableStream(std::shared_ptr<Served> svrServed, std::string strDeviceName);
+    bool streamEnabled(std::shared_ptr<Served> svrServed, std::string strDeviceName);
     
     void shutdown();
     bool cycle();

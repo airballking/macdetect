@@ -103,7 +103,7 @@ namespace macdetect {
 	  }
 	} else {
 	  fcntl(nSocketFDAccepted, F_SETFL, O_NONBLOCK);
-	  Served* svrServed = new Served(nSocketFDAccepted);
+	  std::shared_ptr<Served> svrServed = std::make_shared<Served>(nSocketFDAccepted);
 	  
 	  // Initialize connection?
 	  
@@ -127,10 +127,10 @@ namespace macdetect {
 	}
       }
       
-      std::list<Served*> lstRemoveServed;
+      std::list< std::shared_ptr<Served> > lstRemoveServed;
       
-      for(std::pair<Served*, int> prServed : m_lstServed) {
-	Served* svrServed = prServed.first;
+      for(std::pair< std::shared_ptr<Served>, int> prServed : m_lstServed) {
+	std::shared_ptr<Served> svrServed = prServed.first;
 	std::shared_ptr<Value> valReceived = svrServed->receive();
 	
 	if(valReceived) {
@@ -142,12 +142,10 @@ namespace macdetect {
 	}
       }
       
-      for(Served* svrRemove : lstRemoveServed) {
-	for(std::list< std::pair<Served*, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
+      for(std::shared_ptr<Served> svrRemove : lstRemoveServed) {
+	for(std::list< std::pair< std::shared_ptr<Served>, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
 	  if((*itServed).first == svrRemove) {
 	    m_lstRemoved.push_back((*itServed).first);
-	    
-	    delete svrRemove;
 	    m_lstServed.erase(itServed);
 	    
 	    break;
@@ -218,7 +216,7 @@ namespace macdetect {
     return {Serving::Invalid, -1, -1, "", 0};
   }
   
-  void Server::handleValue(Served* svrServed, int nServingID, std::shared_ptr<Value> valReceived) {
+  void Server::handleValue(std::shared_ptr<Served> svrServed, int nServingID, std::shared_ptr<Value> valReceived) {
     m_lstValueQueue.push_back({valReceived, svrServed, nServingID});
   }
   
@@ -229,18 +227,18 @@ namespace macdetect {
     return lstValues;
   }
   
-  std::list< std::pair<Served*, int> > Server::served() {
+  std::list< std::pair< std::shared_ptr<Served>, int> > Server::served() {
     return m_lstServed;
   }
   
   void Server::distributeStreamValue(std::shared_ptr<Value> valStream) {
-    for(std::pair<Served*, int> prServed : m_lstServed) {
+    for(std::pair<std::shared_ptr<Served>, int> prServed : m_lstServed) {
       prServed.first->send(valStream);
     }
   }
   
-  std::list<Served*> Server::removed() {
-    std::list<Served*> lstReturn = m_lstRemoved;
+  std::list< std::shared_ptr<Served> > Server::removed() {
+    std::list< std::shared_ptr<Served> > lstReturn = m_lstRemoved;
     m_lstRemoved.clear();
     
     return lstReturn;
