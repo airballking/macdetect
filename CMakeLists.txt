@@ -10,6 +10,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
 
+enable_testing()
+
 include_directories(
   utils/include
   macdetectd/include
@@ -20,3 +22,4 @@ add_subdirectory(utils)
 add_subdirectory(macdetectd)
 add_subdirectory(client)
 add_subdirectory(pymacdetect)
+
