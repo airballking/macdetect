@@ -10,3 +10,7 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/Value.cpp
   src/PacketEntity.cpp)
+
+add_executable(argumentparser-test
+  src/ArgumentParser.cpp
+  tests/argumentparser.cpp)
