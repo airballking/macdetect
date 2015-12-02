@@ -75,26 +75,23 @@ namespace macdetect {
       for(Server::QueuedValue qvValue : lstValues) {
 	std::shared_ptr<Value> valValue = qvValue.valValue;
 	Server::Serving sviServing = m_srvServer.servingByID(qvValue.nServingID);
+	std::shared_ptr<Value> valResponse = this->response(valValue);
 	
 	if(valValue->key() == "request") {
 	  if(valValue->content() == "devices-list") {
 	    std::list< std::shared_ptr<Device> > lstDevices = m_nwNetwork.knownDevices();
 	    
-	    std::shared_ptr<Value> valDevices = this->response(valValue);
 	    for(std::shared_ptr<Device> dvDevice : lstDevices) {
 	      std::shared_ptr<Value> valAdd = std::make_shared<Value>("device", dvDevice->deviceName());
 	      valAdd->add("mac", dvDevice->mac());
 	      valAdd->add("ip", dvDevice->ip());
 	      valAdd->add("broadcast-ip", dvDevice->broadcastIP());
 	      
-	      valDevices->add(valAdd);
+	      valResponse->add(valAdd);
 	    }
-	    
-	    qvValue.svrServed->send(valDevices);
 	  } else if(valValue->content() == "known-mac-addresses") {
 	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
 	    
-	    std::shared_ptr<Value> valMACs = this->response(valValue);
 	    for(Network::MACEntity meMAC : lstMACs) {
 	      std::shared_ptr<Value> valMAC = std::make_shared<Value>("mac", meMAC.strMAC);
 	      valMAC->add(std::make_shared<Value>("device-name", meMAC.strDeviceName));
@@ -107,10 +104,8 @@ namespace macdetect {
 	      valMAC->add(std::make_shared<Value>("first-seen", sts.str()));
 	      valMAC->add(std::make_shared<Value>("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
 	      
-	      valMACs->add(valMAC);
+	      valResponse->add(valMAC);
 	    }
-	    
-	    qvValue.svrServed->send(valMACs);
 	  } else if(valValue->content() == "enable-stream") {
 	    std::shared_ptr<Value> valDeviceName = valValue->sub("device-name");
 	    
@@ -118,19 +113,16 @@ namespace macdetect {
 	      std::string strDeviceName = valDeviceName->content();
 	      
 	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
-		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "already-enabled"}});
+		valResponse->set("result", "already-enabled");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
-		qvValue.svrServed->send(valResponse);
 	      } else {
 		this->enableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->set("result", "success");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
-		qvValue.svrServed->send(valResponse);
 	      }
 	    } else {
-	      std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "device-name-missing"}});
-	      qvValue.svrServed->send(valResponse);
+	      valResponse->set("result", "device-name-missing");
 	    }
 	  } else if(valValue->content() == "disable-stream") {
 	    std::shared_ptr<Value> valDeviceName = valValue->sub("device-name");
@@ -141,20 +133,19 @@ namespace macdetect {
 	      if(this->streamEnabled(qvValue.svrServed, sviServing.strDeviceName)) {
 		this->disableStream(qvValue.svrServed, sviServing.strDeviceName);
 		
-		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "success"}});
+		valResponse->set("result", "success");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
-		qvValue.svrServed->send(valResponse);
 	      } else {
-		std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "already-disabled"}});
+		valResponse->set("result", "already-disabled");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
-		qvValue.svrServed->send(valResponse);
 	      }
 	    } else {
-	      std::shared_ptr<Value> valResponse = this->response(valValue, {{"result", "device-name-missing"}});
-	      qvValue.svrServed->send(valResponse);
+	      valResponse->set("result", "device-name-missing");
 	    }
 	  }
 	}
+	
+	qvValue.svrServed->send(valResponse);
       }
       
       // Handle network events
