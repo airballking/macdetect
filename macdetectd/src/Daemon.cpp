@@ -283,4 +283,8 @@ namespace macdetect {
     m_srvServer.shutdown();
     m_nwNetwork.shutdown();
   }
+  
+  bool Daemon::privilegesSuffice() {
+    return m_nwNetwork.privilegesSuffice();
+  }
 }

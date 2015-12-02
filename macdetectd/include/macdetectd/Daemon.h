@@ -53,6 +53,8 @@ namespace macdetect {
     
     void shutdown();
     bool cycle();
+    
+    bool privilegesSuffice();
   };
 }
 
