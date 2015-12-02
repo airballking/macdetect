@@ -75,7 +75,11 @@ namespace macdetect {
 	  syslog(LOG_NOTICE, "Now serving on device '%s' (IP %s, port %d).", strDeviceName.c_str(), strIP.c_str(), usPort);
 	  
 	  bResult = true;
+	} else {
+	  syslog(LOG_ERR, "Failed to bind socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
 	}
+      } else {
+	syslog(LOG_ERR, "Failed to create socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
       }
     }
     
@@ -108,6 +112,8 @@ namespace macdetect {
 	} else {
 	  fcntl(nSocketFDAccepted, F_SETFL, O_NONBLOCK);
 	  std::shared_ptr<Served> svrServed = std::make_shared<Served>(nSocketFDAccepted);
+
+	  syslog(LOG_NOTICE, "Accepted new connection on device '%s'.", (*itServing).strDeviceName.c_str());
 	  
 	  // Initialize connection?
 	  m_lstServed.push_back(std::make_pair(svrServed, (*itServing).nID));
