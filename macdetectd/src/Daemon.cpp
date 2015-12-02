@@ -27,7 +27,9 @@ namespace macdetect {
     
     // TODO: This is too narrow; re-specify
     m_nwNetwork.addDeviceWhiteBlacklistEntry("(wlan)(.*)");
+    m_nwNetwork.addDeviceWhiteBlacklistEntry("(wifi)(.*)");
     m_nwNetwork.addDeviceWhiteBlacklistEntry("(eth)(.*)");
+    m_nwNetwork.addDeviceWhiteBlacklistEntry("(en)(.*)");
   }
   
   Daemon::~Daemon() {
