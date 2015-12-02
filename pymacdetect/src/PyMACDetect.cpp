@@ -60,17 +60,18 @@ static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
 static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   PyObject* pyoClient = NULL;
-  char carrIP[1024];
+  char* carrIP = NULL;
   
   macdetect_client::MDClient* mdcClient = NULL;
-  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient);
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrIP);
   
   if(nOK == 1) {
     mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
     
     if(mdcClient) {
       std::string strIP(carrIP);
-      if(mdcClient->connect(carrIP)) {
+      
+      if(mdcClient->connect(strIP)) {
 	Py_INCREF(Py_True);
 	pyoResult = Py_True;
       } else {

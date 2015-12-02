@@ -33,7 +33,7 @@ namespace macdetect {
       this->disconnect();
     }
     
-    m_nSocketFD = ::socket(PF_INET, SOCK_STREAM, 0);
+    m_nSocketFD = ::socket(AF_INET, SOCK_STREAM, 0);
     
     if(m_nSocketFD != -1) {
       struct sockaddr_in sinAddress;

@@ -62,7 +62,7 @@ namespace macdetect {
 	
 	sinAddress.sin_family = AF_INET;
 	sinAddress.sin_port = htons(usPort);
-	inet_pton(AF_INET, strIP.c_str(), &(sinAddress.sin_addr));
+	sinAddress.sin_addr = ((struct sockaddr_in*)&ifrTemp.ifr_addr)->sin_addr;
 	
 	if(::bind(srvServing.nSocketFD, (struct sockaddr*)&sinAddress, sizeof(struct sockaddr)) == 0) {
 	  srvServing.stStatus = Serving::Stopped;
@@ -72,20 +72,11 @@ namespace macdetect {
 	  
 	  m_lstServings.push_back(srvServing);
 	  
+	  syslog(LOG_NOTICE, "Now serving on device '%s' (IP %s, port %d).", strDeviceName.c_str(), strIP.c_str(), usPort);
+	  
 	  bResult = true;
 	}
       }
-    }
-    
-    if(bResult) {
-      std::stringstream sts;
-      sts << "Now serving on ";
-      sts << strDeviceName;
-      sts << " (port ";
-      sts << usPort;
-      sts << ")";
-      
-      syslog(LOG_NOTICE, "%s", sts.str().c_str());
     }
     
     return bResult;
@@ -99,8 +90,10 @@ namespace macdetect {
 	if((*itServing).stStatus == Serving::Stopped) {
 	  if(::listen((*itServing).nSocketFD, 3) == 0) {
 	    (*itServing).stStatus = Serving::Started;
+	    syslog(LOG_NOTICE, "Now listen()ing on device '%s'.", (*itServing).strDeviceName.c_str());
 	  } else {
 	    (*itServing).stStatus = Serving::Invalid;
+	    syslog(LOG_ERR, "Failed to listen() on device '%s'.", (*itServing).strDeviceName.c_str());
 	  }
 	}
 	
@@ -118,6 +111,8 @@ namespace macdetect {
 	  
 	  // Initialize connection?
 	  m_lstServed.push_back(std::make_pair(svrServed, (*itServing).nID));
+	  
+	  syslog(LOG_NOTICE, "Accepted new connection on device '%s' (port %d).", (*itServing).strDeviceName.c_str(), (*itServing).usPort);
 	}
       }
       
