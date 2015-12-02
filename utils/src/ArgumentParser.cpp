@@ -81,7 +81,7 @@ namespace macdetect {
   bool ArgumentParser::switched(std::string strKey) {
     bool bReturn = false;
     
-    for(Argument argArgument : m_lstArguments) {
+    for(Argument argArgument : this->arguments()) {
       if(argArgument.atType == Switch && this->keyFitsArgument(strKey, argArgument)) {
 	bReturn = true;
 	break;
@@ -94,7 +94,7 @@ namespace macdetect {
   std::string ArgumentParser::value(std::string strKey) {
     std::string strReturn = "";
     
-    for(Argument argArgument : m_lstArguments) {
+    for(Argument argArgument : this->arguments()) {
       if(argArgument.atType == Token && this->keyFitsArgument(strKey, argArgument)) {
 	strReturn = argArgument.strValue;
 	break;
@@ -120,7 +120,7 @@ namespace macdetect {
   std::list<std::string> ArgumentParser::parameters() {
     std::list<std::string> lstParameters;
     
-    for(Argument argArgument : m_lstArguments) {
+    for(Argument argArgument : this->arguments()) {
       if(argArgument.atType == Parameter) {
 	lstParameters.push_back(argArgument.strValue);
       }
