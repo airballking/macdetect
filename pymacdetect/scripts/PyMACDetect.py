@@ -9,7 +9,7 @@ class Client:
         pymacdetect.destroyClient(self.mdcClient)
     
     def connect(self, strIP):
-        pymacdetect.connectClient(self.mdcClient, strIP)
+        return pymacdetect.connectClient(self.mdcClient, strIP)
     
     def knownMACs(self):
         return pymacdetect.knownMACAddresses(self.mdcClient)
