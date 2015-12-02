@@ -19,7 +19,7 @@
 
 
 namespace macdetect {
-  ArgumentParser::ArgumentParser(std::list< std::pair<std::string, bool> > lstValidArguments) : m_lstValidArguments(lstValidArguments) {
+  ArgumentParser::ArgumentParser(std::list<ArgumentPrototype> lstValidArguments) : m_lstValidArguments(lstValidArguments) {
   }
   
   ArgumentParser::~ArgumentParser() {
@@ -30,12 +30,47 @@ namespace macdetect {
   }
   
   void ArgumentParser::parse(int nArgCount, char** carrArgs) {
-    std::vector<std::string> vecArtifacts(carrArgs, carrArgs + nArgCount);
+    std::vector<std::string> vecArtifacts;
     
-    for(unsigned int unI = 1; unI < vecArtifacts.size(); unI++) {
+    for(unsigned int unI = 1; unI < nArgCount; unI++) {
+      vecArtifacts.push_back(std::string(carrArgs[unI]));
+    }
+    
+    for(unsigned int unI = 0; unI < vecArtifacts.size(); unI++) {
       std::string strArtifact = vecArtifacts[unI];
       
-      // TODO(winkler): Implement the artifact parsing here.
+      ArgumentType atType;
+      std::string strKey = "";
+      bool bLong = false;
+      bool bParameter = false;
+      
+      if(strArtifact.substr(0, 2) == "--") {
+	strKey = strArtifact.substr(2);
+	bLong = true;
+      } else if(strArtifact.substr(0, 1) == "-") {
+	strKey = strArtifact.substr(1);
+      } else {
+	strKey = strArtifact;
+	bParameter = true;
+      }
+      
+      if(!bParameter) {
+	for(ArgumentPrototype apArgument : m_lstValidArguments) {
+	  if(((bLong && apArgument.strLong == strKey) ||
+	      (!bLong && apArgument.strShort == strKey))) {
+	    if(apArgument.atType == Switch) {
+	      this->addArgument({strKey, "", Switch});
+	    } else if(apArgument.atType == Token) {
+	      if(unI < vecArtifacts.size() - 1) {
+		this->addArgument({strKey, vecArtifacts[unI + 1], Token});
+		unI++;
+	      }
+	    }
+	  }
+	}
+      } else {
+	this->addArgument({"", strKey, Parameter});
+      }
     }
   }
   
@@ -43,16 +78,54 @@ namespace macdetect {
     return m_lstArguments;
   }
   
-  std::string ArgumentParser::value(std::string strToken) {
+  bool ArgumentParser::switched(std::string strKey) {
+    bool bReturn = false;
+    
+    for(Argument argArgument : m_lstArguments) {
+      if(argArgument.atType == Switch && this->keyFitsArgument(strKey, argArgument)) {
+	bReturn = true;
+	break;
+      }
+    }
+    
+    return bReturn;
+  }
+  
+  std::string ArgumentParser::value(std::string strKey) {
     std::string strReturn = "";
     
     for(Argument argArgument : m_lstArguments) {
-      if(argArgument.bHasToken && argArgument.strToken == strToken) {
+      if(argArgument.atType == Token && this->keyFitsArgument(strKey, argArgument)) {
 	strReturn = argArgument.strValue;
 	break;
       }
     }
     
     return strReturn;
+  }
+  
+  bool ArgumentParser::keyFitsArgument(std::string strKey, Argument argArgument) {
+    bool bReturn = false;
+    
+    for(ArgumentPrototype apArgument : m_lstValidArguments) {
+      if(apArgument.strShort == strKey || apArgument.strLong == strKey) {
+	bReturn = (argArgument.strKey == apArgument.strShort || argArgument.strKey == apArgument.strLong);
+	break;
+      }
+    }
+    
+    return bReturn;
+  }
+  
+  std::list<std::string> ArgumentParser::parameters() {
+    std::list<std::string> lstParameters;
+    
+    for(Argument argArgument : m_lstArguments) {
+      if(argArgument.atType == Parameter) {
+	lstParameters.push_back(argArgument.strValue);
+      }
+    }
+    
+    return lstParameters;
   }
 }

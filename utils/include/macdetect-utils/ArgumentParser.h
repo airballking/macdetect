@@ -29,28 +29,43 @@
 namespace macdetect {
   class ArgumentParser {
   public:
+    typedef enum {
+      Switch = 0,
+      Token = 1,
+      Parameter = 2
+    } ArgumentType;
+    
     typedef struct {
-      std::string strToken;
+      std::string strShort;
+      std::string strLong;
+      ArgumentType atType;
+    } ArgumentPrototype;
+    
+    typedef struct {
+      std::string strKey;
       std::string strValue;
-      bool bHasValue;
-      bool bHasToken;
+      ArgumentType atType;
     } Argument;
     
   private:
-    std::list< std::pair<std::string, bool> > m_lstValidArguments;
+    std::list<ArgumentPrototype> m_lstValidArguments;
     std::list<Argument> m_lstArguments;
     
   protected:
     void addArgument(Argument argAdd);
     
   public:
-    ArgumentParser(std::list< std::pair<std::string, bool> > lstValidArguments);
+    ArgumentParser(std::list<ArgumentPrototype> lstValidArguments);
     ~ArgumentParser();
     
     void parse(int nArgCount, char** carrArgs);
     
     std::list<Argument> arguments();
-    std::string value(std::string strToken);
+    bool switched(std::string strKey);
+    std::string value(std::string strKey);
+    
+    bool keyFitsArgument(std::string strKey, Argument argArgument);
+    std::list<std::string> parameters();
   };
 }
 
