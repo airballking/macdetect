@@ -14,3 +14,6 @@ add_library(${PROJECT_NAME}
 add_executable(argumentparser-test
   src/ArgumentParser.cpp
   tests/argumentparser.cpp)
+
+add_test(NAME argumentparser
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/argumentparser-test)
