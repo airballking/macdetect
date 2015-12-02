@@ -11,7 +11,11 @@ int main(int argc, char** argv) {
     macdetect::Data::Vendor vdApple = dtData.vendorForMAC("00:CD:FE:00:00:00");
     
     if(vdApple.bValid && vdApple.strVendor == "Apple, Inc.") {
-      nReturnvalue = EXIT_SUCCESS;
+      macdetect::Data::Vendor vdInvalid = dtData.vendorForMAC("FF:FF:FF:00:00:00");
+      
+      if(!vdInvalid.bValid) {
+	nReturnvalue = EXIT_SUCCESS;
+      }
     }
   }
   
