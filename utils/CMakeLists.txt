@@ -11,9 +11,9 @@ add_library(${PROJECT_NAME}
   src/Value.cpp
   src/PacketEntity.cpp)
 
-add_executable(argumentparser-test
+add_executable(test-argumentparser
   src/ArgumentParser.cpp
   tests/argumentparser.cpp)
 
 add_test(NAME argumentparser
-  COMMAND ${EXECUTABLE_OUTPUT_PATH}/argumentparser-test)
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-argumentparser)

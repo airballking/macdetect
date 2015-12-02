@@ -24,3 +24,10 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   macdetect-utils)
+
+add_executable(test-readvendordata
+  src/Data.cpp
+  tests/readvendordata.cpp)
+
+add_test(NAME readvendordata
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-readvendordata)

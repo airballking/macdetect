@@ -41,12 +41,8 @@ namespace macdetect {
     std::string strLine = "";
     
     while(std::getline(ifOUI, strLine)) {
-      std::istringstream iss(strLine);
-      
-      std::string strMAC;
-      std::string strVendor;
-      getline(iss, strMAC, ',');
-      getline(iss, strVendor, ',');
+      std::string strMAC = strLine.substr(0, 6);
+      std::string strVendor = strLine.substr(7);
       
       strMAC.erase(strMAC.find_last_not_of(" \n\r\t\"")+1);
       
