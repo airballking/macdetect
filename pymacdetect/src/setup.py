@@ -29,11 +29,11 @@ pymacdetect_module = Extension('pymacdetect',
                                                '../../pymacdetect/include',
                                                '../../client/include',
                                                '../../utils/include'],
-                               libraries = ['macdetect-client', 'macdetect-utils'],
+                               libraries = ['macdetect-client', 'macdetect-utils', 'gcov'],
                                library_dirs = ['/usr/local/lib',
                                                '../../lib'],
                                sources = [local_cmake_dir + '/src/PyMACDetect.cpp'],
-                               extra_compile_args=['-std=c++11'])
+                               extra_compile_args=['-std=c++11', '--coverage'])
 
 setup(name = 'PyMACDetect',
       version = '1.0',
