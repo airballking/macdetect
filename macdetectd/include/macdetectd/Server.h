@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
+#include <syslog.h>
+#include <sstream>
 
 // MAC detect
 #include <macdetectd/Served.h>

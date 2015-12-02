@@ -77,6 +77,17 @@ namespace macdetect {
       }
     }
     
+    if(bResult) {
+      std::stringstream sts;
+      sts << "Now serving on ";
+      sts << strDeviceName;
+      sts << " (port ";
+      sts << usPort;
+      sts << ")";
+      
+      syslog(LOG_NOTICE, "%s", sts.str().c_str());
+    }
+    
     return bResult;
   }
   
@@ -106,7 +117,6 @@ namespace macdetect {
 	  std::shared_ptr<Served> svrServed = std::make_shared<Served>(nSocketFDAccepted);
 	  
 	  // Initialize connection?
-	  
 	  m_lstServed.push_back(std::make_pair(svrServed, (*itServing).nID));
 	}
       }
