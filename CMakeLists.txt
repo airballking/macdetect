@@ -22,4 +22,3 @@ add_subdirectory(utils)
 add_subdirectory(macdetectd)
 add_subdirectory(client)
 add_subdirectory(pymacdetect)
-

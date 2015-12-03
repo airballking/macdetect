@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ether.h>
+#include <syslog.h>
+#include <sstream>
 
 // MAC Detect
 #include <macdetectd/SocketReader.h>

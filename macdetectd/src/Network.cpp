@@ -449,7 +449,7 @@ namespace macdetect {
 	} break;
 	  
 	case 0x8035: { // RARP
-	  std::cout << "Received RARP packet" << std::endl;
+	  syslog(LOG_NOTICE, "Received RARP packet");
 	} break;
 	  
 	default: {

@@ -114,7 +114,7 @@ namespace macdetect {
     }
     
     if(nSocket == -1) {
-      std::cout << "Error while creating socket (device '" << strDeviceName << "', source '" << strErrorSource << "'): " << strerror(errno) << std::endl;
+      syslog(LOG_ERR, "Error while creating socket (device '%s', source '%s'): %s", strDeviceName.c_str(), strErrorSource.c_str(), strerror(errno));
     }
     
     return nSocket;
@@ -132,11 +132,16 @@ namespace macdetect {
     
     if(usProtocol != m_usProtocol) {
       nSocket = this->createSocket(m_strDeviceName, usProtocol);
-      std::cout << "Sending to non-default protocol 0x" << std::hex << usProtocol << std::endl;
+      
+      std::stringstream sts;
+      sts << std::hex;
+      sts << usProtocol;
+      
+      syslog(LOG_NOTICE, "Sending to non-default protocol 0x%s", sts.str().c_str());
     }
     
     if((nWritten = ::write(nSocket, vdBuffer, unLength)) == -1) {
-      std::cerr << "Failure: " << strerror(errno) << std::endl;
+      syslog(LOG_ERR, "Failure: %s", strerror(errno));
       
       bSuccess = false;
     }
