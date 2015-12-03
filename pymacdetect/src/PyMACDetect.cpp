@@ -21,7 +21,21 @@
 static PyObject* valueToPyObject(std::shared_ptr<macdetect::Value> valValue) {
   PyObject* pyoResult = NULL;
   
-  // TODO(winkler): Do the conversion here.
+  int nSubCount = valValue->subValues().size();
+  pyoResult = PyDict_New();
+  
+  PyObject* pyoKey = Py_BuildValue("z#", valValue->content().c_str(), valValue->content().length());
+  PyDict_SetItemString(pyoResult, valValue->key().c_str(), pyoKey);
+  
+  if(nSubCount > 0) {
+    //PyObject* pyoChildren = Py_BuildValue("z#", "sub-values", 10);
+    //PyDict_SetItemString(pyoChildren, valValue->key().c_str(), pyoKey);
+    //PyObject* pyoSubValues = PyDict_New();
+  }
+  
+  for(std::shared_ptr<macdetect::Value> valSubValue : valValue->subValues()) {
+    
+  }
   
   return pyoResult;
 }
@@ -130,6 +144,62 @@ static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
       PyList_SetItem(pyoResult, unIndex, pyoItem);
       
       unIndex++;
+    }
+  } else {
+    Py_INCREF(Py_False);
+    pyoResult = Py_False;
+  }
+  
+  return pyoResult;
+}
+
+static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  PyObject* pyoClient = NULL;
+  char* carrDeviceName = NULL;
+  
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDeviceName);
+  
+  if(nOK == 1) {
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+    
+    if(mdcClient) {
+      bool bSuccess = mdcClient->enableStream(std::string(carrDeviceName));
+      
+      Py_INCREF(Py_True);
+      pyoResult = Py_True;
+    } else {
+      Py_INCREF(Py_False);
+      pyoResult = Py_False;
+    }
+  } else {
+    Py_INCREF(Py_False);
+    pyoResult = Py_False;
+  }
+  
+  return pyoResult;
+}
+
+static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  PyObject* pyoClient = NULL;
+  char* carrDeviceName = NULL;
+  
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDeviceName);
+  
+  if(nOK == 1) {
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+    
+    if(mdcClient) {
+      bool bSuccess = mdcClient->disableStream(std::string(carrDeviceName));
+      
+      Py_INCREF(Py_True);
+      pyoResult = Py_True;
+    } else {
+      Py_INCREF(Py_False);
+      pyoResult = Py_False;
     }
   } else {
     Py_INCREF(Py_False);

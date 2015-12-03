@@ -13,3 +13,12 @@ class Client:
     
     def knownMACs(self):
         return pymacdetect.knownMACAddresses(self.mdcClient)
+    
+    def info(self):
+        return pymacdetect.info(self.mdcClient);
+    
+    def enableStream(self, strDeviceName):
+        return pymacdetect.enableStream(self.mdcClient, strDeviceName);
+    
+    def disableStream(self, strDeviceName):
+        return pymacdetect.disableStream(self.mdcClient, strDeviceName);

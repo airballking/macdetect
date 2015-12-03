@@ -41,6 +41,11 @@ static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* devicesList(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs);
 
+static PyObject* info(PyObject* pyoSelf, PyObject* pyoArgs);
+
+static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs);
+
 PyMODINIT_FUNC initpymacdetect(void);
 
 static PyObject* pyoMACDetectError;
@@ -58,6 +63,12 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Retrieves all known MAC addresses from a connected server."},
   {"devicesList", devicesList, METH_VARARGS,
    "Retrieves all list of all actively monitored network devices on the server."},
+  {"info", info, METH_VARARGS,
+   "Retrieves all info packages currently streamed from the server."},
+  {"enableStream", enableStream, METH_VARARGS,
+   "Enables the info event stream for the given device name on the server."},
+  {"disableStream", disableStream, METH_VARARGS,
+   "Disables the info event stream for the given device name on the server."},
   {NULL, NULL, 0, NULL}
 };
 
