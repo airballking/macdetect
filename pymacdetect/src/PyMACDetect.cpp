@@ -18,6 +18,15 @@
 #include <pymacdetect/PyMACDetect.h>
 
 
+static PyObject* valueToPyObject(std::shared_ptr<macdetect::Value> valValue) {
+  PyObject* pyoResult = NULL;
+  
+  // TODO(winkler): Do the conversion here.
+  
+  return pyoResult;
+}
+
+
 static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs) {
   PyObject* pyoClient = NULL;
   macdetect_client::MDClient* mdcClient = NULL;
@@ -125,6 +134,27 @@ static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
   } else {
     Py_INCREF(Py_False);
     pyoResult = Py_False;
+  }
+  
+  return pyoResult;
+}
+
+static PyObject* info(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    std::shared_ptr<macdetect::Value> valInfo = mdcClient->info();
+    
+    if(valInfo) {
+      pyoResult = valueToPyObject(valInfo);
+    } else {
+      Py_INCREF(Py_None);
+      pyoResult = Py_None;
+    }
+  } else {
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
   }
   
   return pyoResult;
