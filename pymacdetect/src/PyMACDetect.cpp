@@ -167,8 +167,13 @@ static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
     if(mdcClient) {
       bool bSuccess = mdcClient->enableStream(std::string(carrDeviceName));
       
-      Py_INCREF(Py_True);
-      pyoResult = Py_True;
+      if(bSuccess) {
+	Py_INCREF(Py_True);
+	pyoResult = Py_True;
+      } else {
+	Py_INCREF(Py_False);
+	pyoResult = Py_False;
+      }
     } else {
       Py_INCREF(Py_False);
       pyoResult = Py_False;
@@ -195,8 +200,13 @@ static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
     if(mdcClient) {
       bool bSuccess = mdcClient->disableStream(std::string(carrDeviceName));
       
-      Py_INCREF(Py_True);
-      pyoResult = Py_True;
+      if(bSuccess) {
+	Py_INCREF(Py_True);
+	pyoResult = Py_True;
+      } else {
+	Py_INCREF(Py_False);
+	pyoResult = Py_False;
+      }
     } else {
       Py_INCREF(Py_False);
       pyoResult = Py_False;
