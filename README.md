@@ -44,7 +44,7 @@ principle interface for clients shouldn't change that much, though
 (maybe function names, but the basic functionality will stay the
 same).
 
-The whole code is licensed under the Apache 2.0 license. See any
-header or source files for more info. The copyright belongs to me. If
-you want to do anything with this software that is not compatible with
-Apache 2.0, message me.
+The whole code is licensed under the GPL 2.0 license. See any header
+or source files for more info. The copyright belongs to me. If you
+want to do anything with this software that is not compatible with
+GPL 2.0, message me.
