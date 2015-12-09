@@ -50,6 +50,8 @@ namespace macdetect {
     unsigned int serialize(void* vdBuffer, unsigned int unLength);
     unsigned int deserialize(void* vdBuffer, unsigned int unLength);
     
+    void setKey(std::string strKey);
+    void setContent(std::string strContent);
     void set(std::string strKey, std::string strContent);
     
     std::list< std::shared_ptr<Value> > subValues();

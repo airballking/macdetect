@@ -41,13 +41,8 @@ static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 
-static PyObject* devicesList(PyObject* pyoSelf, PyObject* pyoArgs);
-static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs);
-
-static PyObject* info(PyObject* pyoSelf, PyObject* pyoArgs);
-
-static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs);
-static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs);
 
 PyMODINIT_FUNC initpymacdetect(void);
 
@@ -62,16 +57,10 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Connects a MAC Detect client instance to a target IP."},
   {"disconnectClient", disconnectMDClient, METH_VARARGS,
    "Disconnects a MAC Detect client instance from its current server."},
-  {"knownMACAddresses", knownMACAddresses, METH_VARARGS,
-   "Retrieves all known MAC addresses from a connected server."},
-  {"devicesList", devicesList, METH_VARARGS,
-   "Retrieves all list of all actively monitored network devices on the server."},
-  {"info", info, METH_VARARGS,
-   "Retrieves all info packages currently streamed from the server."},
-  {"enableStream", enableStream, METH_VARARGS,
-   "Enables the info event stream for the given device name on the server."},
-  {"disableStream", disableStream, METH_VARARGS,
-   "Disables the info event stream for the given device name on the server."},
+  {"receive", receive, METH_VARARGS,
+   "Retrieves the next newest packet received from the server."},
+  {"send", send, METH_VARARGS,
+   "Sends a packet to the server and requests an immediate response."},
   {NULL, NULL, 0, NULL}
 };
 

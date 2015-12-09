@@ -154,7 +154,7 @@ namespace macdetect_client {
     return bSuccess;
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::info() {
-    return this->get("info", "", false);
+  std::shared_ptr<macdetect::Value> MDClient::receive() {
+    return this->get("", "", false);
   }
 }

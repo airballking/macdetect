@@ -22,42 +22,68 @@
 
 
 static PyObject* valueToPyObject(std::shared_ptr<macdetect::Value> valValue) {
-  PyObject* pyoResult = NULL;
+  PyObject* pyoResult = PyDict_New();
+  PyObject* pyoContent = PyDict_New();
+  
+  PyObject* pyoContentString = Py_BuildValue("z#", valValue->content().c_str(), valValue->content().length());
+  PyDict_SetItemString(pyoContent, "content", pyoContentString);
   
   int nSubCount = valValue->subValues().size();
-  pyoResult = PyDict_New();
-  
-  PyObject* pyoKey = Py_BuildValue("z#", valValue->content().c_str(), valValue->content().length());
-  
-  PyObject* pyoIntDict = PyDict_New();
-  PyDict_SetItemString(pyoResult, "content", pyoKey);
-  
-  PyDict_SetItemString(pyoResult, valValue->key().c_str(), pyoKey);
-  
   if(nSubCount > 0) {
-    //PyObject* pyoList = PyList_New(nSubCount);
+    PyObject* pyoSubs = PyDict_New();
     
     for(std::shared_ptr<macdetect::Value> valSub : valValue->subValues()) {
+      PyObject* pyoSub = valueToPyObject(valSub);
       
+      PyDict_SetItemString(pyoSubs, valSub->key().c_str(), PyDict_GetItemString(pyoSub, valSub->key().c_str()));
     }
     
-    //PyObject* pyoChildren = Py_BuildValue("z#", "sub-values", 10);
-    //PyDict_SetItemString(pyoChildren, valValue->key().c_str(), pyoKey);
-    //PyObject* pyoSubValues = PyDict_New();
+    PyDict_SetItemString(pyoContent, "subs", pyoSubs);
   }
   
-  for(std::shared_ptr<macdetect::Value> valSubValue : valValue->subValues()) {
-    
-  }
+  PyDict_SetItemString(pyoResult, valValue->key().c_str(), pyoContent);
   
   return pyoResult;
+}
+
+
+static std::shared_ptr<macdetect::Value> pyObjectToValue(PyObject* pyoObject) {
+  std::shared_ptr<macdetect::Value> valResult = std::make_shared<macdetect::Value>();
+  PyObject* pyoKeys = PyDict_Keys(pyoObject);
+  PyObject* pyoKey = PyList_GetItem(pyoKeys, 0);
+  
+  std::string strKey = PyString_AsString(pyoKey);
+  valResult->setKey(strKey);
+  PyObject* pyoContentDict = PyDict_GetItemString(pyoObject, strKey.c_str());
+  valResult->setContent(PyString_AsString(PyDict_GetItemString(pyoContentDict, "content")));
+  
+  PyObject* pyoSubs = PyDict_GetItemString(pyoContentDict, "subs");
+  
+  if(pyoSubs) {
+    PyObject* pyoSubKeys = PyDict_Keys(pyoSubs);
+    int nSize = PyList_Size(pyoSubKeys);
+    
+    for(int nI = 0; nI < nSize; nI++) {
+      PyObject* pyoSubKey = PyList_GetItem(pyoSubKeys, 0);
+      std::string strSubKey = PyString_AsString(pyoSubKey);
+      
+      PyObject* pyoSubDict = PyDict_New();
+      PyDict_SetItemString(pyoSubDict, strSubKey.c_str(), PyDict_GetItemString(pyoSubs, strSubKey.c_str()));
+      
+      valResult->add(pyObjectToValue(pyoSubDict));
+    }
+  }
+  
+  return valResult;
 }
 
 
 static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs) {
   PyObject* pyoClient = NULL;
   macdetect_client::MDClient* mdcClient = NULL;
-  int nOK = PyArg_ParseTuple(pyoArgs, "O", &pyoClient);
+  
+  std::string strParameterFormat = "O";
+  int nOK = PyArg_ParseTuple(pyoArgs, strParameterFormat.c_str(), &pyoClient);
   
   if(nOK == 1) {
     mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
@@ -140,107 +166,27 @@ static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
-static PyObject* knownMACAddresses(PyObject* pyoSelf, PyObject* pyoArgs) {
-  PyObject* pyoResult = NULL;
-  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
-  
-  if(mdcClient) {
-    std::list<std::string> lstAddresses = mdcClient->knownMACAddresses();
-    pyoResult = PyList_New(lstAddresses.size());
-    
-    unsigned int unIndex = 0;
-    for(std::list<std::string>::iterator itItem = lstAddresses.begin();
-	itItem != lstAddresses.end(); itItem++) {
-      std::string strItem = *itItem;
-      
-      PyObject* pyoItem = Py_BuildValue("z#", strItem.c_str(), strItem.length());
-      PyList_SetItem(pyoResult, unIndex, pyoItem);
-      
-      unIndex++;
-    }
-  } else {
-    Py_INCREF(Py_False);
-    pyoResult = Py_False;
-  }
-  
-  return pyoResult;
-}
 
-static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
+static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   PyObject* pyoClient = NULL;
-  char* carrDeviceName = NULL;
+  PyObject* pyoMessage = NULL;
   
   macdetect_client::MDClient* mdcClient = NULL;
-  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDeviceName);
+  int nOK = PyArg_ParseTuple(pyoArgs, "OO", &pyoClient, &pyoMessage);
   
   if(nOK == 1) {
     mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
     
     if(mdcClient) {
-      bool bSuccess = mdcClient->enableStream(std::string(carrDeviceName));
+      std::shared_ptr<macdetect::Value> valSend = pyObjectToValue(pyoMessage);
       
-      if(bSuccess) {
-	Py_INCREF(Py_True);
-	pyoResult = Py_True;
+      if(valSend) {
+	pyoResult = valueToPyObject(mdcClient->requestResponse(valSend));
       } else {
-	Py_INCREF(Py_False);
-	pyoResult = Py_False;
+	Py_INCREF(Py_None);
+	pyoResult = Py_None;
       }
-    } else {
-      Py_INCREF(Py_False);
-      pyoResult = Py_False;
-    }
-  } else {
-    Py_INCREF(Py_False);
-    pyoResult = Py_False;
-  }
-  
-  return pyoResult;
-}
-
-static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
-  PyObject* pyoResult = NULL;
-  PyObject* pyoClient = NULL;
-  char* carrDeviceName = NULL;
-  
-  macdetect_client::MDClient* mdcClient = NULL;
-  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDeviceName);
-  
-  if(nOK == 1) {
-    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
-    
-    if(mdcClient) {
-      bool bSuccess = mdcClient->disableStream(std::string(carrDeviceName));
-      
-      if(bSuccess) {
-	Py_INCREF(Py_True);
-	pyoResult = Py_True;
-      } else {
-	Py_INCREF(Py_False);
-	pyoResult = Py_False;
-      }
-    } else {
-      Py_INCREF(Py_False);
-      pyoResult = Py_False;
-    }
-  } else {
-    Py_INCREF(Py_False);
-    pyoResult = Py_False;
-  }
-  
-  return pyoResult;
-}
-
-static PyObject* info(PyObject* pyoSelf, PyObject* pyoArgs) {
-  PyObject* pyoResult = NULL;
-  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
-  
-  if(mdcClient) {
-    std::shared_ptr<macdetect::Value> valInfo = mdcClient->info();
-    
-    if(valInfo) {
-      pyoResult = valueToPyObject(valInfo);
     } else {
       Py_INCREF(Py_None);
       pyoResult = Py_None;
@@ -253,31 +199,28 @@ static PyObject* info(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
-static PyObject* devicesList(PyObject* pyoSelf, PyObject* pyoArgs) {
+
+static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
   
   if(mdcClient) {
-    std::list< std::shared_ptr<macdetect::Value> > lstDevices = mdcClient->devicesList();
-    pyoResult = PyList_New(lstDevices.size());
+    std::shared_ptr<macdetect::Value> valReceived = mdcClient->receive();
     
-    unsigned int unIndex = 0;
-    for(std::list< std::shared_ptr<macdetect::Value> >::iterator itItem = lstDevices.begin();
-	itItem != lstDevices.end(); itItem++) {
-      std::shared_ptr<macdetect::Value> valItem = *itItem;
-      
-      /*PyObject* pyoItem = Py_BuildValue("z#", strItem.c_str(), strItem.length());
-	PyList_SetItem(pyoResult, unIndex, pyoItem);*/
-      
-      unIndex++;
+    if(valReceived) {
+      pyoResult = valueToPyObject(valReceived);
+    } else {
+      Py_INCREF(Py_None);
+      pyoResult = Py_None;
     }
   } else {
-    Py_INCREF(Py_False);
-    pyoResult = Py_False;
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
   }
   
   return pyoResult;
 }
+
 
 PyMODINIT_FUNC initpymacdetect(void) {
   PyObject* pyoM = Py_InitModule("pymacdetect", PyMACDetectMethods);

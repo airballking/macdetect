@@ -27,13 +27,12 @@ ip = "127.0.0.1"
 #ip = "192.168.178.25"
 
 if cliClient.connect(ip):
-    print cliClient.knownMACs()
     cliClient.enableStream("eth1")
     
     while True:
-        info = cliClient.info()
+        packet = cliClient.receive()
         
-        if info:
-            print info
+        if packet:
+            print packet
 else:
     print "Unable to connect to '" + ip + "'"

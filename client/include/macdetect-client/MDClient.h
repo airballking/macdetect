@@ -57,7 +57,7 @@ namespace macdetect_client {
     bool enableStream(std::string strDeviceName);
     bool disableStream(std::string strDeviceName);
     
-    std::shared_ptr<macdetect::Value> info();
+    std::shared_ptr<macdetect::Value> receive();
   };
 }
 

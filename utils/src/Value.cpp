@@ -132,9 +132,17 @@ namespace macdetect {
     }
   }
   
-  void Value::set(std::string strKey, std::string strContent) {
+  void Value::setKey(std::string strKey) {
     m_strKey = strKey;
+  }
+  
+  void Value::setContent(std::string strContent) {
     m_strContent = strContent;
+  }
+  
+  void Value::set(std::string strKey, std::string strContent) {
+    this->setKey(strKey);
+    this->setContent(strContent);
   }
   
   std::shared_ptr<Value> Value::copy() {

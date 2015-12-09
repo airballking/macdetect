@@ -31,14 +31,19 @@ class Client:
     def connect(self, strIP):
         return pymacdetect.connectClient(self.mdcClient, strIP)
     
-    def knownMACs(self):
-        return pymacdetect.knownMACAddresses(self.mdcClient)
-    
-    def info(self):
-        return pymacdetect.info(self.mdcClient);
+    def disconnect(self):
+        return pymacdetect.disconnectClient(self.mdcClient)
     
     def enableStream(self, strDeviceName):
-        return pymacdetect.enableStream(self.mdcClient, strDeviceName);
+        return self.send({"request": {"content": "enable-stream",
+                                      "subs": {"device-name": {"content": strDeviceName}}}});
     
     def disableStream(self, strDeviceName):
-        return pymacdetect.disableStream(self.mdcClient, strDeviceName);
+        return self.send({"request": {"content": "disable-stream",
+                                      "subs": {"device-name": {"content": strDeviceName}}}});
+    
+    def receive(self):
+        return pymacdetect.receive(self.mdcClient)
+    
+    def send(self, dicMessage):
+        return pymacdetect.send(self.mdcClient, dicMessage)
