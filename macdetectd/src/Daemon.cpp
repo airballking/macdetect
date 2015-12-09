@@ -23,7 +23,7 @@
 
 namespace macdetect {
   Daemon::Daemon() {
-    //m_srvServer.serve("lo", 7090);
+    m_srvServer.serve("lo", 7090);
     m_srvServer.serve("wlan0", 7090);
     
     m_nwNetwork.setAutoManageDevices(true);
