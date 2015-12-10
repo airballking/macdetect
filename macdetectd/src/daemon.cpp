@@ -22,11 +22,11 @@
 #include <cstdlib>
 #include <signal.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 // MAC Detect
+#include <macdetectd/Globals.h>
 #include <macdetectd/Network.h>
 #include <macdetectd/Server.h>
 #include <macdetectd/Daemon.h>
@@ -34,6 +34,10 @@
 
 
 macdetect::Daemon g_dmDaemon;
+
+namespace macdetect {
+  bool g_bDaemon = false;
+}
 
 
 void catchHandler(int nSignum) {
@@ -58,40 +62,44 @@ int main(int argc, char** argv) {
   
   int nReturnvalue = EXIT_FAILURE;
   
-  if(g_dmDaemon.privilegesSuffice()) {
-    macdetect::ArgumentParser apArguments({{"d", "daemon", macdetect::ArgumentParser::Switch}});
-    apArguments.parse(argc, argv);
-    bool bRegularStartup = false;
+  macdetect::ArgumentParser apArguments({{"d", "daemon", macdetect::ArgumentParser::Switch}});
+  apArguments.parse(argc, argv);
   
+  bool bPrivilegesSuffice = g_dmDaemon.privilegesSuffice();
+  bool bRunnable = false;
+  
+  if(bPrivilegesSuffice) {
     if(apArguments.switched("daemon")) {
+      macdetect::g_bDaemon = true;
+      
       pid_t pPid = fork();
-    
+      
       if(pPid == 0) {
 	// We are the child.
+	bRunnable = true;
 	umask(0);
-      
+	
 	openlog(argv[0], LOG_NOWAIT | LOG_PID, LOG_USER);
-	syslog(LOG_NOTICE, "Started macdetectd daemon.");
-      
+	log(macdetect::Normal, "Started macdetectd daemon.");
+	
 	pid_t pSid = setsid();
+	
 	if(pSid < 0) {
-	  syslog(LOG_ERR, "Could not create process group (failed during `setsid()`).");
+	  log(macdetect::Error, "Could not create process group (failed during `setsid()`).");
 	} else {
 	  // NOTE(winkler): One could change the working directory here;
 	  // we rely on the local data directory, so we're not doing
 	  // that at the moment.
-	
+	  
 	  close(STDIN_FILENO);
 	  close(STDOUT_FILENO);
 	  close(STDERR_FILENO);
-	
+	  
 	  nReturnvalue = EXIT_SUCCESS;
 	}
       
 	if(nReturnvalue == EXIT_SUCCESS) {
-	  bRegularStartup = true;
-	} else {
-	  closelog();
+	  bRunnable = true;
 	}
       } else if(pPid < 0) {
 	// Something went wrong.
@@ -100,22 +108,26 @@ int main(int argc, char** argv) {
 	nReturnvalue = EXIT_SUCCESS;
       }
     } else {
-      bRegularStartup = true;
+      bRunnable = true;
     }
   
-    if(bRegularStartup) {
-      syslog(LOG_NOTICE, "Entering main loop.");
-    
+    if(bRunnable) {
+      g_dmDaemon.serve("lo", 7090);
+      g_dmDaemon.serve("wlan0", 7090);
+      
+      log(macdetect::Normal, "Entering main loop.");
+      
       while(g_dmDaemon.cycle()) {
 	usleep(10);
       }
     
-      syslog(LOG_NOTICE, "Exiting gracefully.");
-      closelog();
+      log(macdetect::Normal, "Exiting gracefully.");
     }
   } else {
-    syslog(LOG_NOTICE, "User privileges don't suffice. Exiting.");
+    log(macdetect::Error, "User privileges don't suffice. Exiting.");
   }
+  
+  closelog();
   
   return nReturnvalue;
 }

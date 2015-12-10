@@ -43,6 +43,7 @@
 #include <macdetectd/Wire.h>
 #include <macdetectd/Data.h>
 #include <macdetectd/RARP.h>
+#include <macdetectd/Globals.h>
 
 
 #define NSEC_PER_SEC 1000000000L

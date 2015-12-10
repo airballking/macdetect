@@ -35,6 +35,7 @@
 
 // MAC Detect
 #include <macdetectd/SocketReader.h>
+#include <macdetectd/Globals.h>
 
 
 namespace macdetect {
@@ -44,12 +45,12 @@ namespace macdetect {
     unsigned short m_usProtocol;
     
   public:
-    Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol = ETH_P_ALL);
+    Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol = ETH_P_ALL, bool bSilent = false);
     ~Wire();
     
     static int wrapInEthernetFrame(std::string strSourceMAC, std::string strDestinationMAC, unsigned short usEtherType, void* vdPayload, unsigned int unPayloadLength, void* vdBuffer);
     
-    int createSocket(std::string strDeviceName, unsigned short usProtocol);
+    int createSocket(std::string strDeviceName, unsigned short usProtocol, bool bSilent = false);
     
     bool write(void* vdBuffer, unsigned int unLength);
     bool write(void* vdBuffer, unsigned int unLength, unsigned short usProtocol);

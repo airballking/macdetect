@@ -58,6 +58,8 @@ namespace macdetect {
     bool cycle();
     
     bool privilegesSuffice();
+    
+    bool serve(std::string strDeviceName, unsigned short usPort);
   };
 }
 

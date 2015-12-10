@@ -75,14 +75,14 @@ namespace macdetect {
 	  
 	  m_lstServings.push_back(srvServing);
 	  
-	  syslog(LOG_NOTICE, "Now serving on device '%s' (IP %s, port %d).", strDeviceName.c_str(), strIP.c_str(), usPort);
+	  log(Normal, "Now serving on device '%s' (IP %s, port %d).", strDeviceName.c_str(), strIP.c_str(), usPort);
 	  
 	  bResult = true;
 	} else {
-	  syslog(LOG_ERR, "Failed to bind socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
+	  log(Error, "Failed to bind socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
 	}
       } else {
-	syslog(LOG_ERR, "Failed to create socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
+	log(Error, "Failed to create socket for serving device %s (port %d).", strDeviceName.c_str(), usPort);
       }
     }
     
@@ -97,10 +97,10 @@ namespace macdetect {
 	if((*itServing).stStatus == Serving::Stopped) {
 	  if(::listen((*itServing).nSocketFD, 3) == 0) {
 	    (*itServing).stStatus = Serving::Started;
-	    syslog(LOG_NOTICE, "Now listen()ing on device '%s'.", (*itServing).strDeviceName.c_str());
+	    log(Normal, "Now listen()ing on device '%s'.", (*itServing).strDeviceName.c_str());
 	  } else {
 	    (*itServing).stStatus = Serving::Invalid;
-	    syslog(LOG_ERR, "Failed to listen() on device '%s'.", (*itServing).strDeviceName.c_str());
+	    log(Error, "Failed to listen() on device '%s'.", (*itServing).strDeviceName.c_str());
 	  }
 	}
 	
@@ -119,7 +119,7 @@ namespace macdetect {
 	  // Initialize connection?
 	  m_lstServed.push_back(std::make_pair(svrServed, (*itServing).nID));
 	  
-	  syslog(LOG_NOTICE, "Accepted new connection on device '%s' (port %d).", (*itServing).strDeviceName.c_str(), (*itServing).usPort);
+	  log(Normal, "Accepted new connection on device '%s' (port %d).", (*itServing).strDeviceName.c_str(), (*itServing).usPort);
 	  
 	  // Send hello packet: Temporary measure to test
 	  // client/server communication

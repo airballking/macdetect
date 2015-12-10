@@ -31,7 +31,7 @@ namespace macdetect {
   }
   
   bool Network::privilegesSuffice() {
-    Wire wrTest("", ETH_FRAME_LEN);
+    Wire wrTest("", ETH_FRAME_LEN, ETH_P_ALL, true);
     bool bSuffices = (wrTest.socket() > -1);
     
     return bSuffices;
@@ -452,7 +452,7 @@ namespace macdetect {
 	} break;
 	  
 	case 0x8035: { // RARP
-	  syslog(LOG_NOTICE, "Received RARP packet");
+	  log(Normal, "Received RARP packet");
 	} break;
 	  
 	default: {

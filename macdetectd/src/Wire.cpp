@@ -22,8 +22,8 @@
 
 
 namespace macdetect {
-  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol) : m_strDeviceName(strDeviceName), m_usProtocol(usProtocol) {
-    this->setSocket(this->createSocket(strDeviceName, usProtocol));
+  Wire::Wire(std::string strDeviceName, int nDefaultReadingLength, unsigned short usProtocol, bool bSilent) : m_strDeviceName(strDeviceName), m_usProtocol(usProtocol) {
+    this->setSocket(this->createSocket(strDeviceName, usProtocol, bSilent));
     this->setDefaultReadingLength(nDefaultReadingLength);
   }
   
@@ -53,7 +53,7 @@ namespace macdetect {
     return nBytes;
   }
   
-  int Wire::createSocket(std::string strDeviceName, unsigned short usProtocol) {
+  int Wire::createSocket(std::string strDeviceName, unsigned short usProtocol, bool bSilent) {
     int nSocket = ::socket(PF_PACKET, SOCK_RAW, htons(usProtocol));
     std::string strErrorSource = "socket";
     
@@ -117,7 +117,9 @@ namespace macdetect {
     }
     
     if(nSocket == -1) {
-      syslog(LOG_ERR, "Error while creating socket (device '%s', source '%s'): %s", strDeviceName.c_str(), strErrorSource.c_str(), strerror(errno));
+      if(!bSilent) {
+	log(Error, "Error while creating socket (device '%s', source '%s'): %s", strDeviceName.c_str(), strErrorSource.c_str(), strerror(errno));
+      }
     }
     
     return nSocket;
@@ -140,11 +142,11 @@ namespace macdetect {
       sts << std::hex;
       sts << usProtocol;
       
-      syslog(LOG_NOTICE, "Sending to non-default protocol 0x%s", sts.str().c_str());
+      log(Normal, "Sending to non-default protocol 0x%s", sts.str().c_str());
     }
     
     if((nWritten = ::write(nSocket, vdBuffer, unLength)) == -1) {
-      syslog(LOG_ERR, "Failure: %s", strerror(errno));
+      log(Error, "Failure: %s", strerror(errno));
       
       bSuccess = false;
     }

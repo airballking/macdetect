@@ -10,6 +10,7 @@ include_directories(
   include)
 
 add_executable(${PROJECT_NAME}
+  src/Globals.cpp
   src/daemon.cpp
   src/Network.cpp
   src/Device.cpp

@@ -38,6 +38,7 @@
 
 // MAC detect
 #include <macdetectd/Served.h>
+#include <macdetectd/Globals.h>
 
 
 namespace macdetect {
