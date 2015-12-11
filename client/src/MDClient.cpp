@@ -33,18 +33,16 @@ namespace macdetect_client {
     bool bReceived = false;
     
     while(!bReceived) {
-      while(m_lstReceivedValues.size() == 0) {
-	std::shared_ptr<macdetect::Value> valReceived = m_cliClient.receive();
-	
-	if(valReceived) {
-	  m_lstReceivedValues.push_back(valReceived);
-	}
+      std::shared_ptr<macdetect::Value> valReceived = m_cliClient.receive();
+      
+      if(valReceived) {
+	m_lstReceivedValues.push_back(valReceived);
       }
       
       for(std::list<std::shared_ptr<macdetect::Value>>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
 	std::shared_ptr<macdetect::Value> valValue = *itValue;
 	
-	if((strKey == "" || valValue->key() == strKey) &&
+	if((strKey == "" || valValue->key() == strKey || (strKey == "request" && valValue->key() == "response")) &&
 	   (strValue == "" || valValue->content() == strValue)) {
 	  valReturn = valValue;
 	  bReceived = true;

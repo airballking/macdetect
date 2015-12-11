@@ -27,12 +27,14 @@ ip = "127.0.0.1"
 #ip = "192.168.178.25"
 
 if cliClient.connect(ip):
-    cliClient.enableStream("eth1")
+    cliClient.enableStream("wlan0")
     
     while True:
         packet = cliClient.receive()
         
         if packet:
             print packet
+        else:
+            print "Nope"
 else:
     print "Unable to connect to '" + ip + "'"

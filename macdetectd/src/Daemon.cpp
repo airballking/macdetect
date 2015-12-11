@@ -76,7 +76,8 @@ namespace macdetect {
       for(Server::QueuedValue qvValue : lstValues) {
 	std::shared_ptr<Value> valValue = qvValue.valValue;
 	Server::Serving sviServing = m_srvServer.servingByID(qvValue.nServingID);
-	std::shared_ptr<Value> valResponse = this->response(valValue);
+	std::shared_ptr<Value> valResponseOuter = this->response(valValue);
+	std::shared_ptr<Value> valResponse = std::make_shared<Value>();
 	
 	if(valValue->key() == "request") {
 	  if(valValue->content() == "devices-list") {
@@ -146,7 +147,9 @@ namespace macdetect {
 	  }
 	}
 	
-	qvValue.svrServed->send(valResponse);
+	valResponseOuter->add(valResponse);
+	
+	qvValue.svrServed->send(valResponseOuter);
       }
       
       // Handle network events
