@@ -7,7 +7,7 @@ namespace macdetect {
   void log(MessagePriority mpPriority, const char* carrFormat, ...) {
     va_list valArgs;
     va_start(valArgs, carrFormat);
-    std::cout << g_bDaemon << std::endl;
+    
     if(g_bDaemon) {
       int nPriority;
       
