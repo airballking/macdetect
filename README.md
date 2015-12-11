@@ -45,6 +45,6 @@ principle interface for clients shouldn't change that much, though
 same).
 
 The whole code is licensed under the GPL 2.0 license. See any header
-or source files for more info. The copyright belongs to me. If you
-want to do anything with this software that is not compatible with
-GPL 2.0, message me.
+or source files or the LICENSE file for more info. The copyright
+belongs to me. If you want to do anything with this software that is
+not compatible with GPL 2.0, message me.
