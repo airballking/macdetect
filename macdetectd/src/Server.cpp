@@ -121,11 +121,9 @@ namespace macdetect {
 	  
 	  log(Normal, "Accepted new connection on device '%s' (port %d).", (*itServing).strDeviceName.c_str(), (*itServing).usPort);
 	  
-	  // Send hello packet: Temporary measure to test
-	  // client/server communication
-	  std::shared_ptr<Value> valHello = std::make_shared<Value>("hello", "there");
-	  valHello->add("what", "happened");
-	  valHello->add("to", "you");
+	  // Send hello packet
+	  std::shared_ptr<Value> valHello = std::make_shared<Value>("info", "hello");
+	  valHello->add("node", "node-0");
 	  
 	  svrServed->send(valHello);
 	}
