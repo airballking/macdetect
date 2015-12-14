@@ -105,6 +105,7 @@ static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
+
 static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
@@ -140,14 +141,12 @@ static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
 	Py_INCREF(Py_False);
 	pyoResult = Py_False;
       }
-    } else {
-      Py_INCREF(Py_None);
-      pyoResult = Py_None;
     }
   }
   
   return pyoResult;
 }
+
 
 static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
@@ -187,9 +186,6 @@ static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs) {
 	Py_INCREF(Py_None);
 	pyoResult = Py_None;
       }
-    } else {
-      Py_INCREF(Py_None);
-      pyoResult = Py_None;
     }
   } else {
     Py_INCREF(Py_None);
@@ -213,9 +209,6 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
       Py_INCREF(Py_None);
       pyoResult = Py_None;
     }
-  } else {
-    Py_INCREF(Py_None);
-    pyoResult = Py_None;
   }
   
   return pyoResult;
