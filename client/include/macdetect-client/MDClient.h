@@ -37,7 +37,7 @@ namespace macdetect_client {
     macdetect::Client m_cliClient;
     
   protected:
-    std::shared_ptr<macdetect::Value> get(std::string strKey, std::string strContent, bool bBlock = true);
+    std::shared_ptr<macdetect::Value> get(std::string strKey, std::string strContent, bool bBlock, bool& bDisconnected);
     
   public:
     MDClient();
@@ -57,7 +57,7 @@ namespace macdetect_client {
     bool enableStream(std::string strDeviceName);
     bool disableStream(std::string strDeviceName);
     
-    std::shared_ptr<macdetect::Value> receive();
+    std::shared_ptr<macdetect::Value> receive(bool& bDisconnected);
   };
 }
 

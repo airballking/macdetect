@@ -47,7 +47,11 @@ int main(int argc, char** argv) {
     }
     
     while(true) {
-      std::shared_ptr<macdetect::Value> valInfo = mdcClient.receive();
+      bool bDisconnected;
+      
+      // TODO(winkler): Honor `bDisconnected` here.
+      
+      std::shared_ptr<macdetect::Value> valInfo = mdcClient.receive(bDisconnected);
     }
     
     return EXIT_SUCCESS;

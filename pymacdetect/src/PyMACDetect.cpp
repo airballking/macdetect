@@ -21,6 +21,49 @@
 #include <pymacdetect/PyMACDetect.h>
 
 
+extern PyObject* g_pyoModule;
+
+
+static PyObject* argsInvalidException() {
+  PyObject* pyoException = PyErr_NewException((char*)"macdetect.arguments_invalid", NULL, NULL);
+  Py_INCREF(pyoException);
+  
+  PyErr_SetString(pyoException, "Arguments invalid");
+  
+  return pyoException;
+}
+
+
+static PyObject* disconnectedException() {
+  PyObject* pyoException = PyErr_NewException((char*)"macdetect.disconnected", NULL, NULL);
+  Py_INCREF(pyoException);
+  
+  PyErr_SetString(pyoException, "Client disconnected");
+  
+  return pyoException;
+}
+
+
+static PyObject* valueInvalidException() {
+  PyObject* pyoException = PyErr_NewException((char*)"macdetect.value_invalid", NULL, NULL);
+  Py_INCREF(pyoException);
+  
+  PyErr_SetString(pyoException, "Value invalid");
+  
+  return pyoException;
+}
+
+
+static PyObject* mdcInvalidException() {
+  PyObject* pyoException = PyErr_NewException((char*)"macdetect.client_invalid", NULL, NULL);
+  Py_INCREF(pyoException);
+  
+  PyErr_SetString(pyoException, "Client instance invalid");
+  
+  return pyoException;
+}
+
+
 static PyObject* valueToPyObject(std::shared_ptr<macdetect::Value> valValue) {
   PyObject* pyoResult = PyDict_New();
   PyObject* pyoContent = PyDict_New();
@@ -100,6 +143,10 @@ static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   if(nOK == 1) {
     macdetect_client::MDClient* mdcClient = new macdetect_client::MDClient();
     pyoResult = PyCObject_FromVoidPtr(mdcClient, NULL);
+  } else {
+    pyoResult = NULL;
+    g_pyoException = argsInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -115,6 +162,10 @@ static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
     
     Py_INCREF(Py_None);
     pyoResult = Py_None;
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -141,7 +192,15 @@ static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
 	Py_INCREF(Py_False);
 	pyoResult = Py_False;
       }
+    } else {
+      pyoResult = NULL;
+      g_pyoException = mdcInvalidException();
+      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     }
+  } else {
+    pyoResult = NULL;
+    g_pyoException = argsInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -153,13 +212,17 @@ static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
   
   if(mdcClient) {
-    // Disconnect here.
-    
-    Py_INCREF(Py_True);
-    pyoResult = Py_True;
+    if(mdcClient->disconnect()) {
+      Py_INCREF(Py_True);
+      pyoResult = Py_True;
+    } else {
+      Py_INCREF(Py_False);
+      pyoResult = Py_False;
+    }
   } else {
-    Py_INCREF(Py_None);
-    pyoResult = Py_None;
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -183,13 +246,17 @@ static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs) {
       if(valSend) {
 	pyoResult = valueToPyObject(mdcClient->requestResponse(valSend));
       } else {
-	Py_INCREF(Py_None);
-	pyoResult = Py_None;
+	pyoResult = valueInvalidException();
       }
+    } else {
+      pyoResult = NULL;
+      g_pyoException = mdcInvalidException();
+      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     }
   } else {
-    Py_INCREF(Py_None);
-    pyoResult = Py_None;
+    pyoResult = NULL;
+    g_pyoException = argsInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -201,14 +268,23 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
   
   if(mdcClient) {
-    std::shared_ptr<macdetect::Value> valReceived = mdcClient->receive();
+    bool bDisconnected;
+    std::shared_ptr<macdetect::Value> valReceived = mdcClient->receive(bDisconnected);
     
-    if(valReceived) {
-      pyoResult = valueToPyObject(valReceived);
+    if(bDisconnected) {
+      pyoResult = disconnectedException();
     } else {
-      Py_INCREF(Py_None);
-      pyoResult = Py_None;
+      if(valReceived) {
+	pyoResult = valueToPyObject(valReceived);
+      } else {
+	Py_INCREF(Py_None);
+	pyoResult = Py_None;
+      }
     }
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;

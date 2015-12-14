@@ -36,5 +36,6 @@ if cliClient.connect(ip):
             print packet
         else:
             print "Nope"
+            break
 else:
     print "Unable to connect to '" + ip + "'"

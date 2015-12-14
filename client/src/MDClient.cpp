@@ -28,33 +28,36 @@ namespace macdetect_client {
   MDClient::~MDClient() {
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::get(std::string strKey, std::string strValue, bool bBlock) {
+  std::shared_ptr<macdetect::Value> MDClient::get(std::string strKey, std::string strValue, bool bBlock, bool& bDisconnected) {
     std::shared_ptr<macdetect::Value> valReturn = NULL;
     bool bReceived = false;
+    bDisconnected = false;
     
-    while(!bReceived) {
-      std::shared_ptr<macdetect::Value> valReceived = m_cliClient.receive();
+    while(!bReceived && !bDisconnected) {
+      std::shared_ptr<macdetect::Value> valReceived = m_cliClient.receive(bDisconnected);
       
-      if(valReceived) {
-	m_lstReceivedValues.push_back(valReceived);
-      }
-      
-      for(std::list<std::shared_ptr<macdetect::Value>>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
-	std::shared_ptr<macdetect::Value> valValue = *itValue;
-	
-	if((strKey == "" || valValue->key() == strKey || (strKey == "request" && valValue->key() == "response")) &&
-	   (strValue == "" || valValue->content() == strValue)) {
-	  valReturn = valValue;
-	  bReceived = true;
-	  m_lstReceivedValues.erase(itValue);
-	  
-	  break;
+      if(bDisconnected == false) {
+	if(valReceived) {
+	  m_lstReceivedValues.push_back(valReceived);
 	}
-      }
       
-      if(valReturn == NULL) {
-	if(!bBlock) {
-	  break;
+	for(std::list<std::shared_ptr<macdetect::Value>>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
+	  std::shared_ptr<macdetect::Value> valValue = *itValue;
+	
+	  if((strKey == "" || valValue->key() == strKey || (strKey == "request" && valValue->key() == "response")) &&
+	     (strValue == "" || valValue->content() == strValue)) {
+	    valReturn = valValue;
+	    bReceived = true;
+	    m_lstReceivedValues.erase(itValue);
+	  
+	    break;
+	  }
+	}
+      
+	if(valReturn == NULL) {
+	  if(!bBlock) {
+	    break;
+	  }
 	}
       }
     }
@@ -79,8 +82,11 @@ namespace macdetect_client {
   
   std::shared_ptr<macdetect::Value> MDClient::requestResponse(std::shared_ptr<macdetect::Value> pktRequest, std::string strKey) {
     m_cliClient.send(pktRequest);
+    bool bDisconnected;
     
-    return this->get(strKey, pktRequest->content());
+    // TODO(winkler): Honor `bDisconnected` here.
+    
+    return this->get(strKey, pktRequest->content(), true, bDisconnected);
   }
   
   std::list<std::string> MDClient::deviceNames() {
@@ -152,7 +158,7 @@ namespace macdetect_client {
     return bSuccess;
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::receive() {
-    return this->get("", "", false);
+  std::shared_ptr<macdetect::Value> MDClient::receive(bool& bDisconnected) {
+    return this->get("", "", false, bDisconnected);
   }
 }

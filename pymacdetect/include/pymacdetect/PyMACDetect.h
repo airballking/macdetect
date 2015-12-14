@@ -33,6 +33,10 @@
 #include <macdetect-client/MDClient.h>
 
 
+static PyObject* g_pyoException;
+static PyObject* g_pyoModule;
+
+
 static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs);
 
 static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs);

@@ -44,7 +44,7 @@ namespace macdetect {
     return nResult == unLength;
   }
   
-  std::shared_ptr<Value> PacketEntity::receive() {
+  std::shared_ptr<Value> PacketEntity::receive(bool& bDisconnected) {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     
     std::shared_ptr<Value> valReceived = NULL;
@@ -55,6 +55,7 @@ namespace macdetect {
     if(nLength == -1) {
       if(errno != EAGAIN && errno != EWOULDBLOCK) {
 	m_bFailureState = true;
+	bDisconnected = true;
       }
     } else if(nLength == 0) {
       m_bFailureState = true;

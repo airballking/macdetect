@@ -149,7 +149,11 @@ namespace macdetect {
       
       for(std::pair< std::shared_ptr<Served>, int> prServed : m_lstServed) {
 	std::shared_ptr<Served> svrServed = prServed.first;
-	std::shared_ptr<Value> valReceived = svrServed->receive();
+	
+	bool bDisconnected;
+	std::shared_ptr<Value> valReceived = svrServed->receive(bDisconnected);
+	
+	// TODO(winkler): Honor `bDisconnected` here.
 	
 	if(valReceived) {
 	  this->handleValue(svrServed, prServed.second, valReceived);

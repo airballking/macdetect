@@ -44,7 +44,7 @@ namespace macdetect {
     ~PacketEntity();
     
     bool send(std::shared_ptr<Value> valSend);
-    std::shared_ptr<Value> receive();
+    std::shared_ptr<Value> receive(bool& bDisconnected);
     
     int socket();
     bool failureState();
