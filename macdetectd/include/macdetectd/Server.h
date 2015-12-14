@@ -68,10 +68,10 @@ namespace macdetect {
     int m_nSocketFDControl;
     bool m_bRun;
     std::list<Serving> m_lstServings;
-    std::list< std::pair< std::shared_ptr<Served>, int> > m_lstServed;
+    std::list<std::pair<std::shared_ptr<Served>, int>> m_lstServed;
     
     std::list<QueuedValue> m_lstValueQueue;
-    std::list< std::shared_ptr<Served> > m_lstRemoved;
+    std::list<std::shared_ptr<Served>> m_lstRemoved;
     
   protected:
   public:
@@ -91,10 +91,10 @@ namespace macdetect {
     void handleValue(std::shared_ptr<Served> svrServed, int nServingID, std::shared_ptr<Value> valReceived);
     std::list<QueuedValue> queuedValues();
     
-    std::list< std::pair< std::shared_ptr<Served>, int> > served();
+    std::list<std::pair<std::shared_ptr<Served>, int>> served();
     void distributeStreamValue(std::shared_ptr<Value> valStream);
     
-    std::list< std::shared_ptr<Served> > removed();
+    std::list<std::shared_ptr<Served>> removed();
   };
 }
 

@@ -22,7 +22,7 @@
 
 
 namespace macdetect {
-  Daemon::Daemon() {
+  Daemon::Daemon() : m_dLastKeepAlive(0.0), m_dKeepAliveInterval(1.0) {
     m_nwNetwork.setAutoManageDevices(true);
     m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
     
@@ -230,15 +230,26 @@ namespace macdetect {
 	}
 	
 	if(valSend) {
-	  std::list< std::pair< std::shared_ptr<Served>, int> > lstServed = m_srvServer.served();
-	  
-	  for(std::pair< std::shared_ptr<Served>, int> prServed : lstServed) {
+	  for(std::pair< std::shared_ptr<Served>, int> prServed : m_srvServer.served()) {
 	    std::shared_ptr<Served> svrServed = prServed.first;
 	    
 	    if(strDeviceName == "" || this->streamEnabled(svrServed, strDeviceName)) {
 	      svrServed->send(valSend);
 	    }
 	  }
+	}
+      }
+      
+      // Last but not least, send the keepalive packages if necessary
+      double dTime = m_nwNetwork.time();
+      if(dTime > m_dLastKeepAlive + m_dKeepAliveInterval) {
+	m_dLastKeepAlive = dTime;
+	std::shared_ptr<Value> valKeepAlive = std::make_shared<Value>("info", "keepalive");
+	
+	for(std::pair< std::shared_ptr<Served>, int> prServed : m_srvServer.served()) {
+	  std::shared_ptr<Served> svrServed = prServed.first;
+	  
+	  svrServed->send(valKeepAlive);
 	}
       }
       

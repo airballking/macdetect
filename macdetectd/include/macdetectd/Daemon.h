@@ -43,6 +43,9 @@ namespace macdetect {
     
     std::list<Stream> m_lstStreams;
     
+    double m_dLastKeepAlive;
+    double m_dKeepAliveInterval;
+    
   protected:
   public:
     Daemon();
