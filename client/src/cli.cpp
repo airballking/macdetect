@@ -29,35 +29,35 @@
 int main(int argc, char** argv) {
   macdetect_client::MDClient mdcClient;
   
-  if(mdcClient.connect("127.0.0.1")) {
-    std::list<std::string> lstDeviceNames = mdcClient.deviceNames();
-    for(std::string strDeviceName : lstDeviceNames) {
-      std::cout << "Enabling stream for '" << strDeviceName << "'" << std::endl;
-      if(mdcClient.enableStream(strDeviceName)) {
-	std::cout << " - OK" << std::endl;
-      } else {
-	std::cout << " - Failed" << std::endl;
-      }
-    }
+  // if(mdcClient.connect("127.0.0.1")) {
+  //   std::list<std::string> lstDeviceNames = mdcClient.deviceNames();
+  //   for(std::string strDeviceName : lstDeviceNames) {
+  //     std::cout << "Enabling stream for '" << strDeviceName << "'" << std::endl;
+  //     if(mdcClient.enableStream(strDeviceName)) {
+  // 	std::cout << " - OK" << std::endl;
+  //     } else {
+  // 	std::cout << " - Failed" << std::endl;
+  //     }
+  //   }
     
-    std::cout << std::endl << "Known MAC addresses:" << std::endl;
-    std::list<std::string> lstMACAddresses = mdcClient.knownMACAddresses();
-    for(std::string strMACAddress : lstMACAddresses) {
-      std::cout << " - " << strMACAddress << std::endl;
-    }
+  //   std::cout << std::endl << "Known MAC addresses:" << std::endl;
+  //   std::list<std::string> lstMACAddresses = mdcClient.knownMACAddresses();
+  //   for(std::string strMACAddress : lstMACAddresses) {
+  //     std::cout << " - " << strMACAddress << std::endl;
+  //   }
     
-    while(true) {
-      bool bDisconnected;
+  //   while(true) {
+  //     bool bDisconnected;
       
-      // TODO(winkler): Honor `bDisconnected` here.
+  //     // TODO(winkler): Honor `bDisconnected` here.
       
-      std::shared_ptr<macdetect::Value> valInfo = mdcClient.receive(bDisconnected);
-    }
+  //     std::shared_ptr<macdetect::Value> valInfo = mdcClient.receive(bDisconnected);
+  //   }
     
-    return EXIT_SUCCESS;
-  } else {
-    std::cerr << "Fail." << std::endl;
+  //   return EXIT_SUCCESS;
+  // } else {
+  //   std::cerr << "Fail." << std::endl;
     
-    return EXIT_FAILURE;
-  }
+  //   return EXIT_FAILURE;
+  // }
 }
