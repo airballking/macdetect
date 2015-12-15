@@ -46,7 +46,6 @@ namespace macdetect {
     
   protected:
   public:
-    Event(const Event& evtCopy);
     Event(EventType tpType);
     virtual ~Event();
     
@@ -70,7 +69,6 @@ namespace macdetect {
     
   protected:
   public:
-    DeviceEvent(const DeviceEvent& devCopy);
     DeviceEvent(EventType tpType, std::string strDeviceName);
     ~DeviceEvent();
     
