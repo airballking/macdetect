@@ -272,7 +272,9 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
     std::shared_ptr<macdetect::Value> valReceived = mdcClient->receive(bDisconnected);
     
     if(bDisconnected) {
-      pyoResult = disconnectedException();
+      pyoResult = NULL;
+      g_pyoException = disconnectedException();
+      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     } else {
       if(valReceived) {
 	pyoResult = valueToPyObject(valReceived);
@@ -292,12 +294,12 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
 
 
 PyMODINIT_FUNC initpymacdetect(void) {
-  PyObject* pyoM = Py_InitModule("pymacdetect", PyMACDetectMethods);
+  g_pyoModule = Py_InitModule("pymacdetect", PyMACDetectMethods);
   
-  if(pyoM) { // Error
+  if(g_pyoModule) { // Error
     char cError[] = "pymacdetect.error";
     pyoMACDetectError = PyErr_NewException(cError, NULL, NULL);
     Py_INCREF(pyoMACDetectError);
-    PyModule_AddObject(pyoM, "error", pyoMACDetectError);
+    PyModule_AddObject(g_pyoModule, "error", pyoMACDetectError);
   }
 }
