@@ -59,6 +59,7 @@ namespace macdetect {
       }
     } else if(nLength == 0) {
       m_bFailureState = true;
+      bDisconnected = true;
     } else {
       valReceived = std::make_shared<Value>();
       valReceived->deserialize(ucarrBuffer, nLength);
