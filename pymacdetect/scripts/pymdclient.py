@@ -18,7 +18,7 @@
 ## \author Jan Winkler
 
 
-from PyMACDetect import Client
+from pymdlib.PyMACDetect import Client
 import pymacdetect
 
 
