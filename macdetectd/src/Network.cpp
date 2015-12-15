@@ -289,6 +289,7 @@ namespace macdetect {
       if(dvMaintain->up() != bUp) {
 	std::shared_ptr<DeviceEvent> evUp = std::make_shared<DeviceEvent>(Event::DeviceStateChanged, dvMaintain->deviceName());
 	evUp->setStateChangeUp(true);
+	evUp->setUp(bUp);
 	
 	this->scheduleEvent(evUp);
       }
@@ -296,6 +297,7 @@ namespace macdetect {
       if(dvMaintain->running() != bRunning) {
 	std::shared_ptr<DeviceEvent> evRunning = std::make_shared<DeviceEvent>(Event::DeviceStateChanged, dvMaintain->deviceName());
 	evRunning->setStateChangeRunning(true);
+	evRunning->setRunning(bRunning);
 	
 	this->scheduleEvent(evRunning);
       }
