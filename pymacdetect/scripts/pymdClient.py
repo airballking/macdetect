@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 ## macdetect, a daemon and clients for detecting MAC addresses
 ## Copyright (C) 2015 Jan Winkler <jan.winkler.84@gmail.com>
 ## 
