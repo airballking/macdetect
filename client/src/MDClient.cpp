@@ -28,33 +28,18 @@ namespace macdetect_client {
   MDClient::~MDClient() {
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::get(std::string strKey, std::string strValue, bool bBlock, bool& bDisconnected) {
+  std::shared_ptr<macdetect::Value> MDClient::receive(bool& bDisconnected, bool bBlock) {
     std::shared_ptr<macdetect::Value> valReturn = NULL;
     bool bReceived = false;
     bDisconnected = false;
     
     while(!bReceived && !bDisconnected) {
-      std::shared_ptr<macdetect::Value> valReceived = m_cliClient.receive(bDisconnected);
+      valReturn = m_cliClient.receive(bDisconnected);
       
       if(bDisconnected == false) {
-	if(valReceived) {
-	  m_lstReceivedValues.push_back(valReceived);
-	}
-	
-	for(std::list<std::shared_ptr<macdetect::Value>>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
-	  std::shared_ptr<macdetect::Value> valValue = *itValue;
-	  
-	  if((strKey == "" || valValue->key() == strKey || (strKey == "request" && valValue->key() == "response")) &&
-	     (strValue == "" || valValue->content() == strValue)) {
-	    valReturn = valValue;
-	    bReceived = true;
-	    m_lstReceivedValues.erase(itValue);
-	    
-	    break;
-	  }
-	}
-	
-	if(!valReturn) {
+	if(valReturn) {
+	  bReceived = true;
+	} else {
 	  if(!bBlock) {
 	    break;
 	  }
@@ -73,92 +58,29 @@ namespace macdetect_client {
     return m_cliClient.disconnect();
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::requestResponse(std::string strRequest) {
-    std::shared_ptr<macdetect::Value> pktRequest = std::make_shared<macdetect::Value>("request", strRequest);
-    std::shared_ptr<macdetect::Value> pktResponse = this->requestResponse(pktRequest);
-    
-    return pktResponse;
+  bool MDClient::requestDeviceNames() {
+    return this->send(std::make_shared<macdetect::Value>("request", "devices-list"));
   }
   
-  std::shared_ptr<macdetect::Value> MDClient::requestResponse(std::shared_ptr<macdetect::Value> pktRequest, std::string strKey) {
-    m_cliClient.send(pktRequest);
-    bool bDisconnected;
-    
-    // TODO(winkler): Honor `bDisconnected` here.
-    
-    return this->get(strKey, pktRequest->content(), true, bDisconnected);
+  bool MDClient::requestKnownMACAddresses() {
+    return this->send(std::make_shared<macdetect::Value>("request", "known-mac-addresses"));
   }
   
-  std::list<std::string> MDClient::deviceNames() {
-    std::list<std::string> lstDeviceNames;
-    std::shared_ptr<macdetect::Value> pktDevices = this->requestResponse("devices-list");
+  bool MDClient::requestEnableStream(std::string strDeviceName) {
+    std::shared_ptr<macdetect::Value> valRequest = std::make_shared<macdetect::Value>("request", "enable-stream");
+    valRequest->add(std::make_shared<macdetect::Value>("device-name", strDeviceName));
     
-    for(std::shared_ptr<macdetect::Value> pktSub : pktDevices->subValues()) {
-      lstDeviceNames.push_back(pktSub->content());
-    }
-    
-    return lstDeviceNames;
+    return this->send(valRequest);
   }
   
-  std::list<std::shared_ptr<macdetect::Value>> MDClient::devicesList() {
-    std::list<std::shared_ptr<macdetect::Value>> lstDevices;
-    std::shared_ptr<macdetect::Value> pktResponse = this->requestResponse("devices-list");
+  bool MDClient::requestDisableStream(std::string strDeviceName) {
+    std::shared_ptr<macdetect::Value> valRequest = std::make_shared<macdetect::Value>("request", "disable-stream");
+    valRequest->add(std::make_shared<macdetect::Value>("device-name", strDeviceName));
     
-    for(std::shared_ptr<macdetect::Value> pktDevice : pktResponse->subValues()) {
-      if(pktDevice->key() == "device") {
-	lstDevices.push_back(pktDevice->copy());
-      }
-    }
-    
-    return lstDevices;
+    return this->send(valRequest);
   }
   
-  std::list<std::string> MDClient::knownMACAddresses() {
-    std::list<std::string> lstMACAddresses;
-    std::shared_ptr<macdetect::Value> pktMACAddresses = this->requestResponse("known-mac-addresses");
-    
-    for(std::shared_ptr<macdetect::Value> pktSub : pktMACAddresses->subValues()) {
-      lstMACAddresses.push_back(pktSub->content());
-    }
-    
-    return lstMACAddresses;
-  }
-  
-  bool MDClient::enableStream(std::string strDeviceName) {
-    bool bSuccess = false;
-    
-    std::shared_ptr<macdetect::Value> pktRequest = std::make_shared<macdetect::Value>("request", "enable-stream");
-    pktRequest->add(std::make_shared<macdetect::Value>("device-name", strDeviceName));
-    
-    std::shared_ptr<macdetect::Value> pktResult = this->requestResponse(pktRequest);
-    
-    if(pktResult->sub("result")) {
-      if(pktResult->sub("result")->content() == "success") {
-	bSuccess = true;
-      }
-    }
-    
-    return bSuccess;
-  }
-  
-  bool MDClient::disableStream(std::string strDeviceName) {
-    bool bSuccess = false;
-    
-    std::shared_ptr<macdetect::Value> pktRequest = std::make_shared<macdetect::Value>("request", "disable-stream");
-    pktRequest->add(std::make_shared<macdetect::Value>("device-name", strDeviceName));
-    
-    std::shared_ptr<macdetect::Value> pktResult = this->requestResponse(pktRequest);
-    
-    if(pktResult->sub("result")) {
-      if(pktResult->sub("result")->content() == "success") {
-	bSuccess = true;
-      }
-    }
-    
-    return bSuccess;
-  }
-  
-  std::shared_ptr<macdetect::Value> MDClient::receive(bool& bDisconnected) {
-    return this->get("", "", false, bDisconnected);
+  bool MDClient::send(std::shared_ptr<macdetect::Value> valSend) {
+    return m_cliClient.send(valSend);
   }
 }
