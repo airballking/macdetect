@@ -38,7 +38,7 @@ namespace macdetect {
   /*
     Device related event class
   */
-  DeviceEvent::DeviceEvent(EventType tpType, std::string strDeviceName) : m_strDeviceName(strDeviceName), m_bStateChangeUp(false), m_bStateChangeRunning(false), Event(tpType) {
+  DeviceEvent::DeviceEvent(EventType tpType, std::string strDeviceName) : m_strDeviceName(strDeviceName), m_bStateChangeUp(false), m_bStateChangeRunning(false), Event(tpType), m_strEvidenceField(""), m_strEvidenceValue(""), m_strEvidenceValueFormer("") {
   }
   
   DeviceEvent::~DeviceEvent() {
@@ -58,6 +58,22 @@ namespace macdetect {
   
   bool DeviceEvent::stateChangeRunning() {
     return m_bStateChangeRunning;
+  }
+  
+  void DeviceEvent::setUp(bool bUp) {
+    m_bUp = bUp;
+  }
+  
+  bool DeviceEvent::up() {
+    return m_bUp;
+  }
+  
+  void DeviceEvent::setRunning(bool bRunning) {
+    m_bRunning = bRunning;
+  }
+  
+  bool DeviceEvent::running() {
+    return m_bRunning;
   }
   
   std::string DeviceEvent::deviceName() {
