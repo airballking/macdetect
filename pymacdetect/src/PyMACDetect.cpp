@@ -158,7 +158,6 @@ static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   } else {
     pyoResult = NULL;
     g_pyoException = argsInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -177,7 +176,6 @@ static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   } else {
     pyoResult = NULL;
     g_pyoException = mdcInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -207,12 +205,10 @@ static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
     } else {
       pyoResult = NULL;
       g_pyoException = mdcInvalidException();
-      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     }
   } else {
     pyoResult = NULL;
     g_pyoException = argsInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -234,7 +230,6 @@ static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   } else {
     pyoResult = NULL;
     g_pyoException = mdcInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -263,12 +258,10 @@ static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs) {
     } else {
       pyoResult = NULL;
       g_pyoException = mdcInvalidException();
-      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     }
   } else {
     pyoResult = NULL;
     g_pyoException = argsInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
@@ -286,7 +279,6 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
     if(bDisconnected) {
       pyoResult = NULL;
       g_pyoException = disconnectedException();
-      PyModule_AddObject(g_pyoModule, "error", g_pyoException);
     } else {
       if(valReceived) {
 	pyoResult = valueToPyObject(valReceived);
@@ -298,7 +290,6 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
   } else {
     pyoResult = NULL;
     g_pyoException = mdcInvalidException();
-    PyModule_AddObject(g_pyoModule, "error", g_pyoException);
   }
   
   return pyoResult;
