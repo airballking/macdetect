@@ -26,11 +26,19 @@ namespace macdetect {
   }
   
   Server::~Server() {
+    for(std::pair<std::shared_ptr<Served>, int> prServed : m_lstServed) {
+      ::close(prServed.first->socket());
+    }
+    
+    m_lstServed.clear();
+    
     for(Serving srvServing : m_lstServings) {
       ::close(srvServing.nSocketFD);
     }
     
     m_lstServings.clear();
+    
+    ::close(m_nSocketFDControl);
   }
   
   bool Server::serve(std::string strDeviceName, unsigned short usPort) {
