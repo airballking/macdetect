@@ -20,6 +20,7 @@
 
 from PyMACDetect import Client
 
+
 cliClient = Client()
 
 ip = "127.0.0.1"
@@ -34,8 +35,5 @@ if cliClient.connect(ip):
         
         if packet:
             print packet
-        else:
-            print "Nope"
-            break
 else:
     print "Unable to connect to '" + ip + "'"
