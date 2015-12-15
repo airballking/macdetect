@@ -46,8 +46,9 @@ namespace macdetect {
     
   protected:
   public:
+    Event(const Event& evtCopy);
     Event(EventType tpType);
-    ~Event();
+    virtual ~Event();
     
     EventType type();
     void setEventType(EventType tpSet);
@@ -64,9 +65,12 @@ namespace macdetect {
     std::string m_strEvidenceField;
     std::string m_strEvidenceValue;
     std::string m_strEvidenceValueFormer;
+    bool m_bUp;
+    bool m_bRunning;
     
   protected:
   public:
+    DeviceEvent(const DeviceEvent& devCopy);
     DeviceEvent(EventType tpType, std::string strDeviceName);
     ~DeviceEvent();
     
@@ -85,6 +89,12 @@ namespace macdetect {
     std::string evidenceValue();
     void setEvidenceValueFormer(std::string strValue);
     std::string evidenceValueFormer();
+    
+    void setUp(bool bUp);
+    bool up();
+    
+    void setRunning(bool bRunning);
+    bool running();
   };
   
   /*
