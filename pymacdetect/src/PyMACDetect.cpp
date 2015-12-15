@@ -22,10 +22,22 @@
 
 
 extern PyObject* g_pyoModule;
+extern std::map<std::string, PyObject*> g_mapErrors;
+
+
+void addException(std::string strName) {
+  g_mapErrors[strName] = PyErr_NewException((char*)("pymacdetect." + strName).c_str(), NULL, NULL);
+  PyModule_AddObject(g_pyoModule, strName.c_str(), g_mapErrors[strName]);
+}
+
+
+PyObject* exception(std::string strName) {
+  return g_mapErrors[strName];
+}
 
 
 static PyObject* argsInvalidException() {
-  PyObject* pyoException = PyErr_NewException((char*)"macdetect.arguments_invalid", NULL, NULL);
+  PyObject* pyoException = exception("ArgumentsInvalidError");
   Py_INCREF(pyoException);
   
   PyErr_SetString(pyoException, "Arguments invalid");
@@ -35,7 +47,7 @@ static PyObject* argsInvalidException() {
 
 
 static PyObject* disconnectedException() {
-  PyObject* pyoException = PyErr_NewException((char*)"macdetect.disconnected", NULL, NULL);
+  PyObject* pyoException = exception("DisconnectedError");
   Py_INCREF(pyoException);
   
   PyErr_SetString(pyoException, "Client disconnected");
@@ -45,7 +57,7 @@ static PyObject* disconnectedException() {
 
 
 static PyObject* valueInvalidException() {
-  PyObject* pyoException = PyErr_NewException((char*)"macdetect.value_invalid", NULL, NULL);
+  PyObject* pyoException = exception("ValueInvalidError");
   Py_INCREF(pyoException);
   
   PyErr_SetString(pyoException, "Value invalid");
@@ -55,7 +67,7 @@ static PyObject* valueInvalidException() {
 
 
 static PyObject* mdcInvalidException() {
-  PyObject* pyoException = PyErr_NewException((char*)"macdetect.client_invalid", NULL, NULL);
+  PyObject* pyoException = exception("ClientInvalidError");
   Py_INCREF(pyoException);
   
   PyErr_SetString(pyoException, "Client instance invalid");
@@ -296,10 +308,10 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
 PyMODINIT_FUNC initpymacdetect(void) {
   g_pyoModule = Py_InitModule("pymacdetect", PyMACDetectMethods);
   
-  if(g_pyoModule) { // Error
-    char cError[] = "pymacdetect.error";
-    pyoMACDetectError = PyErr_NewException(cError, NULL, NULL);
-    Py_INCREF(pyoMACDetectError);
-    PyModule_AddObject(g_pyoModule, "error", pyoMACDetectError);
+  if(g_pyoModule) {
+    addException("ArgumentsInvalidError");
+    addException("DisconnectedError");
+    addException("ValueInvalidError");
+    addException("ClientInvalidError");
   }
 }

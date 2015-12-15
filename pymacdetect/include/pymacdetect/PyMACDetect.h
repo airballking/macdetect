@@ -25,6 +25,7 @@
 // System
 #include <list>
 #include <string>
+#include <map>
 
 // Python
 #include <python2.7/Python.h>
@@ -35,6 +36,7 @@
 
 static PyObject* g_pyoException;
 static PyObject* g_pyoModule;
+static std::map<std::string, PyObject*> g_mapErrors;
 
 
 static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs);
@@ -49,8 +51,6 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs);
 
 PyMODINIT_FUNC initpymacdetect(void);
-
-static PyObject* pyoMACDetectError;
 
 static PyMethodDef PyMACDetectMethods[] = {
   {"createClient", createMDClient, METH_VARARGS,

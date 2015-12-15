@@ -19,6 +19,7 @@
 
 
 from PyMACDetect import Client
+import pymacdetect
 
 
 cliClient = Client()
@@ -29,9 +30,16 @@ ip = "127.0.0.1"
 
 if cliClient.connect(ip):
     cliClient.enableStream("wlan0")
+    loop = True
     
-    while True:
-        packet = cliClient.receive()
+    while loop:
+        packet = None
+        
+        try:
+            packet = cliClient.receive()
+        except pymacdetect.DisconnectedError:
+            print "Client disconnected from server."
+            loop = False
         
         if packet:
             print packet
