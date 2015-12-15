@@ -161,15 +161,14 @@ namespace macdetect {
 	
 	switch(evEvent->type()) {
 	case Event::DeviceAdded: {
-	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::static_pointer_cast<macdetect::DeviceEvent>(evEvent);
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::dynamic_pointer_cast<macdetect::DeviceEvent>(evEvent);
 	  
 	  valSend->set("info", "device-added");
 	  valSend->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
 	} break;
 	  
 	case Event::DeviceRemoved: {
-	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::static_pointer_cast<macdetect::DeviceEvent>(evEvent);
-	  
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::dynamic_pointer_cast<macdetect::DeviceEvent>(evEvent);
 	  bool bChanged = true;
 	  while(bChanged) {
 	    bChanged = false;
@@ -193,19 +192,29 @@ namespace macdetect {
 	} break;
 	  
 	case Event::DeviceStateChanged: {
-	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::static_pointer_cast<macdetect::DeviceEvent>(evEvent);
-	  
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::dynamic_pointer_cast<macdetect::DeviceEvent>(evEvent);
 	  valSend->set("info", "device-state-changed");
+	  
+	  if(devEvent->stateChangeUp()) {
+	    valSend->add(std::make_shared<Value>("changed-state", "up"));
+	    valSend->add(std::make_shared<Value>("state", (devEvent->up() ? "true" : "false")));
+	  } else if(devEvent->stateChangeRunning()) {
+	    valSend->add(std::make_shared<Value>("changed-state", "running"));
+	    valSend->add(std::make_shared<Value>("state", (devEvent->running() ? "true" : "false")));
+	  }
 	} break;
 	  
 	case Event::DeviceEvidenceChanged: {
-	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::static_pointer_cast<macdetect::DeviceEvent>(evEvent);
+	  std::shared_ptr<macdetect::DeviceEvent> devEvent = std::dynamic_pointer_cast<macdetect::DeviceEvent>(evEvent);
 	  
 	  valSend->set("info", "device-evidence-changed");
+	  valSend->add(std::make_shared<Value>("field", devEvent->evidenceField()));
+	  valSend->add(std::make_shared<Value>("value", devEvent->evidenceValue()));
+	  valSend->add(std::make_shared<Value>("value-former", devEvent->evidenceValueFormer()));
 	} break;
 	  
 	case Event::MACAddressDiscovered: {
-	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::static_pointer_cast<macdetect::MACEvent>(evEvent);
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
 	  
 	  valSend->set("info", "mac-address-discovered");
 	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
@@ -215,7 +224,7 @@ namespace macdetect {
 	} break;
 	  
 	case Event::MACAddressDisappeared: {
-	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::static_pointer_cast<macdetect::MACEvent>(evEvent);
+	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
 	  
 	  valSend->set("info", "mac-address-disappeared");
 	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
