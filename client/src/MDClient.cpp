@@ -40,21 +40,21 @@ namespace macdetect_client {
 	if(valReceived) {
 	  m_lstReceivedValues.push_back(valReceived);
 	}
-      
+	
 	for(std::list<std::shared_ptr<macdetect::Value>>::iterator itValue = m_lstReceivedValues.begin(); itValue != m_lstReceivedValues.end(); itValue++) {
 	  std::shared_ptr<macdetect::Value> valValue = *itValue;
-	
+	  
 	  if((strKey == "" || valValue->key() == strKey || (strKey == "request" && valValue->key() == "response")) &&
 	     (strValue == "" || valValue->content() == strValue)) {
 	    valReturn = valValue;
 	    bReceived = true;
 	    m_lstReceivedValues.erase(itValue);
-	  
+	    
 	    break;
 	  }
 	}
-      
-	if(valReturn == NULL) {
+	
+	if(!valReturn) {
 	  if(!bBlock) {
 	    break;
 	  }

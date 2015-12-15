@@ -47,6 +47,7 @@ namespace macdetect {
       inet_pton(AF_INET, strIP.c_str(), &(sinAddress.sin_addr));
       
       if(::connect(m_nSocketFD, (struct sockaddr*)&sinAddress, sizeof(struct sockaddr)) == 0) {
+	fcntl(m_nSocketFD, F_SETFL, O_NONBLOCK);
 	bConnected = true;
       }
     }

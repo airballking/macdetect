@@ -28,6 +28,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // MAC detect
 #include <macdetect-utils/PacketEntity.h>
