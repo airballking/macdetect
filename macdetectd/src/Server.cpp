@@ -175,6 +175,10 @@ namespace macdetect {
       for(std::shared_ptr<Served> svrRemove : lstRemoveServed) {
 	for(std::list< std::pair< std::shared_ptr<Served>, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
 	  if((*itServed).first == svrRemove) {
+	    Serving svrServing = this->servingByID((*itServed).second);
+	      
+	    log(Normal, "Removed connection from device '%s' (port %d).", svrServing.strDeviceName.c_str(), svrServing.usPort);
+	    
 	    m_lstRemoved.push_back((*itServed).first);
 	    m_lstServed.erase(itServed);
 	    
