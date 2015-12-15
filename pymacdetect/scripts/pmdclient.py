@@ -29,6 +29,7 @@ ip = "127.0.0.1"
 #ip = "192.168.178.25"
 
 if cliClient.connect(ip):
+    print "Connected to", ip
     cliClient.enableStream("wlan0")
     loop = True
     
@@ -43,5 +44,14 @@ if cliClient.connect(ip):
         
         if packet:
             print packet
+            if "info" in packet: # Info packet
+                what = packet["info"]["content"]
+                subs = None
+                if "subs" in packet["info"]:
+                    subs = packet["info"]["subs"]
+                
+                if what == "device-added":
+                    device = subs["device-name"]["content"]
+                    cliClient.enableStream(device)
 else:
     print "Unable to connect to '" + ip + "'"

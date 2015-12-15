@@ -35,12 +35,10 @@ class Client:
         return pymacdetect.disconnectClient(self.mdcClient)
     
     def enableStream(self, strDeviceName):
-        return self.send({"request": {"content": "enable-stream",
-                                      "subs": {"device-name": {"content": strDeviceName}}}});
+        return pymacdetect.enableStream(self.mdcClient, strDeviceName)
     
     def disableStream(self, strDeviceName):
-        return self.send({"request": {"content": "disable-stream",
-                                      "subs": {"device-name": {"content": strDeviceName}}}});
+        return pymacdetect.disableStream(self.mdcClient, strDeviceName)
     
     def receive(self):
         return pymacdetect.receive(self.mdcClient)

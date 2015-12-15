@@ -181,6 +181,75 @@ static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   return pyoResult;
 }
 
+
+static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  PyObject* pyoClient = NULL;
+  char* carrDevice = NULL;
+  
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDevice);
+  
+  if(nOK == 1) {
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+    
+    if(mdcClient) {
+      std::string strDevice(carrDevice);
+      
+      if(mdcClient->requestEnableStream(strDevice)) {
+	Py_INCREF(Py_True);
+	pyoResult = Py_True;
+      } else {
+	Py_INCREF(Py_False);
+	pyoResult = Py_False;
+      }
+    } else {
+      pyoResult = NULL;
+      g_pyoException = mdcInvalidException();
+    }
+  } else {
+    pyoResult = NULL;
+    g_pyoException = argsInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
+static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  PyObject* pyoClient = NULL;
+  char* carrDevice = NULL;
+  
+  macdetect_client::MDClient* mdcClient = NULL;
+  int nOK = PyArg_ParseTuple(pyoArgs, "Os", &pyoClient, &carrDevice);
+  
+  if(nOK == 1) {
+    mdcClient = (macdetect_client::MDClient*)PyCObject_AsVoidPtr(pyoClient);
+    
+    if(mdcClient) {
+      std::string strDevice(carrDevice);
+      
+      if(mdcClient->requestDisableStream(strDevice)) {
+	Py_INCREF(Py_True);
+	pyoResult = Py_True;
+      } else {
+	Py_INCREF(Py_False);
+	pyoResult = Py_False;
+      }
+    } else {
+      pyoResult = NULL;
+      g_pyoException = mdcInvalidException();
+    }
+  } else {
+    pyoResult = NULL;
+    g_pyoException = argsInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
 static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   PyObject* pyoClient = NULL;
@@ -251,7 +320,13 @@ static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs) {
       std::shared_ptr<macdetect::Value> valSend = pyObjectToValue(pyoMessage);
       
       if(valSend) {
-	pyoResult = valueToPyObject(mdcClient->requestResponse(valSend));
+	if(mdcClient->send(valSend)) {
+	  pyoResult = Py_True;
+	  Py_INCREF(Py_True);
+	} else {
+	  pyoResult = Py_False;
+	  Py_INCREF(Py_False);
+	}
       } else {
 	pyoResult = valueInvalidException();
       }

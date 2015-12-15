@@ -44,6 +44,9 @@ static macdetect_client::MDClient* clientFromPyArgs(PyObject* pyoArgs);
 static PyObject* createMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* destroyMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 
+static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs);
+
 static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 
@@ -65,6 +68,10 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Retrieves the next newest packet received from the server."},
   {"send", send, METH_VARARGS,
    "Sends a packet to the server and requests an immediate response."},
+  {"enableStream", enableStream, METH_VARARGS,
+   "Enables the live streaming of network changes on the given network interface."},
+  {"disableStream", disableStream, METH_VARARGS,
+   "Disables the live streaming of network changes on the given network interface."},
   {NULL, NULL, 0, NULL}
 };
 
