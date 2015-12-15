@@ -118,7 +118,7 @@ namespace macdetect {
 		valResponse->set("result", "already-enabled");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
 	      } else {
-		this->enableStream(qvValue.svrServed, sviServing.strDeviceName);
+		this->enableStream(qvValue.svrServed, strDeviceName);
 		
 		valResponse->set("result", "success");
 		valResponse->add(std::make_shared<Value>("device-name", strDeviceName));
@@ -148,7 +148,6 @@ namespace macdetect {
 	}
 	
 	valResponseOuter->add(valResponse);
-	
 	qvValue.svrServed->send(valResponseOuter);
       }
       
