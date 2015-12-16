@@ -114,9 +114,7 @@ class MainWindow:
                 self.log("Connected to " + where)
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
-                sleep(0.1)
                 self.cliClient.send({"request": {"content": "devices-list"}})
-                sleep(0.1)
                 self.cliClient.send({"request": {"content": "known-mac-addresses"}})
             else:
                 self.log("Failed to connect to " + where)
