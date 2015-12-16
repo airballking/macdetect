@@ -121,7 +121,7 @@ class MainWindow:
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
                 self.cliClient.send({"request": {"content": "devices-list"}})
-                self.cliClient.send({"request": {"content": "known-mac-addresses"}})
+                self.requestKnownMACAddresses()
             else:
                 self.log("Failed to connect to " + where)
         else:
@@ -200,11 +200,36 @@ class MainWindow:
     def addDevice(self, device, devtype):
         self.lsDeviceList.append([False, device, devtype])
     
+    def deviceListToggled(self, wdgWidget, ptPath):
+        treeiter = self.lsDeviceList[ptPath]
+        state = not treeiter[0]
+        treeiter[0] = state
+        
+        device = treeiter[1]
+        
+        if state:
+            self.enableStream(device)
+            self.requestKnownMACAddresses()
+        else:
+            self.disableStream(device)
+    
+    def enableStream(self, device):
+        self.cliClient.send({"request": {"content": "enable-stream",
+                                         "subs": {"device-name": {"content": device}}}})
+    
+    def disableStream(self, device):
+        self.cliClient.send({"request": {"content": "disable-stream",
+                                         "subs": {"device-name": {"content": device}}}})
+    
+    def requestKnownMACAddresses(self):
+        self.cliClient.send({"request": {"content": "known-mac-addresses"}})
+    
     def prepareDeviceList(self):
         self.lsDeviceList = Gtk.ListStore(bool, str, str)
         self.vwDeviceList = Gtk.TreeView(self.lsDeviceList)
         
         rdActive = Gtk.CellRendererToggle()
+        rdActive.connect("toggled", self.deviceListToggled)
         colActive = Gtk.TreeViewColumn("Active", rdActive, active=0)
         
         rdType = Gtk.CellRendererText()
