@@ -78,24 +78,43 @@ namespace macdetect {
 	Server::Serving sviServing = m_srvServer.servingByID(qvValue.nServingID);
 	std::shared_ptr<Value> valResponseOuter = this->response(valValue);
 	std::shared_ptr<Value> valResponse = std::make_shared<Value>();
-	
+	valValue->print();
 	if(valValue->key() == "request") {
 	  if(valValue->content() == "devices-list") {
 	    std::list< std::shared_ptr<Device> > lstDevices = m_nwNetwork.knownDevices();
 	    
+	    valResponse->set("devices-list", "");
 	    for(std::shared_ptr<Device> dvDevice : lstDevices) {
-	      std::shared_ptr<Value> valAdd = std::make_shared<Value>("device", dvDevice->deviceName());
+	      std::shared_ptr<Value> valAdd = std::make_shared<Value>(dvDevice->deviceName(), "");
 	      valAdd->add("mac", dvDevice->mac());
 	      valAdd->add("ip", dvDevice->ip());
 	      valAdd->add("broadcast-ip", dvDevice->broadcastIP());
+	      
+	      std::string strHWType = "";
+	      switch(dvDevice->hardwareType()) {
+	      case Device::Loopback:
+		strHWType = "loopback";
+		break;
+		
+	      case Device::Wired:
+		strHWType = "wired";
+		break;
+		
+	      case Device::Wireless:
+		strHWType = "wireless";
+		break;
+	      }
+	      
+	      valAdd->add("hardware-type", strHWType);
 	      
 	      valResponse->add(valAdd);
 	    }
 	  } else if(valValue->content() == "known-mac-addresses") {
 	    std::list<Network::MACEntity> lstMACs = m_nwNetwork.knownMACs();
 	    
+	    valResponse->set("known-mac-addresses", "");
 	    for(Network::MACEntity meMAC : lstMACs) {
-	      std::shared_ptr<Value> valMAC = std::make_shared<Value>("mac", meMAC.strMAC);
+	      std::shared_ptr<Value> valMAC = std::make_shared<Value>(meMAC.strMAC, "");
 	      valMAC->add(std::make_shared<Value>("device-name", meMAC.strDeviceName));
 	      
 	      std::stringstream sts;
@@ -148,6 +167,7 @@ namespace macdetect {
 	}
 	
 	valResponseOuter->add(valResponse);
+	valResponseOuter->print();
 	qvValue.svrServed->send(valResponseOuter);
       }
       
@@ -164,6 +184,23 @@ namespace macdetect {
 	  
 	  valSend->set("info", "device-added");
 	  valSend->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
+	  
+	  std::string strHWType = "";
+	  switch(m_nwNetwork.deviceHardwareType(devEvent->deviceName())) {
+	  case Device::Loopback:
+	    strHWType = "loopback";
+	    break;
+	    
+	  case Device::Wired:
+	    strHWType = "wired";
+	    break;
+	    
+	  case Device::Wireless:
+	    strHWType = "wireless";
+	    break;
+	  }
+	  
+	  valSend->add("hardware-type", strHWType);
 	} break;
 	  
 	case Event::DeviceRemoved: {

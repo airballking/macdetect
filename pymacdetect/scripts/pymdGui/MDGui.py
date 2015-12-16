@@ -21,7 +21,7 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 from pymdLib import PyMACDetect
 import ConnectionManager
-from time import gmtime, strftime
+from time import gmtime, strftime, sleep
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -36,12 +36,15 @@ class MainWindow:
     
     def checkPyMACDetect(self):
         if self.cliClient and self.cliClient.connected():
+            packet = None
+            
             try:
                 packet = self.cliClient.receive()
             except pymacdetect.DisconnectedError:
                 return False
             
             if packet:
+                print packet
                 if "info" in packet:
                     what = packet["info"]["content"]
                     subs = None
@@ -51,9 +54,24 @@ class MainWindow:
                     
                     if what == "device-added":
                         device = subs["device-name"]["content"]
-                        devtype = "wired" # TODO: Add device type
+                        devtype = subs["hardware-type"]["content"]
                         
                         self.addDevice(device, devtype)
+                elif "response" in packet:
+                    what = packet["response"]["content"]
+                    subs = None
+                    
+                    if "subs" in packet["response"]:
+                        subs = packet["response"]["subs"]
+                    
+                    if what == "devices-list":
+                        for sub in subs["devices-list"]["subs"]:
+                            device = sub
+                            devtype = subs["devices-list"]["subs"][sub]["subs"]["hardware-type"]["content"]
+                            
+                            self.addDevice(device, devtype)
+                    elif what == "known-mac-addresses":
+                        pass
             
             return True
         else:
@@ -96,6 +114,10 @@ class MainWindow:
                 self.log("Connected to " + where)
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
+                sleep(0.1)
+                self.cliClient.send({"request": {"content": "devices-list"}})
+                sleep(0.1)
+                self.cliClient.send({"request": {"content": "known-mac-addresses"}})
             else:
                 self.log("Failed to connect to " + where)
         else:
