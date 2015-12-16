@@ -143,6 +143,7 @@ namespace macdetect {
     void setMACMaxAge(double dMaxAge);
     double macMaxAge();
     
+    std::string vendorForMAC(std::string strMAC);
     std::string readableMACIdentifier(std::string strMAC, bool bDefaultToMAC = true);
   };
 }

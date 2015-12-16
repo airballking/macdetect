@@ -559,6 +559,10 @@ namespace macdetect {
     return m_dMaxMACAge;
   }
   
+  std::string Network::vendorForMAC(std::string strMAC) {
+    return m_dtData.vendorForMAC(strMAC).strVendor;
+  }
+  
   std::string Network::readableMACIdentifier(std::string strMAC, bool bDefaultToMAC) {
     std::string strReturn = "";
     Data::Vendor vdVendor = m_dtData.vendorForMAC(strMAC);

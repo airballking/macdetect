@@ -123,7 +123,7 @@ namespace macdetect {
 	      sts.str("");
 	      sts << meMAC.dFirstSeen;
 	      valMAC->add(std::make_shared<Value>("first-seen", sts.str()));
-	      valMAC->add(std::make_shared<Value>("vendor", m_nwNetwork.readableMACIdentifier(meMAC.strMAC, false)));
+	      valMAC->add(std::make_shared<Value>("vendor", m_nwNetwork.vendorForMAC(meMAC.strMAC)));
 	      
 	      valResponse->add(valMAC);
 	    }
