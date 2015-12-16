@@ -3,12 +3,16 @@ import pymacdetect
 
 
 def setup():
-    print "Test setup"
-
+    global mdcClient
+    
+    mdcClient = pymacdetect.createClient()
 
 def teardown():
-    print "Test teardown"
+    global mdcClient
+    
+    pymacdetect.destroyClient(mdcClient)
 
-
-def test_basic():
-    print "Basic test"
+def test_client_valid():
+    global mdcClient
+    
+    return mdcClient != None
