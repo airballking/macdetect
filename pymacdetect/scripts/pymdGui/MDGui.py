@@ -21,6 +21,7 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 from pymdLib import PyMACDetect
 import ConnectionManager
+from time import gmtime, strftime
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -28,7 +29,10 @@ import ConnectionManager
 
 class MainWindow:
     def __init__(self):
+        self.cliClient = PyMACDetect.Client()
         self.prepareUI()
+        
+        self.log("Startup")
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -57,17 +61,36 @@ class MainWindow:
         self.winRef.set_titlebar(hdrTitle)
     
     def processConnectionManager(self):
-        print self.cmgrConnectionManager.what, self.cmgrConnectionManager.where
+        what = self.cmgrConnectionManager.what
+        where = self.cmgrConnectionManager.where
+        
+        if what == "connect":
+            self.log("Connecting to " + where)
+            if self.cliClient.connect(where):
+                self.log("Connected to " + where)
+            else:
+                self.log("Failed to connect to " + where)
+        else:
+            # Everything else
+            pass
+    
+    def log(self, message):
+        time = strftime("%H:%M:%S", gmtime())
+        self.lsLog.append([time, message])
     
     def clickConnectionManager(self, wdgWidget):
         self.cmgrConnectionManager.show()
         self.cmgrConnectionManager.winRef.set_modal(True)
     
+    def logChanged(self, wdgWidget, evEvent, dtData=None):
+        adjAdjustment = wdgWidget.get_vadjustment()
+        adjAdjustment.set_value(adjAdjustment.get_upper() - adjAdjustment.get_page_size())
+    
     def prepareLog(self):
         self.lsLog = Gtk.ListStore(str, str)
-        self.lsLog.append(["19:32", "Startup"]) # Test
-        
         self.vwLog = Gtk.TreeView(self.lsLog)
+        
+        self.vwLog.connect('size-allocate', self.logChanged)
         
         rdTime = Gtk.CellRendererText()
         colTime = Gtk.TreeViewColumn("Time", rdTime, text=0)
