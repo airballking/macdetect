@@ -284,6 +284,27 @@ static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
 }
 
 
+static PyObject* mdClientConnected(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    if(mdcClient->connected()) {
+      Py_INCREF(Py_True);
+      pyoResult = Py_True;
+    } else {
+      Py_INCREF(Py_False);
+      pyoResult = Py_False;
+    }
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
 static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs) {
   PyObject* pyoResult = NULL;
   macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);

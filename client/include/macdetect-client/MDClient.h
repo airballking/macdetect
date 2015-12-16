@@ -42,6 +42,7 @@ namespace macdetect_client {
     ~MDClient();
     
     bool connect(std::string strIP);
+    bool connected();
     bool disconnect();
     
     bool requestKnownMACAddresses();

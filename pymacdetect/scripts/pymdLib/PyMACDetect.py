@@ -31,6 +31,9 @@ class Client:
     def connect(self, strIP):
         return pymacdetect.connectClient(self.mdcClient, strIP)
     
+    def connected(self):
+        return pymacdetect.clientConnected(self.mdcClient)
+    
     def disconnect(self):
         return pymacdetect.disconnectClient(self.mdcClient)
     

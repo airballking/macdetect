@@ -54,6 +54,10 @@ namespace macdetect_client {
     return m_cliClient.connect(strIP);
   }
   
+  bool MDClient::connected() {
+    return m_cliClient.connected();
+  }
+  
   bool MDClient::disconnect() {
     return m_cliClient.disconnect();
   }

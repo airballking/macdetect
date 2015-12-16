@@ -48,6 +48,7 @@ static PyObject* enableStream(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* disableStream(PyObject* pyoSelf, PyObject* pyoArgs);
 
 static PyObject* connectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
+static PyObject* mdClientConnected(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 
 static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs);
@@ -62,6 +63,8 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Destroy a MAC Detect client instance."},
   {"connectClient", connectMDClient, METH_VARARGS,
    "Connects a MAC Detect client instance to a target IP."},
+  {"clientConnected", mdClientConnected, METH_VARARGS,
+   "Checks whether the given client instance is connected to a server."},
   {"disconnectClient", disconnectMDClient, METH_VARARGS,
    "Disconnects a MAC Detect client instance from its current server."},
   {"receive", receive, METH_VARARGS,
