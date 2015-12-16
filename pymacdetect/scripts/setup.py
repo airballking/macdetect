@@ -48,6 +48,5 @@ setup(name = 'PyMACDetect',
       install_requires = ['nose'],
       packages = ['pymacdetect'],
       scripts = [],
-      name = 'pymacdetect',
       long_description = 'Language bindings for using the client class functionalities of macdetect-client.',
       ext_modules = [pymacdetect_module])
