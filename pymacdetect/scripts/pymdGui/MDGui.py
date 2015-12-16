@@ -18,7 +18,7 @@
 ## \author Jan Winkler
 
 
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 from pymdLib import PyMACDetect
 import ConnectionManager
 from time import gmtime, strftime
@@ -33,6 +33,31 @@ class MainWindow:
         self.prepareUI()
         
         self.log("Startup")
+    
+    def checkPyMACDetect(self):
+        if self.cliClient and self.cliClient.connected():
+            try:
+                packet = self.cliClient.receive()
+            except pymacdetect.DisconnectedError:
+                return False
+            
+            if packet:
+                if "info" in packet:
+                    what = packet["info"]["content"]
+                    subs = None
+                    
+                    if "subs" in packet["info"]:
+                        subs = packet["info"]["subs"]
+                    
+                    if what == "device-added":
+                        device = subs["device-name"]["content"]
+                        devtype = "wired" # TODO: Add device type
+                        
+                        self.addDevice(device, devtype)
+            
+            return True
+        else:
+            return False
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -69,6 +94,8 @@ class MainWindow:
             self.log("Connecting to " + where)
             if self.cliClient.connect(where):
                 self.log("Connected to " + where)
+                
+                self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
             else:
                 self.log("Failed to connect to " + where)
         else:
@@ -144,10 +171,11 @@ class MainWindow:
         
         self.stkStack.add_titled(hbxDeviceView, "devices", "Device View")
     
+    def addDevice(self, device, devtype):
+        self.lsDeviceList.append([False, device, devtype])
+    
     def prepareDeviceList(self):
         self.lsDeviceList = Gtk.ListStore(bool, str, str)
-        self.lsDeviceList.append([False, "eth0", "wired"]) # Test
-        
         self.vwDeviceList = Gtk.TreeView(self.lsDeviceList)
         
         rdActive = Gtk.CellRendererToggle()
@@ -163,10 +191,11 @@ class MainWindow:
         self.vwDeviceList.append_column(colDeviceName)
         self.vwDeviceList.append_column(colType)
     
+    def addMAC(self, mac, vendor):
+        self.lsMACList.append([mac, vendor])
+    
     def prepareMACList(self):
         self.lsMACList = Gtk.ListStore(str, str)
-        self.lsMACList.append(["AA:BB:CC:DD:EE:FF", "Apple, Inc."]) # Test
-        
         self.vwMACList = Gtk.TreeView(self.lsMACList)
         
         rdAddress = Gtk.CellRendererText()
