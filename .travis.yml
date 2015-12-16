@@ -14,7 +14,7 @@ install:
  - gem install coveralls-lcov
  - sudo apt-get update -qq
  - sudo apt-get install -y python-coverage
- - pip install coveralls
+ - sudo pip install coveralls
 
 before_script:
  - cd ${TRAVIS_BUILD_DIR}
