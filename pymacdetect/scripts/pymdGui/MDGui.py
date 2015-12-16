@@ -39,6 +39,7 @@ class MainWindow:
         
         self.prepareWindow()
         self.prepareLog()
+        self.prepareDeviceList()
         self.prepareStack()
         self.prepareDeviceView()
         self.prepareIdentityView()
@@ -119,21 +120,26 @@ class MainWindow:
         scwLog = self.withScrolledWindow(self.vwLog)
         scwLog.set_min_content_height(100)
         
-        vbxStack.pack_start(scwLog, False, False, 0)
-        
-        self.winRef.add(vbxStack)
-    
-    def prepareDeviceView(self):
-        self.prepareDeviceList()
-        self.prepareMACList()
-        
-        hbxDeviceView = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hbxMain = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         
         scwDeviceList = self.withScrolledWindow(self.vwDeviceList)
         scwDeviceList.set_min_content_width(170)
         scwDeviceList.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         
-        hbxDeviceView.pack_start(scwDeviceList, False, True, 0)
+        hbxMain.pack_start(scwDeviceList, False, True, 0)
+        hbxMain.pack_start(vbxStack, True, True, 0)
+        
+        vbxMain = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        vbxMain.pack_start(hbxMain, True, True, 0)
+        vbxMain.pack_start(scwLog, False, False, 0)
+        
+        self.winRef.add(vbxMain)
+    
+    def prepareDeviceView(self):
+        self.prepareMACList()
+        
+        hbxDeviceView = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        
         hbxDeviceView.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
         
         self.stkStack.add_titled(hbxDeviceView, "devices", "Device View")
