@@ -1,6 +1,7 @@
 MAC Detect host detection monitor
-[![Build Status](https://travis-ci.org/fairlight1337/macdetect.svg?branch=master)](https://travis-ci.org/fairlight1337/macdetect) [![Coverage Status](https://coveralls.io/repos/fairlight1337/macdetect/badge.svg?branch=master&service=github)](https://coveralls.io/github/fairlight1337/macdetect?branch=master) [![Documentation Status](https://readthedocs.org/projects/macdetect/badge/?version=latest)](http://macdetect.readthedocs.org/en/latest/?badge=latest)
 =================================
+
+[![Build Status](https://travis-ci.org/fairlight1337/macdetect.svg?branch=master)](https://travis-ci.org/fairlight1337/macdetect) [![Coverage Status](https://coveralls.io/repos/fairlight1337/macdetect/badge.svg?branch=master&service=github)](https://coveralls.io/github/fairlight1337/macdetect?branch=master) [![Documentation Status](https://readthedocs.org/projects/macdetect/badge/?version=latest)](http://macdetect.readthedocs.org/en/latest/?badge=latest)
 
 MAC Detect is a software framework for monitoring MAC address
 residence in networks. It consists of three major components, being
