@@ -20,6 +20,7 @@
 
 from gi.repository import Gtk, Gdk, GdkPixbuf
 from pymdLib import PyMACDetect
+import ConnectionManager
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -30,6 +31,8 @@ class MainWindow:
         self.prepareUI()
     
     def prepareUI(self):
+        self.cmgrConnectionManager = ConnectionManager.ConnectionManager()
+        
         self.prepareWindow()
         self.prepareLog()
         self.prepareStack()
@@ -39,16 +42,23 @@ class MainWindow:
     def prepareWindow(self):
         self.winRef = Gtk.Window()
         self.winRef.connect("delete-event", self.triggerQuit)
-        self.winRef.set_default_size(400, 500)
+        self.winRef.set_default_size(600, 500)
         self.winRef.set_border_width(10)
+        self.winRef.set_position(Gtk.WindowPosition.CENTER)
         
         hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop")
         hdrTitle.props.show_close_button = True
         
         self.btnConnection = Gtk.Button("Servers");
+        self.btnConnection.connect("clicked", self.clickConnectionManager)
+        
         hdrTitle.add(self.btnConnection)
         
         self.winRef.set_titlebar(hdrTitle)
+    
+    def clickConnectionManager(self, wdgWidget):
+        self.cmgrConnectionManager.show()
+        self.cmgrConnectionManager.winRef.set_modal(True)
     
     def prepareLog(self):
         self.lsLog = Gtk.ListStore(str, str)
@@ -73,10 +83,17 @@ class MainWindow:
         sswSwitcher = Gtk.StackSwitcher()
         sswSwitcher.set_stack(self.stkStack)
         
+        hbxSwitcher = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        hbxSwitcher.pack_start(sswSwitcher, True, False, 0)
+        
         vbxStack = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbxStack.pack_start(sswSwitcher, False, False, 0)
+        vbxStack.pack_start(hbxSwitcher, False, True, 0)
         vbxStack.pack_start(self.stkStack, True, True, 0)
-        vbxStack.pack_start(self.withScrolledWindow(self.vwLog), False, False, 0)
+        
+        scwLog = self.withScrolledWindow(self.vwLog)
+        scwLog.set_min_content_height(100)
+        
+        vbxStack.pack_start(scwLog, False, False, 0)
         
         self.winRef.add(vbxStack)
     
