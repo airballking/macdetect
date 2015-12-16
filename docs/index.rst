@@ -12,28 +12,28 @@ devices) on any network you have access to.
 
 The principle architecture includes
 
- * A daemon (:components:`macdetectd`): This daemon runs on a network continuously
-   and monitors the MAC addresses it sees. From time to time it sends
-   out broadcast pings to ask for changes in the network, and the rest
-   of the time listens to all other traffic to see who enters, and who
-   leaves the network.
+ * A daemon (`macdetectd <macdetectd.rst>`__): This daemon runs on a
+   network continuously and monitors the MAC addresses it sees. From
+   time to time it sends out broadcast pings to ask for changes in the
+   network, and the rest of the time listens to all other traffic to
+   see who enters, and who leaves the network.
 
- * Client libraries (:components:`client`): The most basic client library included
-   in macdetect is a C++ library that can communicate to any
-   macdetectd instance over the network. You can link your programs
-   against this library, and connect to servers, request their network
-   devices, and switch on and off MAC address notifications for them
-   individually.
+ * Client libraries (`client <client.rst>`__): The most basic client
+   library included in macdetect is a C++ library that can communicate
+   to any macdetectd instance over the network. You can link your
+   programs against this library, and connect to servers, request
+   their network devices, and switch on and off MAC address
+   notifications for them individually.
 
- * Python language bindings (:components:`pymacdetect`): This is a wrapper class
-   around the C++ client libraries, using Python's foreign language
-   interface. Its usage is basically the same as for the C++
-   libraries, but using native Python classes, exceptions, and
+ * Python language bindings (`pymacdetect <pymacdetect.rst>`__): This
+   is a wrapper class around the C++ client libraries, using Python's
+   foreign language interface. Its usage is basically the same as for
+   the C++ libraries, but using native Python classes, exceptions, and
    datatypes.
 
- * Utility classes (:components:`utils`): A couple of utility classes
-   for network communication and value representation commonly used by
-   both, the daemon and the C++ client libraries.
+ * Utility classes (`utils <utils.rst>`__): A couple of utility
+   classes for network communication and value representation commonly
+   used by both, the daemon and the C++ client libraries.
 
 
 Contents:
