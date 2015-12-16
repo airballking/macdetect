@@ -16,3 +16,6 @@ add_custom_command(OUTPUT pymacdetect.so
   COMMENT "Compiling the PyMACDetect libraries")
 
 add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect.so)
+
+add_test(NAME nosetests-${PROJECT_NAME}
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests.sh)
