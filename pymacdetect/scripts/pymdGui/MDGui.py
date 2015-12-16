@@ -71,7 +71,13 @@ class MainWindow:
                             
                             self.addDevice(device, devtype)
                     elif what == "known-mac-addresses":
-                        pass
+                        for sub in subs["known-mac-addresses"]["subs"]:
+                            mac = sub
+                            properties = subs["known-mac-addresses"]["subs"][sub]["subs"]
+                            
+                            vendor = properties["vendor"]["content"]
+                            
+                            self.addMAC(mac, vendor)
             
             return True
         else:
