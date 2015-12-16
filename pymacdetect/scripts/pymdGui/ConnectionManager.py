@@ -66,7 +66,7 @@ class ConnectionManager:
     
     def prepareServerList(self):
         self.lsServerList = Gtk.ListStore(str, str, str)
-        self.lsServerList.append(["Home Server", "192.168.100.1", "manual"]) # Test
+        self.lsServerList.append(["localhost", "127.0.0.1", "manual"]) # Test
         
         self.vwServerList = Gtk.TreeView(self.lsServerList)
         
