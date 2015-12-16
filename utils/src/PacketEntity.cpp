@@ -50,7 +50,7 @@ namespace macdetect {
     std::shared_ptr<Value> valReceived = NULL;
     
     unsigned char ucarrBuffer[2048];
-    int nLength = ::recv(m_nSocketFD, ucarrBuffer, 2048, 0);
+    int nLength = ::recv(m_nSocketFD, ucarrBuffer, 2048, MSG_PEEK);
     
     if(nLength == -1) {
       if(errno != EAGAIN && errno != EWOULDBLOCK) {
@@ -62,7 +62,11 @@ namespace macdetect {
       bDisconnected = true;
     } else {
       valReceived = std::make_shared<Value>();
-      valReceived->deserialize(ucarrBuffer, nLength);
+      int nBytesUsed = valReceived->deserialize(ucarrBuffer, nLength);
+      
+      // Only pull so many formerly peeked bytes in as we actually
+      // used for the deserialization.
+      ::recv(m_nSocketFD, ucarrBuffer, nBytesUsed, 0);
     }
     
     return valReceived;
