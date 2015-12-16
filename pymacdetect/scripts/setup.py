@@ -44,7 +44,10 @@ setup(name = 'PyMACDetect',
       author = 'Jan Winkler',
       author_email = 'jan.winkler.84@gmail.com',
       url = '',
-      long_description = '''
-Language bindings for using the client class functionalities of macdetect-client.
-      ''',
+      download_url = '',
+      install_requires = ['nose'],
+      packages = ['pymacdetect'],
+      scripts = [],
+      name = 'pymacdetect',
+      long_description = 'Language bindings for using the client class functionalities of macdetect-client.',
       ext_modules = [pymacdetect_module])
