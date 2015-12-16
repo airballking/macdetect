@@ -37,10 +37,9 @@ after_success:
 # - coveralls
 
 deploy:
- provider: releases
- api_key: ${GITHUB_OAUTH_TOKEN}
- file:
-  - "bin/macdetectd"
- skip_cleanup: true
- on:
-  - tags: true
+  provider: releases
+  api_key: ${GITHUB_OAUTH_TOKEN}
+  file: "bin/macdetectd"
+  skip_cleanup: true
+  on:
+    tags: true
