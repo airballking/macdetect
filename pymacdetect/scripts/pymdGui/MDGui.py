@@ -31,7 +31,7 @@ class MainWindow:
         self.prepareUI()
     
     def prepareUI(self):
-        self.cmgrConnectionManager = ConnectionManager.ConnectionManager()
+        self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
         
         self.prepareWindow()
         self.prepareLog()
@@ -55,6 +55,9 @@ class MainWindow:
         hdrTitle.add(self.btnConnection)
         
         self.winRef.set_titlebar(hdrTitle)
+    
+    def processConnectionManager(self):
+        print self.cmgrConnectionManager.what, self.cmgrConnectionManager.where
     
     def clickConnectionManager(self, wdgWidget):
         self.cmgrConnectionManager.show()

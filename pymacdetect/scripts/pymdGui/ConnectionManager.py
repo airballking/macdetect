@@ -22,27 +22,76 @@ from gi.repository import Gtk, Gdk, GdkPixbuf
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
+        
         self.prepareUI()
     
     def prepareUI(self):
         self.prepareWindow()
+        self.prepareServerList()
+        
+        self.winRef.add(self.withScrolledWindow(self.vwServerList))
     
     def prepareWindow(self):
         self.winRef = Gtk.Window()
         self.winRef.connect("delete-event", self.triggerClose)
-        self.winRef.set_default_size(200, 100)
+        self.winRef.set_default_size(500, 400)
         self.winRef.set_border_width(10)
         self.winRef.set_position(Gtk.WindowPosition.CENTER)
         
         hdrTitle = Gtk.HeaderBar(title="Connection Manager")
         hdrTitle.props.show_close_button = True
         
+        self.btnConnect = Gtk.Button("Connect")
+        self.btnConnect.connect("clicked", self.clickConnect)
+        hdrTitle.add(self.btnConnect)
+        
         self.winRef.set_titlebar(hdrTitle)
     
-    def triggerClose(self, evEvent, dtData):
+    def clickConnect(self, wdgWidget):
+        model, selected = self.vwServerList.get_selection().get_selected()
+        
+        if selected:
+            self.what = "connect"
+            self.where = model[selected][1]
+        else:
+            self.what = "cancel"
+            self.where = None
+        
         self.winRef.hide()
         self.winRef.set_modal(False)
+        
+        self.parent.processConnectionManager()
+    
+    def prepareServerList(self):
+        self.lsServerList = Gtk.ListStore(str, str, str)
+        self.lsServerList.append(["Home Server", "192.168.100.1", "manual"]) # Test
+        
+        self.vwServerList = Gtk.TreeView(self.lsServerList)
+        
+        rdNickname = Gtk.CellRendererText()
+        colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=0)
+        
+        rdIPHostname = Gtk.CellRendererText()
+        colIPHostname = Gtk.TreeViewColumn("IP / Hostname", rdIPHostname, text=1)
+        
+        rdMode = Gtk.CellRendererText()
+        colMode = Gtk.TreeViewColumn("Mode", rdIPHostname, text=2)
+        
+        self.vwServerList.append_column(colNickname)
+        self.vwServerList.append_column(colIPHostname)
+        self.vwServerList.append_column(colMode)
+    
+    def triggerClose(self, evEvent, dtData):
+        self.what = "cancel"
+        self.where = None
+        
+        self.winRef.hide()
+        self.winRef.set_modal(False)
+        
+        self.parent.processConnectionManager()
+        
         return True
     
     def show(self):
