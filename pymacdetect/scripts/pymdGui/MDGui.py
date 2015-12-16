@@ -57,6 +57,12 @@ class MainWindow:
                         devtype = subs["hardware-type"]["content"]
                         
                         self.addDevice(device, devtype)
+                    if what == "mac-address-discovered":
+                        mac = subs["mac"]["content"]
+                        vendor = subs["vendor"]["content"]
+                        device = subs["device-name"]["content"]
+                        
+                        self.addMAC(mac, vendor, device)
                 elif "response" in packet:
                     what = packet["response"]["content"]
                     subs = None
@@ -65,19 +71,22 @@ class MainWindow:
                         subs = packet["response"]["subs"]
                     
                     if what == "devices-list":
-                        for sub in subs["devices-list"]["subs"]:
-                            device = sub
-                            devtype = subs["devices-list"]["subs"][sub]["subs"]["hardware-type"]["content"]
-                            
-                            self.addDevice(device, devtype)
+                        if "subs" in subs["devices-list"]:
+                            for sub in subs["devices-list"]["subs"]:
+                                device = sub
+                                devtype = subs["devices-list"]["subs"][sub]["subs"]["hardware-type"]["content"]
+                                
+                                self.addDevice(device, devtype)
                     elif what == "known-mac-addresses":
-                        for sub in subs["known-mac-addresses"]["subs"]:
-                            mac = sub
-                            properties = subs["known-mac-addresses"]["subs"][sub]["subs"]
-                            
-                            vendor = properties["vendor"]["content"]
-                            
-                            self.addMAC(mac, vendor)
+                        if "subs" in subs["known-mac-addresses"]:
+                            for sub in subs["known-mac-addresses"]["subs"]:
+                                mac = sub
+                                properties = subs["known-mac-addresses"]["subs"][sub]["subs"]
+                                
+                                vendor = properties["vendor"]["content"]
+                                device = properties["device-name"]["content"]
+                                
+                                self.addMAC(mac, vendor, device)
             
             return True
         else:
@@ -198,7 +207,15 @@ class MainWindow:
         self.stkStack.add_titled(hbxDeviceView, "devices", "Device View")
     
     def addDevice(self, device, devtype):
-        self.lsDeviceList.append([False, device, devtype])
+        is_present = False
+        
+        for treeiter in self.lsDeviceList:
+            if treeiter[1] == device:
+                is_present = True
+                break
+        
+        if not is_present:
+            self.lsDeviceList.append([False, device, devtype])
     
     def deviceListToggled(self, wdgWidget, ptPath):
         treeiter = self.lsDeviceList[ptPath]
@@ -242,11 +259,19 @@ class MainWindow:
         self.vwDeviceList.append_column(colDeviceName)
         self.vwDeviceList.append_column(colType)
     
-    def addMAC(self, mac, vendor):
-        self.lsMACList.append([mac, vendor])
+    def addMAC(self, mac, vendor, device):
+        is_present = False
+        
+        for treeiter in self.lsMACList:
+            if treeiter[0] == mac:
+                is_present = True
+                break
+        
+        if not is_present:
+            self.lsMACList.append([mac, vendor, device])
     
     def prepareMACList(self):
-        self.lsMACList = Gtk.ListStore(str, str)
+        self.lsMACList = Gtk.ListStore(str, str, str)
         self.vwMACList = Gtk.TreeView(self.lsMACList)
         
         rdAddress = Gtk.CellRendererText()
@@ -255,8 +280,12 @@ class MainWindow:
         rdVendor = Gtk.CellRendererText()
         colVendor = Gtk.TreeViewColumn("Vendor", rdVendor, text=1)
         
+        rdDevice = Gtk.CellRendererText()
+        colDevice = Gtk.TreeViewColumn("Device", rdDevice, text=2)
+        
         self.vwMACList.append_column(colAddress)
         self.vwMACList.append_column(colVendor)
+        self.vwMACList.append_column(colDevice)
     
     def prepareIdentityView(self):
         self.prepareIdentityFlow()

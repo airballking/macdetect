@@ -254,6 +254,7 @@ namespace macdetect {
 	  
 	  valSend->set("info", "mac-address-discovered");
 	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
+	  valSend->add(std::make_shared<Value>("vendor", m_nwNetwork.vendorForMAC(mvEvent->macAddress())));
 	  valSend->add(std::make_shared<Value>("device-name", mvEvent->deviceName()));
 	  
 	  strDeviceName = mvEvent->deviceName();
