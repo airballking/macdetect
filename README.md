@@ -1,4 +1,4 @@
-MAC Detect host detection monitor [![Build Status](https://travis-ci.org/fairlight1337/macdetect.svg?branch=master)](https://travis-ci.org/fairlight1337/macdetect) [![Coverage Status](https://coveralls.io/repos/fairlight1337/macdetect/badge.svg?branch=master&service=github)](https://coveralls.io/github/fairlight1337/macdetect?branch=master)
+MAC Detect host detection monitor [![Build Status](https://travis-ci.org/fairlight1337/macdetect.svg?branch=master)](https://travis-ci.org/fairlight1337/macdetect) [![Coverage Status](https://coveralls.io/repos/fairlight1337/macdetect/badge.svg?branch=master&service=github)](https://coveralls.io/github/fairlight1337/macdetect?branch=master) [![Documentation Status](https://readthedocs.org/projects/macdetect/badge/?version=latest)](http://macdetect.readthedocs.org/en/latest/?badge=latest)
 =================================
 
 MAC Detect is a software framework for monitoring MAC address
@@ -45,6 +45,6 @@ principle interface for clients shouldn't change that much, though
 same).
 
 The whole code is licensed under the GPL 2.0 license. See any header
-or source files or the LICENSE file for more info. The copyright
+files, source files, or the LICENSE file for more info. The copyright
 belongs to me. If you want to do anything with this software that is
 not compatible with GPL 2.0, message me.
