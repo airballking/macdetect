@@ -18,7 +18,10 @@
 ## \author Jan Winkler
 
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GdkPixbuf
+
+
+(ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
 
 
 class MainWindow:
@@ -112,14 +115,17 @@ class MainWindow:
         self.scwFlow = Gtk.ScrolledWindow()
         self.scwFlow.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         
-        # self.fbFlowBox = Gtk.FlowBox()
-        # self.fbFlowBox.set_valign(Gtk.Align.START)
-        # self.fbFlowBox.set_max_children_per_line(30)
-        # self.fbFlowBox.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.ivIdentities = Gtk.IconView()
+        self.ivIdentities.set_text_column(ID_COLUMN_TEXT)
+        self.ivIdentities.set_pixbuf_column(ID_COLUMN_PIXBUF)
         
-        # TODO(winkler): Fill flowbox with formerly saved data here.
+        self.lsIdentities = Gtk.ListStore(str, GdkPixbuf.Pixbuf)
+        self.ivIdentities.set_model(self.lsIdentities)
         
-        # self.scwFlow.add(self.fbFlowBox)
+        pixbuf = Gtk.IconTheme.get_default().load_icon("image-missing", 16, 0)
+        self.lsIdentities.append(["Item 1", pixbuf])
+        
+        self.scwFlow.add(self.ivIdentities)
     
     def triggerQuit(self, evEvent, dtData):
         Gtk.main_quit()
