@@ -20,7 +20,7 @@
 ## \author Jan Winkler
 
 
-from pymdlib.PyMACDetect import Client
+from pymdLib.PyMACDetect import Client
 import pymacdetect
 
 
