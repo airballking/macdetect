@@ -50,7 +50,7 @@ namespace macdetect {
     std::shared_ptr<Value> valReceived = NULL;
     
     unsigned char ucarrBuffer[2048];
-    int nLength = ::read(m_nSocketFD, ucarrBuffer, 2048);
+    int nLength = ::recv(m_nSocketFD, ucarrBuffer, 2048, 0);
     
     if(nLength == -1) {
       if(errno != EAGAIN && errno != EWOULDBLOCK) {
