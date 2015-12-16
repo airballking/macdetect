@@ -19,6 +19,7 @@
 
 
 from gi.repository import Gtk, Gdk, GdkPixbuf
+from pymdLib import PyMACDetect
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -30,6 +31,7 @@ class MainWindow:
     
     def prepareUI(self):
         self.prepareWindow()
+        self.prepareLog()
         self.prepareStack()
         self.prepareDeviceView()
         self.prepareIdentityView()
@@ -43,7 +45,25 @@ class MainWindow:
         hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop")
         hdrTitle.props.show_close_button = True
         
+        self.btnConnection = Gtk.Button("Servers");
+        hdrTitle.add(self.btnConnection)
+        
         self.winRef.set_titlebar(hdrTitle)
+    
+    def prepareLog(self):
+        self.lsLog = Gtk.ListStore(str, str)
+        self.lsLog.append(["19:32", "Startup"]) # Test
+        
+        self.vwLog = Gtk.TreeView(self.lsLog)
+        
+        rdTime = Gtk.CellRendererText()
+        colTime = Gtk.TreeViewColumn("Time", rdTime, text=0)
+        
+        rdDescription = Gtk.CellRendererText()
+        colDescription = Gtk.TreeViewColumn("Description", rdDescription, text=1)
+        
+        self.vwLog.append_column(colTime)
+        self.vwLog.append_column(colDescription)
     
     def prepareStack(self):
         self.stkStack = Gtk.Stack()
@@ -56,6 +76,7 @@ class MainWindow:
         vbxStack = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         vbxStack.pack_start(sswSwitcher, False, False, 0)
         vbxStack.pack_start(self.stkStack, True, True, 0)
+        vbxStack.pack_start(self.withScrolledWindow(self.vwLog), False, False, 0)
         
         self.winRef.add(vbxStack)
     
@@ -64,8 +85,13 @@ class MainWindow:
         self.prepareMACList()
         
         hbxDeviceView = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        hbxDeviceView.pack_start(self.vwDeviceList, False, True, 0)
-        hbxDeviceView.pack_start(self.vwMACList, True, True, 0)
+        
+        scwDeviceList = self.withScrolledWindow(self.vwDeviceList)
+        scwDeviceList.set_min_content_width(170)
+        scwDeviceList.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        hbxDeviceView.pack_start(scwDeviceList, False, True, 0)
+        hbxDeviceView.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
         
         self.stkStack.add_titled(hbxDeviceView, "devices", "Device View")
     
@@ -132,3 +158,9 @@ class MainWindow:
     
     def show(self):
         self.winRef.show_all()
+    
+    def withScrolledWindow(self, wdgWidget):
+        scwScrolled = Gtk.ScrolledWindow()
+        scwScrolled.add(wdgWidget)
+        
+        return scwScrolled
