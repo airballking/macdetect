@@ -52,6 +52,7 @@ class MainWindow:
         if init_db:
             self.sql_c.execute("CREATE TABLE identities (id integer, name text)")
             self.sql_c.execute("CREATE TABLE macs (mac text, identity_id integer)")
+            self.sql_c.execute("CREATE TABLE macs_data (mac text, nickname text)")
             self.sql_conn.commit()
         
         self.loadIdentities()
@@ -330,7 +331,20 @@ class MainWindow:
             else:
                 identity_str = ""
             
-            self.lsMACList.append([mac, vendor, device, identity, identity_str])
+            nickname = self.nicknameForMAC(mac)
+            
+            self.lsMACList.append([mac, vendor, device, identity, identity_str, nickname])
+            self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
+    
+    def nicknameForMAC(self, mac):
+        print mac
+        self.sql_c.execute("SELECT nickname FROM macs_data WHERE mac=?", (mac,))
+        result = self.sql_c.fetchone()
+        
+        if result != None:
+            return result[0]
+        else:
+            return ""
     
     def getNewIdentityID(self, name):
         identity_id = 0
@@ -338,13 +352,13 @@ class MainWindow:
         while self.identityIDExists(identity_id):
             identity_id = identity_id + 1
         
-        self.sql_c.execute("INSERT INTO identities VALUES (?, ?)", (str(identity_id), name))
+        self.sql_c.execute("INSERT INTO identities VALUES (?, ?)", (str(identity_id), name,))
         self.sql_conn.commit()
         
         return identity_id
     
     def identityForMAC(self, mac):
-        self.sql_c.execute("SELECT identity_id FROM macs WHERE mac=?", mac)
+        self.sql_c.execute("SELECT identity_id FROM macs WHERE mac=?", (mac,))
         result = self.sql_c.fetchone()
         
         if result != None:
@@ -353,7 +367,7 @@ class MainWindow:
             return -1
     
     def identityIDExists(self, identity_id):
-        self.sql_c.execute("SELECT * FROM identities WHERE id=?", str(identity_id))
+        self.sql_c.execute("SELECT * FROM identities WHERE id=?", (str(identity_id),))
         
         if self.sql_c.fetchone() == None:
             return False
@@ -361,7 +375,7 @@ class MainWindow:
             return True
     
     def nameForIdentity(self, identity_id):
-        self.sql_c.execute("SELECT * FROM identities WHERE id=?", str(identity_id))
+        self.sql_c.execute("SELECT * FROM identities WHERE id=?", (str(identity_id),))
         
         result = self.sql_c.fetchone()
         
@@ -377,7 +391,7 @@ class MainWindow:
                 break
     
     def prepareMACList(self):
-        self.lsMACList = Gtk.ListStore(str, str, str, int, str)
+        self.lsMACList = Gtk.ListStore(str, str, str, int, str, str)
         self.vwMACList = Gtk.TreeView(self.lsMACList)
         
         rdAddress = Gtk.CellRendererText()
@@ -392,10 +406,14 @@ class MainWindow:
         rdIdentity = Gtk.CellRendererText()
         colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
         
+        rdNickname = Gtk.CellRendererText()
+        colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=5)
+        
         self.vwMACList.append_column(colAddress)
         self.vwMACList.append_column(colVendor)
         self.vwMACList.append_column(colDevice)
         self.vwMACList.append_column(colIdentity)
+        self.vwMACList.append_column(colNickname)
     
     def addIdentityClick(self, wdgWidget):
         pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
