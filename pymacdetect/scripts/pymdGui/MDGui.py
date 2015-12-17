@@ -57,12 +57,27 @@ class MainWindow:
                         devtype = subs["hardware-type"]["content"]
                         
                         self.addDevice(device, devtype)
-                    if what == "mac-address-discovered":
+                    elif what == "device-removed":
+                        device = subs["device-name"]["content"]
+                        
+                        self.removeDevice(device)
+                    elif what == "mac-address-discovered":
                         mac = subs["mac"]["content"]
                         vendor = subs["vendor"]["content"]
                         device = subs["device-name"]["content"]
                         
                         self.addMAC(mac, vendor, device)
+                    elif what == "mac-address-disappeared":
+                        mac = subs["mac"]["content"]
+                        device = subs["device-name"]["content"]
+                        
+                        self.removeMAC(mac, device)
+                    elif what == "device-evidence-changed":
+                        # TODO(winkler): Handle this case
+                        pass
+                    elif what == "device-state-changed":
+                        # TODO(winkler): Handle this case
+                        pass
                 elif "response" in packet:
                     what = packet["response"]["content"]
                     subs = None
@@ -217,6 +232,12 @@ class MainWindow:
         if not is_present:
             self.lsDeviceList.append([False, device, devtype])
     
+    def removeDevice(self, device):
+        for treeiter in self.lsDeviceList:
+            if treeiter[1] == device:
+                self.lsDeviceList.remove(treeiter)
+                break
+    
     def deviceListToggled(self, wdgWidget, ptPath):
         treeiter = self.lsDeviceList[ptPath]
         state = not treeiter[0]
@@ -263,12 +284,18 @@ class MainWindow:
         is_present = False
         
         for treeiter in self.lsMACList:
-            if treeiter[0] == mac:
+            if treeiter[0] == mac and treeiter[2] == device:
                 is_present = True
                 break
         
         if not is_present:
             self.lsMACList.append([mac, vendor, device])
+    
+    def removeMAC(self, mac, device):
+        for treeiter in self.lsMACList:
+            if treeiter[0] == mac and treeiter[2] == device:
+                self.lsMACList.remove(treeiter)
+                break
     
     def prepareMACList(self):
         self.lsMACList = Gtk.ListStore(str, str, str)
