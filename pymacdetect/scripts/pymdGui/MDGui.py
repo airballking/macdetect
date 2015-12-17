@@ -44,7 +44,6 @@ class MainWindow:
                 return False
             
             if packet:
-                print packet
                 if "info" in packet:
                     what = packet["info"]["content"]
                     subs = None
