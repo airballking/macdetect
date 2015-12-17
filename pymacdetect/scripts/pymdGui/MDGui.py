@@ -22,6 +22,8 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 from pymdLib import PyMACDetect
 import ConnectionManager
 from time import gmtime, strftime, sleep
+import sqlite3
+import os
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -32,7 +34,35 @@ class MainWindow:
         self.cliClient = PyMACDetect.Client()
         self.prepareUI()
         
+        self.prepareEnvironment()
+        
         self.log("Startup")
+    
+    def prepareEnvironment(self):
+        datadir = os.path.expanduser("~") + "/.pymacdetect"
+        dbfile = "identities.db"
+        
+        if os.path.isdir(datadir) == False:
+            os.makedirs(datadir)
+        
+        init_db = not (os.path.exists(datadir + "/" + dbfile) and os.path.isdir(datadir + "/" + dbfile) == False)
+        self.sql_conn = sqlite3.connect(datadir + "/" + dbfile)
+        self.sql_c = self.sql_conn.cursor()
+        
+        if init_db:
+            self.sql_c.execute("CREATE TABLE identities (id integer, name text)")
+            self.sql_c.execute("CREATE TABLE macs (mac text, identity_id integer)")
+            self.sql_conn.commit()
+        
+        self.loadIdentities()
+    
+    def loadIdentities(self):
+        self.sql_c.execute("SELECT * FROM identities")
+        identities = self.sql_c.fetchall()
+        pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
+        
+        for identity in identities:
+            self.lsIdentities.append([identity[1], pixbuf, identity[0]])
     
     def checkPyMACDetect(self):
         if self.cliClient and self.cliClient.connected():
@@ -293,7 +323,52 @@ class MainWindow:
                 break
         
         if not is_present:
-            self.lsMACList.append([mac, vendor, device])
+            identity = self.identityForMAC(mac)
+            
+            if identity > -1:
+                identity_str = self.nameForIdentity(identity)
+            else:
+                identity_str = ""
+            
+            self.lsMACList.append([mac, vendor, device, identity, identity_str])
+    
+    def getNewIdentityID(self, name):
+        identity_id = 0
+        
+        while self.identityIDExists(identity_id):
+            identity_id = identity_id + 1
+        
+        self.sql_c.execute("INSERT INTO identities VALUES (?, ?)", (str(identity_id), name))
+        self.sql_conn.commit()
+        
+        return identity_id
+    
+    def identityForMAC(self, mac):
+        self.sql_c.execute("SELECT identity_id FROM macs WHERE mac=?", mac)
+        result = self.sql_c.fetchone()
+        
+        if result != None:
+            return result[0]
+        else:
+            return -1
+    
+    def identityIDExists(self, identity_id):
+        self.sql_c.execute("SELECT * FROM identities WHERE id=?", str(identity_id))
+        
+        if self.sql_c.fetchone() == None:
+            return False
+        else:
+            return True
+    
+    def nameForIdentity(self, identity_id):
+        self.sql_c.execute("SELECT * FROM identities WHERE id=?", str(identity_id))
+        
+        result = self.sql_c.fetchone()
+        
+        if result != None:
+            return result[1]
+        else:
+            return None
     
     def removeMAC(self, mac, device):
         for treeiter in self.lsMACList:
@@ -302,7 +377,7 @@ class MainWindow:
                 break
     
     def prepareMACList(self):
-        self.lsMACList = Gtk.ListStore(str, str, str)
+        self.lsMACList = Gtk.ListStore(str, str, str, int, str)
         self.vwMACList = Gtk.TreeView(self.lsMACList)
         
         rdAddress = Gtk.CellRendererText()
@@ -314,15 +389,38 @@ class MainWindow:
         rdDevice = Gtk.CellRendererText()
         colDevice = Gtk.TreeViewColumn("Device", rdDevice, text=2)
         
+        rdIdentity = Gtk.CellRendererText()
+        colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
+        
         self.vwMACList.append_column(colAddress)
         self.vwMACList.append_column(colVendor)
         self.vwMACList.append_column(colDevice)
+        self.vwMACList.append_column(colIdentity)
+    
+    def addIdentityClick(self, wdgWidget):
+        pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
+        identity_id = self.getNewIdentityID("Unnamed")
+        
+        self.lsIdentities.append([self.nameForIdentity(identity_id), pixbuf, identity_id])
     
     def prepareIdentityView(self):
         self.prepareIdentityFlow()
         
         hbxIdentities = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         hbxIdentities.pack_start(self.scwFlow, True, True, 0)
+        
+        vbxControls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        
+        self.idImage = Gtk.Image()
+        vbxControls.pack_start(self.idImage, False, True, 0)
+        self.idImage.set_size_request(100, 100)
+        
+        btnAddIdentity = Gtk.Button("Add")
+        btnAddIdentity.connect("clicked", self.addIdentityClick)
+        
+        vbxControls.pack_start(btnAddIdentity, False, True, 0)
+        
+        hbxIdentities.pack_start(vbxControls, False, True, 0)
         
         self.stkStack.add_titled(hbxIdentities, "identities", "Identity View")
     
@@ -334,11 +432,8 @@ class MainWindow:
         self.ivIdentities.set_text_column(ID_COLUMN_TEXT)
         self.ivIdentities.set_pixbuf_column(ID_COLUMN_PIXBUF)
         
-        self.lsIdentities = Gtk.ListStore(str, GdkPixbuf.Pixbuf)
+        self.lsIdentities = Gtk.ListStore(str, GdkPixbuf.Pixbuf, int)
         self.ivIdentities.set_model(self.lsIdentities)
-        
-        pixbuf = Gtk.IconTheme.get_default().load_icon("image-missing", 16, 0)
-        self.lsIdentities.append(["Item 1", pixbuf])
         
         self.scwFlow.add(self.ivIdentities)
     
