@@ -237,6 +237,11 @@ class MainWindow:
             if treeiter[1] == device:
                 self.lsDeviceList.remove(treeiter)
                 break
+        
+        # Remove all MAC addresses related to this interface
+        for treeiter in self.lsMACList:
+            if treeiter[2] == device:
+                self.lsMACList.remove(treeiter)
     
     def deviceListToggled(self, wdgWidget, ptPath):
         treeiter = self.lsDeviceList[ptPath]
