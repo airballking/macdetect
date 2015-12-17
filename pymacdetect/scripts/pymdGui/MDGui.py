@@ -335,9 +335,9 @@ class MainWindow:
             
             self.lsMACList.append([mac, vendor, device, identity, identity_str, nickname])
             self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
+            self.sql_conn.commit()
     
     def nicknameForMAC(self, mac):
-        print mac
         self.sql_c.execute("SELECT nickname FROM macs_data WHERE mac=?", (mac,))
         result = self.sql_c.fetchone()
         
@@ -390,6 +390,13 @@ class MainWindow:
                 self.lsMACList.remove(treeiter)
                 break
     
+    def nicknameEdited(self, wdgWidget, ptPath, txtText):
+        self.lsMACList[ptPath][5] = txtText
+        
+        mac = self.lsMACList[ptPath][0]
+        self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (txtText, mac,))
+        self.sql_conn.commit()
+    
     def prepareMACList(self):
         self.lsMACList = Gtk.ListStore(str, str, str, int, str, str)
         self.vwMACList = Gtk.TreeView(self.lsMACList)
@@ -407,6 +414,8 @@ class MainWindow:
         colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
         
         rdNickname = Gtk.CellRendererText()
+        rdNickname.set_property("editable", True)
+        rdNickname.connect("edited", self.nicknameEdited)
         colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=5)
         
         self.vwMACList.append_column(colAddress)
@@ -414,6 +423,40 @@ class MainWindow:
         self.vwMACList.append_column(colDevice)
         self.vwMACList.append_column(colIdentity)
         self.vwMACList.append_column(colNickname)
+        
+        # self.mnuMACs = Gtk.Menu()
+        # mniChangeNickname = Gtk.MenuItem("Change Nickname")
+        # mniChangeNickname.show()
+        
+        # mniChangeNickname.connect("activate", self.clickChangeMACNickname)
+        
+        # self.mnuMACs.append(mniChangeNickname)
+        # self.mnuMACs.show_all()
+        
+        # self.vwMACList.connect("button-press-event", self.clickMACList)
+    
+    # def clickChangeMACNickname(self, wdgWidget):
+    #     model, treeiter = self.vwMACList.get_selection().get_selected()
+    #     row = model[treeiter]
+    #     mac = row[0]
+    #     nickname = row[5]
+        
+    #     print mac, nickname
+    
+    def clickMACList(self, wdgWidget, evEvent):
+        if evEvent.type == Gdk.EventType.BUTTON_PRESS and evEvent.button == 3:
+            if len(self.lsMACList) > 0:
+                path, column, a, b = wdgWidget.get_path_at_pos(evEvent.x, evEvent.y)
+                
+                if path:
+                    wdgWidget.row_activated(path, column)
+                    wdgWidget.set_cursor(path)
+                    
+                    model, treeiter = self.vwMACList.get_selection().get_selected()
+                    if treeiter != None:
+                        self.mnuMACs.popup(None, None, None, None, evEvent.button, evEvent.time)
+                        
+                        return True
     
     def addIdentityClick(self, wdgWidget):
         pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
@@ -432,11 +475,6 @@ class MainWindow:
         self.idImage = Gtk.Image()
         vbxControls.pack_start(self.idImage, False, True, 0)
         self.idImage.set_size_request(100, 100)
-        
-        btnAddIdentity = Gtk.Button("Add")
-        btnAddIdentity.connect("clicked", self.addIdentityClick)
-        
-        vbxControls.pack_start(btnAddIdentity, False, True, 0)
         
         hbxIdentities.pack_start(vbxControls, False, True, 0)
         
