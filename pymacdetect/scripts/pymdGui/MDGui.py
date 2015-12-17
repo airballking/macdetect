@@ -157,7 +157,7 @@ class MainWindow:
         hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop")
         hdrTitle.props.show_close_button = True
         
-        self.btnConnection = Gtk.Button("Servers");
+        self.btnConnection = Gtk.Button("Connect");
         self.btnConnection.connect("clicked", self.clickConnectionManager)
         
         hdrTitle.add(self.btnConnection)
@@ -424,24 +424,39 @@ class MainWindow:
         self.vwMACList.append_column(colIdentity)
         self.vwMACList.append_column(colNickname)
         
-        # self.mnuMACs = Gtk.Menu()
-        # mniChangeNickname = Gtk.MenuItem("Change Nickname")
-        # mniChangeNickname.show()
+        self.mnuMACs = Gtk.Menu()
+        mniAssign = Gtk.MenuItem("Assign to Identity")
         
-        # mniChangeNickname.connect("activate", self.clickChangeMACNickname)
+        mniAssignMenu = Gtk.Menu()
+        mniAssign.set_submenu(mniAssignMenu)
+        mniAssignNew = Gtk.MenuItem("New Identity")
+        mniAssignMenu.append(mniAssignNew)
+        mniAssignExisting = Gtk.MenuItem("Existing Identity")
+        mniAssignMenu.append(mniAssignExisting)
         
-        # self.mnuMACs.append(mniChangeNickname)
-        # self.mnuMACs.show_all()
+        mniAssignNew.connect("activate", self.clickAssignNew)
+        mniAssignExisting.connect("activate", self.clickAssignExisting)
         
-        # self.vwMACList.connect("button-press-event", self.clickMACList)
+        self.mnuMACs.append(mniAssign)
+        self.mnuMACs.show_all()
+        
+        self.vwMACList.connect("button-press-event", self.clickMACList)
     
-    # def clickChangeMACNickname(self, wdgWidget):
-    #     model, treeiter = self.vwMACList.get_selection().get_selected()
-    #     row = model[treeiter]
-    #     mac = row[0]
-    #     nickname = row[5]
+    def clickAssignNew(self, wdgWidget):
+        model, treeiter = self.vwMACList.get_selection().get_selected()
+        row = model[treeiter]
+        mac = row[0]
         
-    #     print mac, nickname
+        # TODO(winkler): Call dialog to create a new identity th
+        # assign this MAC to.
+    
+    def clickAssignExisting(self, wdgWidget):
+        model, treeiter = self.vwMACList.get_selection().get_selected()
+        row = model[treeiter]
+        mac = row[0]
+        
+        # TODO(winkler): Call dialog to select an existing identity to
+        # assign this MAC to.
     
     def clickMACList(self, wdgWidget, evEvent):
         if evEvent.type == Gdk.EventType.BUTTON_PRESS and evEvent.button == 3:
