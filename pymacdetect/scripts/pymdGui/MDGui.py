@@ -29,10 +29,18 @@ import os
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
 
 
+class ConnectionState:
+    DISCONNECTED = 0
+    CONNECTING = 1
+    CONNECTED = 2
+
+
 class MainWindow:
     def __init__(self):
         self.cliClient = PyMACDetect.Client()
+        
         self.prepareUI()
+        self.setConnectionState(ConnectionState.DISCONNECTED)
         
         self.prepareEnvironment()
         
@@ -164,19 +172,33 @@ class MainWindow:
         
         self.winRef.set_titlebar(hdrTitle)
     
+    def setConnectionState(self, state):
+        self.connectionState = state
+        
+        if state == ConnectionState.DISCONNECTED:
+            self.btnConnection.set_label("Connect")
+        elif state == ConnectionState.CONNECTING:
+            self.btnConnection.set_label("Cancel")
+        elif state == ConnectionState.CONNECTED:
+            self.btnConnection.set_label("Disconnect")
+    
     def processConnectionManager(self):
         what = self.cmgrConnectionManager.what
         where = self.cmgrConnectionManager.where
         
         if what == "connect":
             self.log("Connecting to " + where)
+            self.setConnectionState(ConnectionState.CONNECTING)
+            
             if self.cliClient.connect(where):
+                self.setConnectionState(ConnectionState.CONNECTED)
                 self.log("Connected to " + where)
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
                 self.cliClient.send({"request": {"content": "devices-list"}})
                 self.requestKnownMACAddresses()
             else:
+                self.setConnectionState(ConnectionState.DISCONNECTED)
                 self.log("Failed to connect to " + where)
         else:
             # Everything else
@@ -187,8 +209,15 @@ class MainWindow:
         self.lsLog.append([time, message])
     
     def clickConnectionManager(self, wdgWidget):
-        self.cmgrConnectionManager.show()
-        self.cmgrConnectionManager.winRef.set_modal(True)
+        if self.connectionState == ConnectionState.DISCONNECTED:
+            self.cmgrConnectionManager.show()
+            self.cmgrConnectionManager.winRef.set_modal(True)
+        elif self.connectionState == ConnectionState.CONNECTING:
+            # Cannot cancel at the moment
+            pass
+        elif self.connectionState == ConnectionState.CONNECTED:
+            self.cliClient.disconnect()
+            self.setConnectionState(ConnectionState.DISCONNECTED)
     
     def logChanged(self, wdgWidget, evEvent, dtData=None):
         adjAdjustment = wdgWidget.get_vadjustment()
