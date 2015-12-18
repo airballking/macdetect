@@ -570,37 +570,53 @@ class MainWindow:
                          (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                           Gtk.STOCK_OK, Gtk.ResponseType.OK))
         
+        dlg.set_resizable(False)
+        
         content_box = dlg.get_content_area()
         
-        # TODO(winkler): Fix selection mode (is not selectable, should
-        # be selectable)
         listbox = Gtk.ListBox()
         scwList = Gtk.ScrolledWindow()
         scwList.add(listbox)
-        
+        scwList.set_min_content_height(200)
         content_box.add(scwList)
         
-        # TODO(winkler): Populate the listbox here.
-        for treeiter in self.lsIdentities:
+        for identity in self.lsIdentities:
             row = Gtk.ListBoxRow()
-            label = Gtk.Label(treeiter[0])
+            row.value = identity[2]
+            label = Gtk.Label(identity[0])
             label.set_justify(Gtk.Justification.LEFT)
-            row.add(label)
-            # TODO: hbox, left align, pack_start
+            
+            hbx = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            hbx.pack_start(label, True, True, 0)
+            
+            row.add(hbx)
             listbox.add(row)
         
         dlg.show_all()
         
+        listbox.connect("row-activated", self.selectedIdentityAssign)
+        
+        current_identity_id = self.identityForMAC(mac)
+        self.assignExistingIdentity = current_identity_id
+        
+        # TODO(winkler): If there is a current identity assigned,
+        # select the respective entry in the listbox.
+        
         result = dlg.run()
         
         if result == Gtk.ResponseType.OK:
-            # TODO(winkler): Process the dialog's data here.
-            pass
+            identity_id = self.assignExistingIdentity
+            identity_name = self.nameForIdentity(identity_id)
+            
+            self.assignMACToIdentity(mac, identity_id)
         elif result == Gtk.ResponseType.CANCEL:
             # Do nothing.
             pass
         
         dlg.destroy()
+    
+    def selectedIdentityAssign(self, wdgWidget, selected):
+        self.assignExistingIdentity = selected.value
     
     def clickMACList(self, wdgWidget, evEvent):
         if evEvent.type == Gdk.EventType.BUTTON_PRESS and evEvent.button == 3:
@@ -644,7 +660,74 @@ class MainWindow:
         self.lsIdentities = Gtk.ListStore(str, GdkPixbuf.Pixbuf, int)
         self.ivIdentities.set_model(self.lsIdentities)
         
+        self.mnuIdentityEdit = Gtk.Menu()
+        mniDelete = Gtk.MenuItem("Delete Identity")
+        mniDelete.connect("activate", self.deleteIdentityFromList)
+        self.mnuIdentityEdit.add(mniDelete)
+        
+        self.mnuIdentityEdit.show_all()
+        
+        self.ivIdentities.connect("button-press-event", self.clickIdentityIV)
+        
         self.scwFlow.add(self.ivIdentities)
+        
+        self.selected_identity = None
+    
+    def deleteIdentityFromList(self, wdg):
+        if self.selected_identity != None:
+            confirm = Gtk.Dialog("Delete Identity", self.winRef, Gtk.DialogFlags.MODAL,
+                                 (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                  Gtk.STOCK_OK, Gtk.ResponseType.OK))
+            
+            label = Gtk.Label("This is a dialog to display additional information")
+            
+            box = confirm.get_content_area()
+            box.add(label)
+            confirm.show_all()
+            
+            if confirm.run() == Gtk.ResponseType.OK:
+                self.deleteIdentity(self.selected_identity)
+                self.selected_identity = None
+            
+            confirm.destroy()
+    
+    def deleteIdentity(self, identity_id):
+        self.sql_c.execute("DELETE FROM identities WHERE id=?", (identity_id,))
+        self.sql_c.execute("DELETE FROM macs WHERE identity_id=?", (identity_id,))
+        self.sql_conn.commit()
+        
+        for i in range(len(self.lsIdentities)):
+            treeiter = self.lsIdentities.get_iter(Gtk.TreePath(i))
+            row = self.lsIdentities[treeiter]
+            
+            if row[2] == identity_id:
+                self.lsIdentities.remove(treeiter)
+                break
+        
+        for i in range(len(self.lsMACList)):
+            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
+            row = self.lsMACList[treeiter]
+            
+            if row[3] == identity_id:
+                row[3] = -1
+                row[4] = ""
+    
+    def clickIdentityIV(self, wdg, evt):
+        if evt.type == Gdk.EventType.BUTTON_PRESS and evt.button == 3:
+            if len(self.lsIdentities) > 0:
+                path = self.ivIdentities.get_path_at_pos(evt.x, evt.y)
+                
+                if path:
+                    self.ivIdentities.select_path(path)
+                    self.ivIdentities.set_cursor(path, None, False)
+                    
+                    sel_itms = self.ivIdentities.get_selected_items()
+                    if len(sel_itms) > 0:
+                        selected = self.lsIdentities[sel_itms[0]]
+                        identity_id = selected[2]
+                        self.selected_identity = identity_id
+                        
+                        self.mnuIdentityEdit.popup(None, None, None, None, evt.button, evt.time)
     
     def triggerQuit(self, evEvent, dtData):
         Gtk.main_quit()
