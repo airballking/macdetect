@@ -433,7 +433,10 @@ class MainWindow:
         self.lsMACList[ptPath][5] = txtText
         
         mac = self.lsMACList[ptPath][0]
-        self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (txtText, mac,))
+        self.setNicknameForMAC(mac, txtText)
+    
+    def setNicknameForMAC(self, mac, nickname):
+        self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (nickname, mac,))
         self.sql_conn.commit()
     
     def prepareMACList(self):
@@ -485,9 +488,56 @@ class MainWindow:
         model, treeiter = self.vwMACList.get_selection().get_selected()
         row = model[treeiter]
         mac = row[0]
+        nickname = self.nicknameForMAC(mac)
         
-        # TODO(winkler): Call dialog to create a new identity th
-        # assign this MAC to.
+        dlg = Gtk.Dialog("Create new Identity", self.winRef, Gtk.DialogFlags.MODAL,
+                         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                          Gtk.STOCK_OK, Gtk.ResponseType.OK))
+        
+        content_box = dlg.get_content_area()
+        
+        vbxRows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        content_box.add(vbxRows)
+        
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=30)
+        label1 = Gtk.Label("Identity Name", xalign=0)
+        entry1 = Gtk.Entry()
+        hbox.pack_start(label1, False, False, 3)
+        hbox.pack_end(entry1, True, True, 3)
+        vbxRows.pack_start(hbox, False, False, 0)
+        
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=30)
+        label2 = Gtk.Label("Device MAC", xalign=0)
+        label22 = Gtk.Label(mac)
+        hbox.pack_start(label2, False, False, 3)
+        hbox.pack_end(label22, True, True, 3)
+        vbxRows.pack_start(hbox, False, False, 0)
+        
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=30)
+        label3 = Gtk.Label("Device Nickname", xalign=0)
+        entry3 = Gtk.Entry()
+        entry3.set_text(nickname)
+        hbox.pack_start(label3, False, False, 3)
+        hbox.pack_end(entry3, True, True, 3)
+        vbxRows.pack_start(hbox, False, False, 0)
+        
+        dlg.show_all()
+        
+        result = dlg.run()
+        
+        if result == Gtk.ResponseType.OK:
+            identity_name = entry1.get_text()
+            nickname = entry3.get_text()
+            
+            self.setNicknameForMAC(mac, nickname)
+            
+            # TODO(winkler): Create the identity based on the given
+            # name here and associate the MAC address with it.
+        elif result == Gtk.ResponseType.CANCEL:
+            # Do nothing.
+            pass
+        
+        dlg.destroy()
     
     def clickAssignExisting(self, wdgWidget):
         model, treeiter = self.vwMACList.get_selection().get_selected()
