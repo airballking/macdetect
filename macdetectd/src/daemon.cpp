@@ -62,7 +62,8 @@ int main(int argc, char** argv) {
   
   int nReturnvalue = EXIT_FAILURE;
   
-  macdetect::ArgumentParser apArguments({{"d", "daemon", macdetect::ArgumentParser::Switch}});
+  macdetect::ArgumentParser apArguments({{"d", "daemon", macdetect::ArgumentParser::Switch},
+                                         {"c", "config-file", macdetect::ArgumentParser::Token}});
   apArguments.parse(argc, argv);
   
   bool bPrivilegesSuffice = g_dmDaemon.privilegesSuffice();
@@ -112,15 +113,28 @@ int main(int argc, char** argv) {
     }
   
     if(bRunnable) {
-      g_dmDaemon.serve("lo", 7090);
-      g_dmDaemon.serve("wlan0", 7090);
+      std::string strConfigFile = apArguments.value("config-file");
+      
+      bool bConfigLoaded = false;
+      if(g_dmDaemon.parseConfigFile(strConfigFile) == false) {
+	bConfigLoaded = g_dmDaemon.parseConfigFile("~/.macdetectd/macdetectd.config");
+      } else {
+	bConfigLoaded = true;
+      }
+      
+      if(!bConfigLoaded) {
+	log(macdetect::Error, "Didn't find any valid configuration files. The daemon will run unconfigured.");
+      }
+      
+      /*g_dmDaemon.serve("lo", 7090);
+	g_dmDaemon.serve("wlan0", 7090);*/
       
       log(macdetect::Normal, "Entering main loop.");
       
       while(g_dmDaemon.cycle()) {
 	usleep(10);
       }
-    
+      
       log(macdetect::Normal, "Exiting gracefully.");
     }
   } else {

@@ -36,6 +36,40 @@ namespace macdetect {
   Daemon::~Daemon() {
   }
   
+  bool Daemon::parseConfigFile(std::string strFilepath) {
+    Config cfgConfig;
+    
+    if(cfgConfig.loadFromFile(strFilepath)) {
+      std::string strListMode = cfgConfig.value("network", "list-mode", "whitelist");
+      if(strListMode == "whitelist") {
+	m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
+      } else if(strListMode == "blacklist") {
+	m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Blacklist);
+      }
+      
+      std::list<std::string> lstListEntries = cfgConfig.list("network", "allowed-devices");
+      for(std::string strEntry : lstListEntries) {
+	m_nwNetwork.addDeviceWhiteBlacklistEntry(strEntry);
+      }
+      
+      std::list<std::string> lstServes = cfgConfig.list("server", "serve");
+      for(std::string strServe : lstServes) {
+	size_t idxColon = strServe.find_first_of(":");
+	std::string strDevice = strServe.substr(0, idxColon);
+	std::string strPort = strServe.substr(idxColon + 1);
+	
+	int nPort;
+	sscanf(strPort.c_str(), "%d", &nPort);
+	
+	this->serve(strDevice, nPort);
+      }
+      
+      return true;
+    }
+    
+    return false;
+  }
+  
   std::shared_ptr<Value> Daemon::response(std::shared_ptr<Value> valValue, std::list< std::pair<std::string, std::string> > lstSubValues) {
     std::shared_ptr<Value> valResponse = NULL;
     

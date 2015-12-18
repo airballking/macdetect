@@ -28,6 +28,7 @@
 // MAC detect
 #include <macdetectd/Network.h>
 #include <macdetectd/Server.h>
+#include <macdetect-utils/Config.h>
 
 
 namespace macdetect {
@@ -50,6 +51,8 @@ namespace macdetect {
   public:
     Daemon();
     ~Daemon();
+    
+    bool parseConfigFile(std::string strFilepath);
     
     std::shared_ptr<Value> response(std::shared_ptr<Value> valValue, std::list< std::pair<std::string, std::string> > lstSubValues = {});
     

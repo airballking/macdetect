@@ -121,8 +121,14 @@ namespace macdetect {
     return false;
   }
   
-  std::string Config::value(std::string strSection, std::string strTerm) {
-    return m_mapSections[strSection][strTerm];
+  std::string Config::value(std::string strSection, std::string strTerm, std::string strDefault) {
+    if(m_mapSections.find(strSection) != m_mapSections.end()) {
+      if(m_mapSections[strSection].find(strTerm) != m_mapSections[strSection].end()) {
+	return m_mapSections[strSection][strTerm];
+      }
+    }
+    
+    return strDefault;
   }
   
   std::list<std::string> Config::list(std::string strSection, std::string strTerm) {
