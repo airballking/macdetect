@@ -302,14 +302,20 @@ class MainWindow:
             self.lsDeviceList.append([False, device, devtype])
     
     def removeDevice(self, device):
-        for treeiter in self.lsDeviceList:
-            if treeiter[1] == device:
+        for i in range(len(self.lsDeviceList)):
+            treeiter = self.lsDeviceList.get_iter(Gtk.TreePath(i))
+            row = self.lsDeviceList[treeiter]
+            
+            if row[1] == device:
                 self.lsDeviceList.remove(treeiter)
                 break
         
         # Remove all MAC addresses related to this interface
-        for treeiter in self.lsMACList:
-            if treeiter[2] == device:
+        for i in range(len(self.lsMACList)):
+            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
+            row = self.lsMACList[treeiter]
+            
+            if row[2] == device:
                 self.lsMACList.remove(treeiter)
     
     def deviceListToggled(self, wdgWidget, ptPath):
@@ -569,17 +575,19 @@ class MainWindow:
         # TODO(winkler): Fix selection mode (is not selectable, should
         # be selectable)
         listbox = Gtk.ListBox()
-        content_box.add(listbox)
+        scwList = Gtk.ScrolledWindow()
+        scwList.add(listbox)
+        
+        content_box.add(scwList)
         
         # TODO(winkler): Populate the listbox here.
         for treeiter in self.lsIdentities:
             row = Gtk.ListBoxRow()
             label = Gtk.Label(treeiter[0])
+            label.set_justify(Gtk.Justification.LEFT)
             row.add(label)
-            # TODO(winkler): Fix: Alignment of labels (is center,
-            # should be left)
-            
-            content_box.add(row)
+            # TODO: hbox, left align, pack_start
+            listbox.add(row)
         
         dlg.show_all()
         
