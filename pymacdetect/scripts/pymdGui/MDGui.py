@@ -171,12 +171,28 @@ class MainWindow:
         hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop")
         hdrTitle.props.show_close_button = True
         
-        self.btnConnection = Gtk.Button("Connect");
+        self.btnConnection = Gtk.Button("Connect")
         self.btnConnection.connect("clicked", self.clickConnectionManager)
         
+        self.btnAbout = Gtk.Button("About")
+        self.btnAbout.connect("clicked", self.clickAbout)
+        
         hdrTitle.add(self.btnConnection)
+        hdrTitle.pack_end(self.btnAbout)
         
         self.winRef.set_titlebar(hdrTitle)
+    
+    def clickAbout(self, wdg):
+        about = Gtk.MessageDialog(self.winRef, 0, Gtk.MessageType.INFO,
+                                  Gtk.ButtonsType.OK, "About PyMACDetect Desktop Client")
+        about.format_secondary_text('''
+PyMACDetect is developed by Jan Winkler <jan.winkler.84@gmail.com>.
+Copyright 2015. Licensed under GPL 2.0.
+
+For more details, see the LICENSE file in the base macdetect folder.''')
+        
+        about.run()
+        about.destroy()
     
     def setConnectionState(self, state):
         self.connectionState = state
