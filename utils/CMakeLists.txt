@@ -25,4 +25,4 @@ add_test(NAME argumentparser
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-argumentparser)
 
 add_test(NAME config
-  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-config)
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-config ${CMAKE_SOURCE_DIR}/macdetectd/config/sample.config)
