@@ -126,9 +126,6 @@ int main(int argc, char** argv) {
 	log(macdetect::Error, "Didn't find any valid configuration files. The daemon will run unconfigured.");
       }
       
-      /*g_dmDaemon.serve("lo", 7090);
-	g_dmDaemon.serve("wlan0", 7090);*/
-      
       log(macdetect::Normal, "Entering main loop.");
       
       while(g_dmDaemon.cycle()) {

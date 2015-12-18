@@ -25,12 +25,6 @@ namespace macdetect {
   Daemon::Daemon() : m_dLastKeepAlive(0.0), m_dKeepAliveInterval(1.0) {
     m_nwNetwork.setAutoManageDevices(true);
     m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
-    
-    // TODO: This is too narrow; re-specify
-    m_nwNetwork.addDeviceWhiteBlacklistEntry("(wlan)(.*)");
-    m_nwNetwork.addDeviceWhiteBlacklistEntry("(wifi)(.*)");
-    m_nwNetwork.addDeviceWhiteBlacklistEntry("(eth)(.*)");
-    m_nwNetwork.addDeviceWhiteBlacklistEntry("(en)(.*)");
   }
   
   Daemon::~Daemon() {
@@ -38,6 +32,9 @@ namespace macdetect {
   
   bool Daemon::parseConfigFile(std::string strFilepath) {
     Config cfgConfig;
+    
+    // TODO(winkler): Honor the other options set in the config file
+    // as well. Also, add option for auto-managing devices.
     
     if(cfgConfig.loadFromFile(strFilepath)) {
       std::string strListMode = cfgConfig.value("network", "list-mode", "whitelist");
