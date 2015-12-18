@@ -394,7 +394,21 @@ class MainWindow:
         self.sql_c.execute("INSERT INTO identities VALUES (?, ?)", (str(identity_id), name,))
         self.sql_conn.commit()
         
+        pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
+        self.lsIdentities.append([self.nameForIdentity(identity_id), pixbuf, identity_id])
+        
         return identity_id
+    
+    def assignMACToIdentity(self, mac, identity_id):
+        self.sql_c.execute("DELETE FROM macs WHERE mac=?", (mac,))
+        
+        self.sql_c.execute("INSERT INTO macs VALUES (?, ?)", (mac, identity_id,))
+        self.sql_conn.commit()
+        
+        for treeiter in self.lsMACList:
+            if treeiter[0] == mac:
+                treeiter[3] = identity_id
+                treeiter[4] = self.nameForIdentity(identity_id)
     
     def identityForMAC(self, mac):
         self.sql_c.execute("SELECT identity_id FROM macs WHERE mac=?", (mac,))
@@ -531,8 +545,8 @@ class MainWindow:
             
             self.setNicknameForMAC(mac, nickname)
             
-            # TODO(winkler): Create the identity based on the given
-            # name here and associate the MAC address with it.
+            identity_id = self.getNewIdentityID(identity_name)
+            self.assignMACToIdentity(mac, identity_id)
         elif result == Gtk.ResponseType.CANCEL:
             # Do nothing.
             pass
@@ -561,12 +575,6 @@ class MainWindow:
                         self.mnuMACs.popup(None, None, None, None, evEvent.button, evEvent.time)
                         
                         return True
-    
-    def addIdentityClick(self, wdgWidget):
-        pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
-        identity_id = self.getNewIdentityID("Unnamed")
-        
-        self.lsIdentities.append([self.nameForIdentity(identity_id), pixbuf, identity_id])
     
     def prepareIdentityView(self):
         self.prepareIdentityFlow()
