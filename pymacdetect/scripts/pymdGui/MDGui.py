@@ -20,6 +20,7 @@
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 from pymdLib import PyMACDetect
+import pymacdetect
 import ConnectionManager
 from time import gmtime, strftime, sleep
 import sqlite3
@@ -80,6 +81,11 @@ class MainWindow:
             try:
                 packet = self.cliClient.receive()
             except pymacdetect.DisconnectedError:
+                self.lsMACList.clear()
+                self.lsDeviceList.clear()
+                self.log("Connection closed by server.")
+                self.setConnectionState(ConnectionState.Disconnected)
+                
                 return False
             
             if packet:
@@ -187,19 +193,19 @@ class MainWindow:
         where = self.cmgrConnectionManager.where
         
         if what == "connect":
-            self.log("Connecting to " + where)
+            self.log("Connecting to " + where + "...")
             self.setConnectionState(ConnectionState.CONNECTING)
             
             if self.cliClient.connect(where):
                 self.setConnectionState(ConnectionState.CONNECTED)
-                self.log("Connected to " + where)
+                self.log("Connected to " + where + ".")
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
                 self.cliClient.send({"request": {"content": "devices-list"}})
                 self.requestKnownMACAddresses()
             else:
                 self.setConnectionState(ConnectionState.DISCONNECTED)
-                self.log("Failed to connect to " + where)
+                self.log("Failed to connect to " + where + ".")
         else:
             # Everything else
             pass
@@ -218,6 +224,10 @@ class MainWindow:
         elif self.connectionState == ConnectionState.CONNECTED:
             self.cliClient.disconnect()
             self.setConnectionState(ConnectionState.DISCONNECTED)
+            self.log("Connection closed.")
+            
+            self.lsMACList.clear()
+            self.lsDeviceList.clear()
     
     def logChanged(self, wdgWidget, evEvent, dtData=None):
         adjAdjustment = wdgWidget.get_vadjustment()
