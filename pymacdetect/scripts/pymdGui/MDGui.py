@@ -661,9 +661,12 @@ class MainWindow:
         self.ivIdentities.set_model(self.lsIdentities)
         
         self.mnuIdentityEdit = Gtk.Menu()
-        mniDelete = Gtk.MenuItem("Delete Identity")
+        mniDelete = Gtk.MenuItem("Delete")
         mniDelete.connect("activate", self.deleteIdentityFromList)
         self.mnuIdentityEdit.add(mniDelete)
+        mniRename = Gtk.MenuItem("Rename")
+        mniRename.connect("activate", self.renameIdentityInList)
+        self.mnuIdentityEdit.add(mniRename)
         
         self.mnuIdentityEdit.show_all()
         
@@ -673,13 +676,17 @@ class MainWindow:
         
         self.selected_identity = None
     
+    def renameIdentityInList(self, wdg):
+        pass
+    
     def deleteIdentityFromList(self, wdg):
         if self.selected_identity != None:
             confirm = Gtk.Dialog("Delete Identity", self.winRef, Gtk.DialogFlags.MODAL,
                                  (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                   Gtk.STOCK_OK, Gtk.ResponseType.OK))
             
-            label = Gtk.Label("This is a dialog to display additional information")
+            name = self.nameForIdentity(self.selected_identity)
+            label = Gtk.Label("Delete Identity '%s'?" % name)
             
             box = confirm.get_content_area()
             box.add(label)
