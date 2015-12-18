@@ -661,12 +661,12 @@ class MainWindow:
         self.ivIdentities.set_model(self.lsIdentities)
         
         self.mnuIdentityEdit = Gtk.Menu()
-        mniDelete = Gtk.MenuItem("Delete")
-        mniDelete.connect("activate", self.deleteIdentityFromList)
-        self.mnuIdentityEdit.add(mniDelete)
         mniRename = Gtk.MenuItem("Rename")
         mniRename.connect("activate", self.renameIdentityInList)
         self.mnuIdentityEdit.add(mniRename)
+        mniDelete = Gtk.MenuItem("Delete")
+        mniDelete.connect("activate", self.deleteIdentityFromList)
+        self.mnuIdentityEdit.add(mniDelete)
         
         self.mnuIdentityEdit.show_all()
         
@@ -677,7 +677,38 @@ class MainWindow:
         self.selected_identity = None
     
     def renameIdentityInList(self, wdg):
-        pass
+        for i in range(len(self.lsIdentities)):
+            treeiter = self.lsIdentities.get_iter(Gtk.TreePath(i))
+            row = self.lsIdentities[treeiter]
+            
+            if row[2] == self.selected_identity:
+                rename = Gtk.Dialog("Rename Identity", self.winRef, Gtk.DialogFlags.MODAL,
+                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_OK, Gtk.ResponseType.OK))
+                
+                name = self.nameForIdentity(self.selected_identity)
+                entry = Gtk.Entry()
+                entry.set_text(name)
+                
+                box = rename.get_content_area()
+                box.add(entry)
+                rename.show_all()
+                
+                if rename.run() == Gtk.ResponseType.OK:
+                    new_name = entry.get_text()
+                    row[0] = new_name
+                    
+                    for i in range(len(self.lsMACList)):
+                        treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
+                        row = self.lsMACList[treeiter]
+                        
+                        if row[3] == self.selected_identity:
+                            row[4] = new_name
+                    
+                    self.sql_c.execute("UPDATE identities SET name=? WHERE id=?", (new_name, self.selected_identity,))
+                    self.sql_conn.commit()
+                
+                rename.destroy()
     
     def deleteIdentityFromList(self, wdg):
         if self.selected_identity != None:
