@@ -39,36 +39,54 @@ namespace macdetect {
     this->add(std::make_shared<Value>(strKey, strContent));
   }
   
-  unsigned int Value::serialize(void* vdBuffer, unsigned int unLength) {
-    unsigned int unOffset = 0;
+  int Value::serialize(void* vdBuffer, unsigned int unLength) {
+    int nOffset = 0;
     unsigned char* ucData = (unsigned char*)vdBuffer;
     
     unsigned int unStringLength;
     
     // Add key
     unStringLength = m_strKey.length();
-    memcpy(&(ucData[unOffset]), &unStringLength, sizeof(unsigned int));
-    unOffset += sizeof(unsigned int);
-    memcpy(&(ucData[unOffset]), m_strKey.c_str(), unStringLength);
-    unOffset += unStringLength;
-    
-    // Add value
-    unStringLength = m_strContent.length();
-    memcpy(&(ucData[unOffset]), &unStringLength, sizeof(unsigned int));
-    unOffset += sizeof(unsigned int);
-    memcpy(&(ucData[unOffset]), m_strContent.c_str(), unStringLength);
-    unOffset += unStringLength;
-    
-    // Add subpackets
-    unsigned int unSubValueCount = m_lstSubValues.size();
-    memcpy(&(ucData[unOffset]), &unSubValueCount, sizeof(unsigned int));
-    unOffset += sizeof(unsigned int);
-    
-    for(std::shared_ptr<Value> valSerialize : m_lstSubValues) {
-      unOffset += valSerialize->serialize(&(ucData[unOffset]), unLength - unOffset);
+    if(nOffset + unStringLength + sizeof(unsigned int) > unLength) {
+      return -1;
+    } else {
+      memcpy(&(ucData[nOffset]), &unStringLength, sizeof(unsigned int));
+      nOffset += sizeof(unsigned int);
+      memcpy(&(ucData[nOffset]), m_strKey.c_str(), unStringLength);
+      nOffset += unStringLength;
+      
+      // Add value
+      unStringLength = m_strContent.length();
+      if(nOffset + unStringLength + sizeof(unsigned int) > unLength) {
+	return -1;
+      } else {
+	memcpy(&(ucData[nOffset]), &unStringLength, sizeof(unsigned int));
+	nOffset += sizeof(unsigned int);
+	memcpy(&(ucData[nOffset]), m_strContent.c_str(), unStringLength);
+	nOffset += unStringLength;
+	
+	// Add subpackets
+	if(nOffset + sizeof(unsigned int) > unLength) {
+	  return -1;
+	} else {
+	  unsigned int unSubValueCount = m_lstSubValues.size();
+	  memcpy(&(ucData[nOffset]), &unSubValueCount, sizeof(unsigned int));
+	  nOffset += sizeof(unsigned int);
+	  
+	  for(std::shared_ptr<Value> valSerialize : m_lstSubValues) {
+	    unsigned int nBytes = valSerialize->serialize(&(ucData[nOffset]), unLength - nOffset);
+	    
+	    if(nBytes == -1) {
+	      return -1;
+	    } else {
+	      nOffset += nBytes;
+	    }
+	  }
+	  
+	  return nOffset;
+	}
+      }
     }
-    
-    return unOffset;
   }
   
   unsigned int Value::deserialize(void* vdBuffer, unsigned int unLength) {

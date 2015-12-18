@@ -36,12 +36,40 @@ namespace macdetect {
   bool PacketEntity::send(std::shared_ptr<Value> valSend) {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     
-    unsigned char ucarrBuffer[2048];
-    unsigned int unLength = valSend->serialize(ucarrBuffer, 2048);
+    bool bResult = false;
+    int nBufferSize = 0;
+    int nSerializedLength = -1;
+    unsigned char* ucarrBuffer = NULL;
     
-    int nResult = ::write(m_nSocketFD, ucarrBuffer, unLength);
+    do {
+      nBufferSize += 2048;
+      
+      if(ucarrBuffer) {
+	delete[] ucarrBuffer;
+      }
+      
+      ucarrBuffer = new unsigned char(nBufferSize);
+      
+      nSerializedLength = valSend->serialize(ucarrBuffer, nBufferSize);
+    } while(nSerializedLength == -1);
     
-    return nResult == unLength;
+    int nSentBytes = 0;
+    while(nSentBytes < nSerializedLength) {
+      int nResult = ::write(m_nSocketFD, &ucarrBuffer[nSentBytes], nSerializedLength - nSentBytes);
+      
+      if(nResult > 0) {
+	nSentBytes += nResult;
+      } else {
+	bResult = false;
+	break;
+      }
+    }
+    
+    if(ucarrBuffer) {
+      delete[] ucarrBuffer;
+    }
+    
+    return bResult;
   }
   
   std::shared_ptr<Value> PacketEntity::receive(bool& bDisconnected) {
