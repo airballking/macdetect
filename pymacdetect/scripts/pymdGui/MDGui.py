@@ -174,13 +174,36 @@ class MainWindow:
         self.btnConnection = Gtk.Button("Connect")
         self.btnConnection.connect("clicked", self.clickConnectionManager)
         
-        self.btnAbout = Gtk.Button("About")
+        self.btnSettings = Gtk.Button()
+        self.btnSettings.connect("clicked", self.clickSettings)
+        img = Gtk.Image()
+        img.set_from_pixbuf(Gtk.IconTheme.get_default().load_icon("preferences-system", 16, 0))
+        self.btnSettings.set_image(img)
+        self.btnSettings.show_all()
+        
+        self.btnAbout = Gtk.Button()
         self.btnAbout.connect("clicked", self.clickAbout)
+        img = Gtk.Image()
+        img.set_from_pixbuf(Gtk.IconTheme.get_default().load_icon("help-about", 16, 0))
+        self.btnAbout.set_image(img)
+        self.btnAbout.show_all()
         
         hdrTitle.add(self.btnConnection)
+        #hdrTitle.pack_end(self.btnSettings)
         hdrTitle.pack_end(self.btnAbout)
         
         self.winRef.set_titlebar(hdrTitle)
+    
+    def clickSettings(self, wdg):
+        prefs = Gtk.Dialog("Settings", self.winRef, Gtk.DialogFlags.MODAL,
+                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                            Gtk.STOCK_OK, Gtk.ResponseType.OK))
+        
+        # TODO: Populate settings dialog here.
+        
+        if prefs.run() == Gtk.ResponseType.OK:
+            # TODO: Process settings here.
+            pass
     
     def clickAbout(self, wdg):
         about = Gtk.MessageDialog(self.winRef, 0, Gtk.MessageType.INFO,
@@ -315,7 +338,14 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 break
         
         if not is_present:
-            self.lsDeviceList.append([False, device, devtype])
+            pixbuf = None
+            
+            if devtype == "wired":
+                pixbuf = Gtk.IconTheme.get_default().load_icon("network-wired", 16, 0)
+            elif devtype == "wireless":
+                pixbuf = Gtk.IconTheme.get_default().load_icon("network-wireless", 16, 0)
+            
+            self.lsDeviceList.append([False, device, pixbuf])
     
     def removeDevice(self, device):
         for i in range(len(self.lsDeviceList)):
@@ -359,18 +389,18 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.cliClient.send({"request": {"content": "known-mac-addresses"}})
     
     def prepareDeviceList(self):
-        self.lsDeviceList = Gtk.ListStore(bool, str, str)
+        self.lsDeviceList = Gtk.ListStore(bool, str, GdkPixbuf.Pixbuf)
         self.vwDeviceList = Gtk.TreeView(self.lsDeviceList)
         
         rdActive = Gtk.CellRendererToggle()
         rdActive.connect("toggled", self.deviceListToggled)
         colActive = Gtk.TreeViewColumn("Active", rdActive, active=0)
         
-        rdType = Gtk.CellRendererText()
-        colType = Gtk.TreeViewColumn("Type", rdType, text=2)
-        
         rdText = Gtk.CellRendererText()
         colDeviceName = Gtk.TreeViewColumn("Device", rdText, text=1)
+        
+        rdType = Gtk.CellRendererPixbuf()
+        colType = Gtk.TreeViewColumn("Type", rdType, pixbuf=2)
         
         self.vwDeviceList.append_column(colActive)
         self.vwDeviceList.append_column(colDeviceName)
@@ -460,9 +490,12 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             return None
     
     def removeMAC(self, mac, device):
-        for treeiter in self.lsMACList:
-            if treeiter[0] == mac and treeiter[2] == device:
-                self.lsMACList.remove(treeiter)
+        for i in range(len(self.lsDeviceList)):
+            treeiter = self.lsDeviceList.get_iter(Gtk.TreePath(i))
+            row = self.lsDeviceList[treeiter]
+            
+            if row[0] == mac and row[2] == device:
+                self.lstMACs.remove(treeiter)
                 break
     
     def nicknameEdited(self, wdgWidget, ptPath, txtText):
