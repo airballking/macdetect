@@ -558,8 +558,41 @@ class MainWindow:
         row = model[treeiter]
         mac = row[0]
         
-        # TODO(winkler): Call dialog to select an existing identity to
-        # assign this MAC to.
+        nickname = self.nicknameForMAC(mac)
+        
+        dlg = Gtk.Dialog("Assign to existing Identity", self.winRef, Gtk.DialogFlags.MODAL,
+                         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                          Gtk.STOCK_OK, Gtk.ResponseType.OK))
+        
+        content_box = dlg.get_content_area()
+        
+        # TODO(winkler): Fix selection mode (is not selectable, should
+        # be selectable)
+        listbox = Gtk.ListBox()
+        content_box.add(listbox)
+        
+        # TODO(winkler): Populate the listbox here.
+        for treeiter in self.lsIdentities:
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(treeiter[0])
+            row.add(label)
+            # TODO(winkler): Fix: Alignment of labels (is center,
+            # should be left)
+            
+            content_box.add(row)
+        
+        dlg.show_all()
+        
+        result = dlg.run()
+        
+        if result == Gtk.ResponseType.OK:
+            # TODO(winkler): Process the dialog's data here.
+            pass
+        elif result == Gtk.ResponseType.CANCEL:
+            # Do nothing.
+            pass
+        
+        dlg.destroy()
     
     def clickMACList(self, wdgWidget, evEvent):
         if evEvent.type == Gdk.EventType.BUTTON_PRESS and evEvent.button == 3:
