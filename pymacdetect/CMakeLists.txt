@@ -19,3 +19,8 @@ add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect.so)
 
 add_test(NAME nosetests-${PROJECT_NAME}
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests.sh)
+
+# Just call the default python installer. That handles installing
+# everything appropriately.
+message(STATUS ${PROJECT_SOURCE_DIR})
+install(CODE "execute_process(COMMAND python ${PROJECT_SOURCE_DIR}/scripts/setup.py install -f --prefix=${CMAKE_INSTALL_PREFIX} ${PROJECT_SOURCE_DIR})")

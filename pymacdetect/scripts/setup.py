@@ -18,10 +18,9 @@
 ## \author Jan Winkler
 
 
+import sys
 from distutils.core import setup, Extension
 
-
-import sys
 local_cmake_dir = sys.argv[len(sys.argv) - 1]
 sys.argv = sys.argv[:-1]
 
@@ -29,12 +28,12 @@ pymacdetect_module = Extension('pymacdetect',
                                define_macros = [('MAJOR_VERSION', '0'),
                                                 ('MINOR_VERSION', '1')],
                                include_dirs = ['/usr/local/include',
-                                               '../../pymacdetect/include',
-                                               '../../client/include',
-                                               '../../utils/include'],
+                                               local_cmake_dir + '/include',
+                                               local_cmake_dir + '/../client/include',
+                                               local_cmake_dir + '/../utils/include'],
                                libraries = ['macdetect-client', 'macdetect-utils', 'gcov'],
                                library_dirs = ['/usr/local/lib',
-                                               '../../lib'],
+                                               local_cmake_dir + '/../lib'],
                                sources = [local_cmake_dir + '/src/PyMACDetect.cpp'],
                                extra_compile_args=['-std=c++11', '--coverage'])
 
@@ -46,8 +45,8 @@ setup(name = 'PyMACDetect',
       url = '',
       download_url = '',
       install_requires = ['nose'],
-      packages = ['pymdGui', 'pymdLib'],
-      package_dir = {'': local_cmake_dir + '/scripts'},
+      packages = ['pymacdetect'],
+      package_dir = {'': local_cmake_dir + '/lib'},
       scripts = [],
       long_description = 'Language bindings for using the client class functionalities of macdetect-client.',
       ext_modules = [pymacdetect_module])
