@@ -22,5 +22,4 @@ add_test(NAME nosetests-${PROJECT_NAME}
 
 # Just call the default python installer. That handles installing
 # everything appropriately.
-message(STATUS ${PROJECT_SOURCE_DIR})
 install(CODE "execute_process(COMMAND python ${PROJECT_SOURCE_DIR}/scripts/setup.py install -f --prefix=${CMAKE_INSTALL_PREFIX} ${PROJECT_SOURCE_DIR})")
