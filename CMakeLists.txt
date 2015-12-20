@@ -37,5 +37,7 @@ set(CPACK_PACKAGE_EXECUTABLES "macdetectd")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jan Winkler <jan.winkler.84@gmail.com>")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-release")
-
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "python2.7")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/pymacdetect/postinst;${CMAKE_SOURCE_DIR}/pymacdetect/prerm;")
+set(CPACK_SET_DESTDIR "ON")
 include(CPack)
