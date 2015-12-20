@@ -18,4 +18,4 @@ add_custom_command(OUTPUT pymacdetect_ext.so
 add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect_ext.so)
 
 add_test(NAME nosetests-${PROJECT_NAME}
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests.sh)
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/tests.sh)
