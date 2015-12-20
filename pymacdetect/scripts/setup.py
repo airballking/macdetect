@@ -24,7 +24,7 @@ from distutils.core import setup, Extension
 local_cmake_dir = sys.argv[len(sys.argv) - 1]
 sys.argv = sys.argv[:-1]
 
-pymacdetect_module = Extension('pymacdetect',
+pymacdetect_module = Extension('pymacdetect_ext',
                                define_macros = [('MAJOR_VERSION', '0'),
                                                 ('MINOR_VERSION', '1')],
                                include_dirs = ['/usr/local/include',
@@ -45,8 +45,8 @@ setup(name = 'PyMACDetect',
       url = '',
       download_url = '',
       install_requires = ['nose'],
-      packages = ['pymacdetect'],
-      package_dir = {'': local_cmake_dir + '/lib'},
+      packages = ['pymdLib', 'pymdGui'],
+      package_dir = {'': local_cmake_dir + '/lib/pymd'},
       scripts = [],
       long_description = 'Language bindings for using the client class functionalities of macdetect-client.',
       ext_modules = [pymacdetect_module])

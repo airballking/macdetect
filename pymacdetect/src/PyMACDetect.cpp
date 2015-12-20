@@ -26,7 +26,7 @@ extern std::map<std::string, PyObject*> g_mapErrors;
 
 
 void addException(std::string strName) {
-  g_mapErrors[strName] = PyErr_NewException((char*)("pymacdetect." + strName).c_str(), NULL, NULL);
+  g_mapErrors[strName] = PyErr_NewException((char*)("pymacdetect_ext." + strName).c_str(), NULL, NULL);
   PyModule_AddObject(g_pyoModule, strName.c_str(), g_mapErrors[strName]);
 }
 
@@ -392,8 +392,8 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
 }
 
 
-PyMODINIT_FUNC initpymacdetect(void) {
-  g_pyoModule = Py_InitModule("pymacdetect", PyMACDetectMethods);
+PyMODINIT_FUNC initpymacdetect_ext(void) {
+  g_pyoModule = Py_InitModule("pymacdetect_ext", PyMACDetectMethods);
   
   if(g_pyoModule) {
     addException("ArgumentsInvalidError");
