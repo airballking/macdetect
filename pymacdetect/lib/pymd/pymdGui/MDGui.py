@@ -507,6 +507,14 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     def setNicknameForMAC(self, mac, nickname):
         self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (nickname, mac,))
         self.sql_conn.commit()
+        identity_mac = self.identityForMAC(mac)
+        
+        for i in range(len(self.lsMACList)):
+            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
+            row = self.lsMACList[treeiter]
+            
+            if row[3] == identity_mac:
+                row[5] = nickname
     
     def prepareMACList(self):
         self.lsMACList = Gtk.ListStore(str, str, str, int, str, str)
@@ -627,13 +635,31 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         scwList = Gtk.ScrolledWindow()
         scwList.add(listbox)
         scwList.set_min_content_height(200)
-        content_box.add(scwList)
+        
+        vboxContent = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        vboxContent.pack_start(scwList, True, True, 0)
+        content_box.add(vboxContent)
+        
+        select_row = None
+        id_mac = self.identityForMAC(mac)
+        self.assignExistingIdentity = id_mac
         
         for identity in self.lsIdentities:
             row = Gtk.ListBoxRow()
             row.value = identity[2]
-            label = Gtk.Label(identity[0])
+            
+            highlight = False
+            if identity[2] == id_mac:
+                select_row = row
+                highlight = True
+            
+            label = Gtk.Label()
             label.set_justify(Gtk.Justification.LEFT)
+            
+            if highlight:
+                label.set_markup("<b>" + identity[0] + "</b>")
+            else:
+                label.set_markup(identity[0])
             
             hbx = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
             hbx.pack_start(label, True, True, 0)
@@ -641,16 +667,27 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             row.add(hbx)
             listbox.add(row)
         
-        dlg.show_all()
+        if select_row:
+            listbox.select_row(select_row)
+        
+        if len(self.lsIdentities) > 0 and not self.assignExistingIdentity:
+            listbox.select_row(listbox.get_row_at_index(0))
         
         listbox.connect("row-activated", self.selectedIdentityAssign)
         
         current_identity_id = self.identityForMAC(mac)
         self.assignExistingIdentity = current_identity_id
         
-        # TODO(winkler): If there is a current identity assigned,
-        # select the respective entry in the listbox.
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+        labelnn = Gtk.Label("Device Nickname", xalign=0)
+        entrynn = Gtk.Entry()
+        entrynn.set_text(nickname)
+        hbox.pack_start(labelnn, False, False, 3)
+        hbox.pack_end(entrynn, True, True, 3)
         
+        vboxContent.pack_start(hbox, False, False, 0)
+        
+        dlg.show_all()
         result = dlg.run()
         
         if result == Gtk.ResponseType.OK:
@@ -658,6 +695,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             identity_name = self.nameForIdentity(identity_id)
             
             self.assignMACToIdentity(mac, identity_id)
+            self.setNicknameForMAC(mac, entrynn.get_text())
         elif result == Gtk.ResponseType.CANCEL:
             # Do nothing.
             pass
