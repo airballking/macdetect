@@ -11,11 +11,23 @@ add_library(${PROJECT_NAME}
   src/Client.cpp
   src/MDClient.cpp)
 
-add_executable(macdetect-cli
+add_executable(${PROJECT_NAME}-cli
   src/cli.cpp)
 
 target_link_libraries(${PROJECT_NAME}
   macdetect-utils)
 
-target_link_libraries(macdetect-cli
+target_link_libraries(${PROJECT_NAME}-cli
   ${PROJECT_NAME})
+
+## Install
+install(TARGETS ${PROJECT_NAME}
+  DESTINATION "lib")
+
+install(TARGETS ${PROJECT_NAME}-cli
+  DESTINATION "bin")
+
+file(GLOB HEADERS "include/client/*.h")
+
+install(FILES ${HEADERS}
+  DESTINATION "include/macdetect/macdetect-client")

@@ -32,3 +32,15 @@ add_executable(test-readvendordata
 
 add_test(NAME readvendordata
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/test-readvendordata)
+
+## Install
+install(TARGETS ${PROJECT_NAME}
+  DESTINATION "bin")
+
+file(GLOB HEADERS "include/macdetectd/*.h")
+
+install(FILES ${HEADERS}
+  DESTINATION "include/macdetect/macdetectd")
+
+install(FILES "config/default.config"
+  DESTINATION "share/macdetect/config")

@@ -23,7 +23,11 @@ add_subdirectory(macdetectd)
 add_subdirectory(client)
 add_subdirectory(pymacdetect)
 
-# CPack
+## Install
+install(FILES "data/oui.txt"
+  DESTINATION "share/macdetect/data")
+
+## CPack
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_NAME})
 set(CPACK_PACKAGE_NAME "macdetect")
 set(CPACK_PACKAGE_VENDOR "Jan Winkler <jan.winkler.84@gmail.com>")

@@ -26,6 +26,7 @@
 #include <string>
 #include <unistd.h>
 #include <map>
+#include <list>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -44,6 +45,8 @@ namespace macdetect {
     std::map<std::string, Vendor> m_mapVendorsCache;
     
   protected:
+    bool tryReadVendors(std::string strPath);
+    
   public:
     Data();
     ~Data();

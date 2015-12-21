@@ -39,21 +39,42 @@ namespace macdetect {
     }
   }
   
-  bool Data::readVendors() {
-    std::ifstream ifOUI(Data::dataPath() + "/oui.txt");
+  bool Data::tryReadVendors(std::string strPath) {
+    std::ifstream ifOUI(strPath);
     std::string strLine = "";
     
-    while(std::getline(ifOUI, strLine)) {
-      std::string strMAC = strLine.substr(0, 6);
-      std::string strVendor = strLine.substr(7);
-      
-      strMAC.erase(strMAC.find_last_not_of(" \n\r\t\"")+1);
-      
-      strVendor.erase(strVendor.find_last_not_of(" \n\r\t\"")+1);
-      strVendor = strVendor.substr(1);
-      
-      m_mapVendorsCache[strMAC] = {true, strVendor};
+    if(ifOUI.is_open()) {
+      while(std::getline(ifOUI, strLine)) {
+	std::string strMAC = strLine.substr(0, 6);
+	std::string strVendor = strLine.substr(7);
+	
+	strMAC.erase(strMAC.find_last_not_of(" \n\r\t\"")+1);
+	
+	strVendor.erase(strVendor.find_last_not_of(" \n\r\t\"")+1);
+	strVendor = strVendor.substr(1);
+	
+	m_mapVendorsCache[strMAC] = {true, strVendor};
+	
+	return true;
+      }
     }
+    
+    return false;
+  }
+  
+  bool Data::readVendors() {
+    // Locations to look in for `oui.txt`.
+    std::list<std::string> lstLocations = {Data::dataPath(),
+					   "/usr/local/share/macdetect/data",
+					   "/usr/share/macdetect/data"};
+    
+    for(std::string strLocation : lstLocations) {
+      if(this->tryReadVendors(strLocation + "/oui.txt")) {
+	return true;
+      }
+    }
+    
+    return false;
   }
   
   std::string Data::executablePath() {

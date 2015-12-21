@@ -115,11 +115,18 @@ int main(int argc, char** argv) {
     if(bRunnable) {
       std::string strConfigFile = apArguments.value("config-file");
       
+      std::list<std::string> lstConfigFiles = {strConfigFile,
+					       "~/.macdetectd/macdetectd.config",
+					       "/usr/local/share/macdetect/config/default.config",
+					       "/usr/share/macdetect/config/default.config"};
+      
       bool bConfigLoaded = false;
-      if(g_dmDaemon.parseConfigFile(strConfigFile) == false) {
-	bConfigLoaded = g_dmDaemon.parseConfigFile("~/.macdetectd/macdetectd.config");
-      } else {
-	bConfigLoaded = true;
+      for(std::string strConfigFile : lstConfigFiles) {
+	bConfigLoaded = g_dmDaemon.parseConfigFile(strConfigFile);
+	
+	if(bConfigLoaded) {
+	  break;
+	}
       }
       
       if(!bConfigLoaded) {
