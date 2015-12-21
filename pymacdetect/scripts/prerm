@@ -3,4 +3,6 @@
 #
 # Removes all files installed by: ./setup.py install
 
+set -e
+
 sudo rm -rf /usr/share/pyshared/pymacdetect
