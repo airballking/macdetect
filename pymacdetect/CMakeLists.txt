@@ -28,7 +28,14 @@ if(PYTHON)
   
   add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect_ext.so)
   
-  install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/setup.py"
+    DESTINATION "/usr/share/pyshared/pymacdetect/scripts")
+  install(FILES lib/pymd/__init__.py lib/pymd/pymdClient.py lib/pymd/pymdDesktop.py
+    DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd")
+  install(FILES lib/pymd/pymdGui/__init__.py lib/pymd/pymdGui/MDGui.py lib/pymd/pymdGui/ConnectionManager.py 
+    DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd/pymdGui")
+  install(FILES lib/pymd/pymdLib/PyMACDetect.py
+    DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd/pymdLib")
 endif()
 
 add_test(NAME nosetests-${PROJECT_NAME}

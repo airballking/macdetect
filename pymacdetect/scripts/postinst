@@ -1,0 +1,7 @@
+#!/bin/sh
+# postinst script
+
+set -e
+
+cd /usr/share/pyshared/pymacdetect
+sudo python setup.py install
