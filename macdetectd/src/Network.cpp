@@ -417,6 +417,18 @@ namespace macdetect {
     return tsTime.tv_sec + double(tsTime.tv_nsec) / NSEC_PER_SEC;
   }
   
+  void Network::updateMACEvidence(std::string strDeviceName, std::string strMACAddress, std::string strKey, std::string strContent) {
+    if(this->macAllowed(strMACAddress)) {
+      std::shared_ptr<MACEvent> meEvidence = std::make_shared<MACEvent>(Event::MACEvidenceChanged, strDeviceName, strMACAddress);
+      // NOTE(winkler): We're ignoring the `former-value` option
+      // here. This might become subject to refactoring if that value
+      // makes sense to remember.
+      meEvidence->setEvidence(strKey, strContent, "");
+      
+      this->scheduleEvent(meEvidence);
+    }
+  }
+  
   void Network::detectNetworkActivity() {
     unsigned char* ucBuffer = NULL;
     int nLengthRead;
@@ -430,6 +442,10 @@ namespace macdetect {
 	std::string strMAC = this->mac(efhHeader.h_source);
 	
 	this->addMAC(strMAC, dvDevice->deviceName());
+	
+	// Testing begin
+	this->updateMACEvidence(dvDevice->deviceName(), strMAC, "test-key", "test-value");
+	// Testing end
 	
 	switch(ntohs(efhHeader.h_proto)) {
 	case 0x0800: { // IP

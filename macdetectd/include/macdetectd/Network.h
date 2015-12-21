@@ -90,6 +90,7 @@ namespace macdetect {
     
   protected:
     void scheduleEvent(std::shared_ptr<Event> evSchedule);
+    void updateMACEvidence(std::string strDeviceName, std::string strMACAddress, std::string strKey, std::string strContent);
     
   public:
     Network();

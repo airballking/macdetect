@@ -280,24 +280,35 @@ namespace macdetect {
 	} break;
 	  
 	case Event::MACAddressDiscovered: {
-	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
+	  std::shared_ptr<macdetect::MACEvent> meEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
 	  
 	  valSend->set("info", "mac-address-discovered");
-	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
-	  valSend->add(std::make_shared<Value>("vendor", m_nwNetwork.vendorForMAC(mvEvent->macAddress())));
-	  valSend->add(std::make_shared<Value>("device-name", mvEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("mac", meEvent->macAddress()));
+	  valSend->add(std::make_shared<Value>("vendor", m_nwNetwork.vendorForMAC(meEvent->macAddress())));
+	  valSend->add(std::make_shared<Value>("device-name", meEvent->deviceName()));
 	  
-	  strDeviceName = mvEvent->deviceName();
+	  strDeviceName = meEvent->deviceName();
 	} break;
 	  
 	case Event::MACAddressDisappeared: {
-	  std::shared_ptr<macdetect::MACEvent> mvEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
+	  std::shared_ptr<macdetect::MACEvent> meEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
 	  
 	  valSend->set("info", "mac-address-disappeared");
-	  valSend->add(std::make_shared<Value>("mac", mvEvent->macAddress()));
-	  valSend->add(std::make_shared<Value>("device-name", mvEvent->deviceName()));
+	  valSend->add(std::make_shared<Value>("mac", meEvent->macAddress()));
+	  valSend->add(std::make_shared<Value>("device-name", meEvent->deviceName()));
 	  
-	  strDeviceName = mvEvent->deviceName();
+	  strDeviceName = meEvent->deviceName();
+	} break;
+	  
+	case Event::MACEvidenceChanged: {
+	  std::shared_ptr<macdetect::MACEvent> meEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
+	  
+	  valSend->set("info", "mac-evidence-changed");
+	  valSend->add(std::make_shared<Value>("field", meEvent->evidenceField()));
+	  valSend->add(std::make_shared<Value>("value", meEvent->evidenceValue()));
+	  valSend->add(std::make_shared<Value>("value-former", meEvent->evidenceValueFormer()));
+	  
+	  strDeviceName = meEvent->deviceName();
 	} break;
 	  
 	default: {

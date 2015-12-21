@@ -38,7 +38,8 @@ namespace macdetect {
       DeviceStateChanged = 2,
       MACAddressDiscovered = 3,
       MACAddressDisappeared = 4,
-      DeviceEvidenceChanged = 5
+      DeviceEvidenceChanged = 5,
+      MACEvidenceChanged = 6
     } EventType;
     
   private:
