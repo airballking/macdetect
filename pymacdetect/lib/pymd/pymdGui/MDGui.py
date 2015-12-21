@@ -357,12 +357,18 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 break
         
         # Remove all MAC addresses related to this interface
-        for i in range(len(self.lsMACList)):
-            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
-            row = self.lsMACList[treeiter]
+        changed = True
+        while changed:
+            changed = False
             
-            if row[2] == device:
-                self.lsMACList.remove(treeiter)
+            for i in range(len(self.lsMACList)):
+                treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
+                row = self.lsMACList[treeiter]
+                
+                if row[2] == device:
+                    self.lsMACList.remove(treeiter)
+                    changed = True
+                    break
     
     def deviceListToggled(self, wdgWidget, ptPath):
         treeiter = self.lsDeviceList[ptPath]
@@ -507,13 +513,12 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     def setNicknameForMAC(self, mac, nickname):
         self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (nickname, mac,))
         self.sql_conn.commit()
-        identity_mac = self.identityForMAC(mac)
         
         for i in range(len(self.lsMACList)):
             treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
             row = self.lsMACList[treeiter]
             
-            if row[3] == identity_mac:
+            if row[0] == mac:
                 row[5] = nickname
     
     def prepareMACList(self):
