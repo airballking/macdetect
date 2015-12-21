@@ -27,6 +27,9 @@ add_subdirectory(pymacdetect)
 install(FILES "data/oui.txt"
   DESTINATION "share/macdetect/data")
 
+install(DIRECTORY "docs/_build/html"
+  DESTINATION "doc/macdetect")
+
 ## CPack
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_NAME})
 set(CPACK_PACKAGE_NAME "macdetect")
