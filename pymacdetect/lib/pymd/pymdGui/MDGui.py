@@ -69,7 +69,7 @@ class MainWindow:
     def loadIdentities(self):
         self.sql_c.execute("SELECT * FROM identities")
         identities = self.sql_c.fetchall()
-        pixbuf = Gtk.IconTheme.get_default().load_icon("face-plain", 16, 0)
+        pixbuf = Gtk.IconTheme.get_default().load_icon("face-smile", 32, 0)
         
         for identity in identities:
             self.lsIdentities.append([identity[1], pixbuf, identity[0]])
@@ -732,7 +732,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         vbxControls.pack_start(self.idImage, False, True, 0)
         self.idImage.set_size_request(100, 100)
         
-        hbxIdentities.pack_start(vbxControls, False, True, 0)
+        # NOTE(winkler): Commented out until this feature gets actually used.
+        #hbxIdentities.pack_start(vbxControls, False, True, 0)
         
         self.stkStack.add_titled(hbxIdentities, "identities", "Identity View")
     
