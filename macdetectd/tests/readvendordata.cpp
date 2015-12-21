@@ -34,8 +34,6 @@ int main(int argc, char** argv) {
     
     if(vdApple.bValid) {
       if(vdApple.strVendor == "Apple, Inc.") {
-	macdetect::Data::Vendor vdInvalid = dtData.vendorForMAC("FF:FF:FF:00:00:00");
-	
 	nReturnvalue = EXIT_SUCCESS;
       } else {
 	std::cerr << "Vendor name not as expected; got: '" << vdApple.strVendor << "'" << std::endl;
