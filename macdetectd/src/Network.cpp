@@ -439,7 +439,9 @@ namespace macdetect {
 	  std::string strSenderIP = inet_ntoa(((struct sockaddr_in*)&iphHeader.saddr)->sin_addr);
 	  
 	  if(this->ipAllowed(strSenderIP)) {
-	    // TODO: Fully implement IP address support.
+	    // TODO(winkler): Fully implement IP address support.
+	    // NOTE(winkler): This is the source for MAC evidence
+	    // changes related to IP addresses.
 	  }
 	  
 	  if(iphHeader.protocol == 0x1) { // ICMP
