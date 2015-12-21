@@ -42,12 +42,11 @@ after_success:
  - cd ${TRAVIS_BUILD_DIR}
  - cd build
  - make package
- - mv macdetect-release.deb ${TRAVIS_BUILD_DIR}
 
 deploy:
   provider: releases
   api_key: ${GITHUB_OAUTH_TOKEN}
-  file: "${TRAVIS_BUILD_DIR}/macdetect-release.deb"
+  file: "${TRAVIS_BUILD_DIR}/build/macdetect-release.deb"
   skip_cleanup: true
   on:
     tags: true
