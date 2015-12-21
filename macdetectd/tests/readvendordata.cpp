@@ -32,13 +32,19 @@ int main(int argc, char** argv) {
   if(dtData.readVendors()) {
     macdetect::Data::Vendor vdApple = dtData.vendorForMAC("00:CD:FE:00:00:00");
     
-    if(vdApple.bValid && vdApple.strVendor == "Apple, Inc.") {
-      macdetect::Data::Vendor vdInvalid = dtData.vendorForMAC("FF:FF:FF:00:00:00");
-      
-      if(!vdInvalid.bValid) {
+    if(vdApple.bValid) {
+      if(vdApple.strVendor == "Apple, Inc.") {
+	macdetect::Data::Vendor vdInvalid = dtData.vendorForMAC("FF:FF:FF:00:00:00");
+	
 	nReturnvalue = EXIT_SUCCESS;
+      } else {
+	std::cerr << "Vendor name not as expected; got: '" << vdApple.strVendor << "'" << std::endl;
       }
+    } else {
+      std::cerr << "Retrieved vendor invalid" << std::endl;
     }
+  } else {
+    std::cerr << "Couldn't read vendor data" << std::endl;
   }
   
   return nReturnvalue;

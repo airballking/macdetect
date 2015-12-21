@@ -40,10 +40,10 @@ namespace macdetect {
   }
   
   bool Data::tryReadVendors(std::string strPath) {
-    std::ifstream ifOUI(strPath);
     std::string strLine = "";
+    std::ifstream ifOUI(strPath);
     
-    if(ifOUI.is_open()) {
+    if(ifOUI) {
       while(std::getline(ifOUI, strLine)) {
 	std::string strMAC = strLine.substr(0, 6);
 	std::string strVendor = strLine.substr(7);
@@ -54,9 +54,9 @@ namespace macdetect {
 	strVendor = strVendor.substr(1);
 	
 	m_mapVendorsCache[strMAC] = {true, strVendor};
-	
-	return true;
       }
+      
+      return true;
     }
     
     return false;
