@@ -10,12 +10,26 @@ include_directories(
 set_directory_properties(PROPERTIES
   ADDITIONAL_MAKE_CLEAN_FILES "${LIBRARY_OUTPUT_PATH}/pymacdetect_ext.so")
 
-add_custom_command(OUTPUT pymacdetect_ext.so
-  COMMAND python "${PROJECT_SOURCE_DIR}/scripts/setup.py" build --build-lib "${LIBRARY_OUTPUT_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}"
-  DEPENDS macdetect-client
-  COMMENT "Compiling the PyMACDetect libraries")
+find_program(PYTHON "python")
 
-add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect_ext.so)
+if(PYTHON)
+  set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/scripts/setup.py.in")
+  set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+  set(DEPS        "macdetect-client")
+  
+  configure_file(${SETUP_PY_IN} ${SETUP_PY})
+  
+  add_custom_command(
+    OUTPUT pymacdetect_ext.so
+    COMMAND ${PYTHON}
+    ARGS setup.py build --build-lib "${LIBRARY_OUTPUT_PATH}"
+    DEPENDS ${DEPS}
+    COMMENT "Compiling the PyMACDetect libraries")
+  
+  add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect_ext.so)
+  
+  install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
+endif()
 
 add_test(NAME nosetests-${PROJECT_NAME}
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/tests.sh)

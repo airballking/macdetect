@@ -21,8 +21,7 @@
 import sys
 from distutils.core import setup, Extension
 
-local_cmake_dir = sys.argv[len(sys.argv) - 1]
-sys.argv = sys.argv[:-1]
+local_cmake_dir = '${CMAKE_CURRENT_SOURCE_DIR}'
 
 pymacdetect_module = Extension('pymacdetect_ext',
                                define_macros = [('MAJOR_VERSION', '0'),
@@ -38,7 +37,7 @@ pymacdetect_module = Extension('pymacdetect_ext',
                                extra_compile_args=['-std=c++11', '--coverage'])
 
 setup(name = 'PyMACDetect',
-      version = '1.0',
+      version = '${PACKAGE_VERSION}',
       description = 'Python language bindings for macdetect-client',
       author = 'Jan Winkler',
       author_email = 'jan.winkler.84@gmail.com',
