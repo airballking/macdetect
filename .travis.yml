@@ -42,6 +42,7 @@ after_success:
  - cd ${TRAVIS_BUILD_DIR}
  - cd build
  - make package
+ - ./scripts/repackage_deb.sh
 
 deploy:
   provider: releases

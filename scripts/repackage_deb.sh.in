@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Init
+set -e
+
+# Variables
+TEMP_BASE=/tmp/repackage_deb
+TEMP_DIR=temp
+SOURCE_FILEPATH=@CMAKE_SOURCE_DIR@/build/@CPACK_PACKAGE_FILE_NAME@.deb
+SOURCE_FILE=$(basename ${SOURCE_FILEPATH})
+TARGET_DIR=@CMAKE_SOURCE_DIR@/build
+
+# Environment
+mkdir -p ${TEMP_BASE}
+cp ${SOURCE_FILEPATH} ${TEMP_BASE}
+cd ${TEMP_BASE}
+
+# Extract
+dpkg-deb -x ${SOURCE_FILE} ${TEMP_DIR}
+dpkg-deb --control ${SOURCE_FILE} ${TEMP_DIR}/DEBIAN
+rm -rf ${SOURCE_FILE}
+
+# Fix misc permissions
+find -type d -print0 |xargs -0 chmod 755
+
+# md5sums file permissions
+chmod 0644 ${TEMP_DIR}/DEBIAN/md5sums
+
+# Repackage
+fakeroot dpkg -b temp ${TARGET_DIR}/${SOURCE_FILE}
+
+# Cleanup
+rm -rf ${TEMP_BASE}
