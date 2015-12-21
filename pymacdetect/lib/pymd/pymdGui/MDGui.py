@@ -446,7 +446,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.sql_c.execute("INSERT INTO identities VALUES (?, ?)", (str(identity_id), name,))
         self.sql_conn.commit()
         
-        pixbuf = Gtk.IconTheme.get_default().load_icon("face-smile", 16, 0)
+        pixbuf = Gtk.IconTheme.get_default().load_icon("face-smile", 32, 0)
         self.lsIdentities.append([self.nameForIdentity(identity_id), pixbuf, identity_id])
         
         return identity_id
