@@ -4,7 +4,7 @@ project(macdetectd)
 set(${PROJECT_NAME}_VERSION_MAJOR_0)
 set(${PROJECT_NAME}_VERSION_MINOR_1)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O2")
 
 include_directories(
   include)
@@ -35,12 +35,15 @@ add_test(NAME readvendordata
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
-  DESTINATION "bin")
+  DESTINATION "bin"
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) # 755
 
 file(GLOB HEADERS "include/macdetectd/*.h")
 
 install(FILES ${HEADERS}
-  DESTINATION "include/macdetect/macdetectd")
+  DESTINATION "include/macdetect/macdetectd"
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 install(FILES "config/default.config"
-  DESTINATION "share/macdetect/config")
+  DESTINATION "share/macdetect/config"
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750

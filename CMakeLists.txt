@@ -10,6 +10,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
 
+set(CMAKE_INSTALL_PREFIX "/usr")
+
 enable_testing()
 
 include_directories(
@@ -25,10 +27,13 @@ add_subdirectory(pymacdetect)
 
 ## Install
 install(FILES "data/oui.txt"
-  DESTINATION "share/macdetect/data")
+  DESTINATION "share/macdetect/data"
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 install(DIRECTORY "docs/_build/html"
-  DESTINATION "doc/macdetect")
+  DESTINATION "doc/macdetect"
+  PATTERN ".git" EXCLUDE
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 ## CPack
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_NAME})
@@ -44,8 +49,10 @@ set(CPACK_PACKAGE_EXECUTABLES "macdetectd")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jan Winkler <jan.winkler.84@gmail.com>")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-release")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "python2.7")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "python2.7 libc6")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/pymacdetect/scripts/postinst;${CMAKE_SOURCE_DIR}/pymacdetect/scripts/prerm;")
 set(CPACK_SET_DESTDIR "ON")
+set(CPACK_SOURCE_STRIP_FILES "")
+set(CPACK_STRIP_FILES "usr/bin/macdetectd;usr/bin/macdetect-client-cli")
 
 include(CPack)
