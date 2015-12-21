@@ -81,7 +81,7 @@ class MainWindow:
             try:
                 packet = self.cliClient.receive()
             except pymacdetect_ext.DisconnectedError:
-                self.lsMACList.clear()
+                self.tsMACList.clear()
                 self.lsDeviceList.clear()
                 self.log("Connection closed by server.")
                 self.setConnectionState(ConnectionState.Disconnected)
@@ -122,6 +122,8 @@ class MainWindow:
                     elif what == "device-state-changed":
                         # TODO(winkler): Handle this case
                         pass
+                    elif what == "mac-evidence-changed":
+                        print subs
                 elif "response" in packet:
                     what = packet["response"]["content"]
                     subs = None
@@ -265,7 +267,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             self.setConnectionState(ConnectionState.DISCONNECTED)
             self.log("Connection closed.")
             
-            self.lsMACList.clear()
+            self.tsMACList.clear()
             self.lsDeviceList.clear()
     
     def logChanged(self, wdgWidget, evEvent, dtData=None):
@@ -361,12 +363,12 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         while changed:
             changed = False
             
-            for i in range(len(self.lsMACList)):
-                treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
-                row = self.lsMACList[treeiter]
+            for i in range(len(self.tsMACList)):
+                treeiter = self.tsMACList.get_iter(Gtk.TreePath(i))
+                row = self.tsMACList[treeiter]
                 
                 if row[2] == device:
-                    self.lsMACList.remove(treeiter)
+                    self.tsMACList.remove(treeiter)
                     changed = True
                     break
     
@@ -415,7 +417,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     def addMAC(self, mac, vendor, device):
         is_present = False
         
-        for treeiter in self.lsMACList:
+        for treeiter in self.tsMACList:
             if treeiter[0] == mac and treeiter[2] == device:
                 is_present = True
                 break
@@ -430,7 +432,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             nickname = self.nicknameForMAC(mac)
             
-            self.lsMACList.append([mac, vendor, device, identity, identity_str, nickname])
+            self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname])
             self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
             self.sql_conn.commit()
     
@@ -463,7 +465,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.sql_c.execute("INSERT INTO macs VALUES (?, ?)", (mac, identity_id,))
         self.sql_conn.commit()
         
-        for treeiter in self.lsMACList:
+        for treeiter in self.tsMACList:
             if treeiter[0] == mac:
                 treeiter[3] = identity_id
                 treeiter[4] = self.nameForIdentity(identity_id)
@@ -505,25 +507,25 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 break
     
     def nicknameEdited(self, wdgWidget, ptPath, txtText):
-        self.lsMACList[ptPath][5] = txtText
+        self.tsMACList[ptPath][5] = txtText
         
-        mac = self.lsMACList[ptPath][0]
+        mac = self.tsMACList[ptPath][0]
         self.setNicknameForMAC(mac, txtText)
     
     def setNicknameForMAC(self, mac, nickname):
         self.sql_c.execute("UPDATE macs_data SET nickname=? WHERE mac=?", (nickname, mac,))
         self.sql_conn.commit()
         
-        for i in range(len(self.lsMACList)):
-            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
-            row = self.lsMACList[treeiter]
+        for i in range(len(self.tsMACList)):
+            treeiter = self.tsMACList.get_iter(Gtk.TreePath(i))
+            row = self.tsMACList[treeiter]
             
             if row[0] == mac:
                 row[5] = nickname
     
     def prepareMACList(self):
-        self.lsMACList = Gtk.ListStore(str, str, str, int, str, str)
-        self.vwMACList = Gtk.TreeView(self.lsMACList)
+        self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str)
+        self.vwMACList = Gtk.TreeView(self.tsMACList)
         
         rdAddress = Gtk.CellRendererText()
         colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0)
@@ -712,7 +714,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     
     def clickMACList(self, wdgWidget, evEvent):
         if evEvent.type == Gdk.EventType.BUTTON_PRESS and evEvent.button == 3:
-            if len(self.lsMACList) > 0:
+            if len(self.tsMACList) > 0:
                 path, column, a, b = wdgWidget.get_path_at_pos(evEvent.x, evEvent.y)
                 
                 if path:
@@ -791,9 +793,9 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                     new_name = entry.get_text()
                     row[0] = new_name
                     
-                    for i in range(len(self.lsMACList)):
-                        treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
-                        row = self.lsMACList[treeiter]
+                    for i in range(len(self.tsMACList)):
+                        treeiter = self.tsMACList.get_iter(Gtk.TreePath(i))
+                        row = self.tsMACList[treeiter]
                         
                         if row[3] == self.selected_identity:
                             row[4] = new_name
@@ -835,9 +837,9 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 self.lsIdentities.remove(treeiter)
                 break
         
-        for i in range(len(self.lsMACList)):
-            treeiter = self.lsMACList.get_iter(Gtk.TreePath(i))
-            row = self.lsMACList[treeiter]
+        for i in range(len(self.tsMACList)):
+            treeiter = self.tsMACList.get_iter(Gtk.TreePath(i))
+            row = self.tsMACList[treeiter]
             
             if row[3] == identity_id:
                 row[3] = -1
