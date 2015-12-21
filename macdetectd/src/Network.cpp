@@ -429,10 +429,6 @@ namespace macdetect {
 	memcpy(&efhHeader, ucBuffer, sizeof(efhHeader));
 	std::string strMAC = this->mac(efhHeader.h_source);
 	
-	// TEST
-	//dvDevice->sendPingBroadcast
-	//this->sendPing(dvDevice, "255.255.255.255");
-	
 	this->addMAC(strMAC, dvDevice->deviceName());
 	
 	switch(ntohs(efhHeader.h_proto)) {
@@ -461,7 +457,7 @@ namespace macdetect {
 	} break;
 	}
       } else if(nLengthRead == -1) {
-	std::cerr << "Error while reading on device '" << dvDevice->deviceName() << "'" << std::endl;
+	std::cerr << "Error while reading from device '" << dvDevice->deviceName() << "'" << std::endl;
       }
     }
   }
