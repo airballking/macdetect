@@ -45,5 +45,11 @@ int main(int argc, char** argv) {
     std::cerr << "Couldn't read vendor data" << std::endl;
   }
   
+  if(nReturnvalue == EXIT_SUCCESS) {
+    if(dtData.readVendors("/tmp") != false) {
+      nReturnvalue = EXIT_FAILURE;
+    }
+  }
+  
   return nReturnvalue;
 }

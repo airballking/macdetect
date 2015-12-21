@@ -52,7 +52,7 @@ namespace macdetect {
     ~Data();
     
     Vendor vendorForMAC(std::string strMAC);
-    bool readVendors();
+    bool readVendors(std::string strFilepath = "");
     
     static std::string executablePath();
     static std::string dataPath();

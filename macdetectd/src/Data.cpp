@@ -62,11 +62,17 @@ namespace macdetect {
     return false;
   }
   
-  bool Data::readVendors() {
+  bool Data::readVendors(std::string strFilepath) {
     // Locations to look in for `oui.txt`.
-    std::list<std::string> lstLocations = {Data::dataPath(),
-					   "/usr/local/share/macdetect/data",
-					   "/usr/share/macdetect/data"};
+    std::list<std::string> lstLocations;
+    
+    if(strFilepath == "") {
+      lstLocations = {Data::dataPath(),
+		      "/usr/local/share/macdetect/data",
+		      "/usr/share/macdetect/data"};
+    } else {
+      lstLocations = {strFilepath};
+    }
     
     for(std::string strLocation : lstLocations) {
       if(this->tryReadVendors(strLocation + "/oui.txt")) {
