@@ -27,6 +27,9 @@ script:
  - cmake ..
  - make
  - make test
+ - cd ${TRAVIS_BUILD_DIR}
+ - cd docs
+ - make html
 
 after_success:
  - cd ${TRAVIS_BUILD_DIR}
