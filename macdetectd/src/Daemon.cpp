@@ -319,6 +319,7 @@ namespace macdetect {
 	  std::shared_ptr<macdetect::MACEvent> meEvent = std::dynamic_pointer_cast<macdetect::MACEvent>(evEvent);
 	  
 	  valSend->set("info", "mac-evidence-changed");
+	  valSend->add(std::make_shared<Value>("mac-address", meEvent->macAddress()));
 	  valSend->add(std::make_shared<Value>("field", meEvent->evidenceField()));
 	  valSend->add(std::make_shared<Value>("value", meEvent->evidenceValue()));
 	  valSend->add(std::make_shared<Value>("value-former", meEvent->evidenceValueFormer()));
