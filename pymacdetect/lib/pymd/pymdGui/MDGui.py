@@ -148,10 +148,31 @@ class MainWindow:
                                 device = properties["device-name"]["content"]
                                 
                                 self.addMAC(mac, vendor, device)
-            
+                                
+                                self.cliClient.send({"request": {"content": "mac-evidence",
+                                                       "subs": {"mac-address": {"content": mac}}}})
+                    elif what == "mac-evidence":
+                        if "subs" in subs["mac-evidence"]:
+                            evidence_dict = {}
+                            mac_address = ""
+                            
+                            for sub in subs["mac-evidence"]["subs"]:
+                                key = sub
+                                content = subs["mac-evidence"]["subs"][sub]["content"]
+                                
+                                if key == "mac-address":
+                                    mac_address = content
+                                else:
+                                    evidence_dict[key] = content
+                            
+                            if mac_address != "":
+                                self.updateMACEvidence(mac_address, evidence_dict)
             return True
         else:
             return False
+    
+    def updateMACEvidence(self, mac_address, evidence_dict):
+        print "Update MAC evidence:", mac_address, evidence_dict
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
