@@ -158,6 +158,21 @@ namespace macdetect {
 	      
 	      valResponse->add(valMAC);
 	    }
+	  } else if(valValue->content() == "mac-evidence") {
+	    std::shared_ptr<Value> valMAC = valValue->sub("mac-address");
+	    
+	    if(valMAC) {
+	      std::string strMAC = valMAC->content();
+	      std::map<std::string, std::string> mapEvidence = m_nwNetwork.macEvidence(strMAC);
+	      mapEvidence["mac-address"] = strMAC;
+	      
+	      valResponse->set("mac-evidence", "");
+	      for(std::pair<std::string, std::string> prEvidence : mapEvidence) {
+		std::shared_ptr<Value> valPair = std::make_shared<Value>(prEvidence.first, prEvidence.second);
+		
+		valResponse->add(valPair);
+	      }
+	    }
 	  } else if(valValue->content() == "enable-stream") {
 	    std::shared_ptr<Value> valDeviceName = valValue->sub("device-name");
 	    
