@@ -330,6 +330,25 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.vwLog.append_column(colTime)
         self.vwLog.append_column(colDescription)
     
+    def filterMACs(self, model, iter, data):
+        subj = self.entSearchMACs.get_text().lower()
+        row = model[iter]
+        
+        if subj == "" or subj in row[0].lower() or subj in row[1].lower() or subj in row[2].lower() or subj in row[4].lower() or subj in row[5].lower():
+            return True
+        else:
+            if self.tsMACList.iter_has_child(iter):
+                childiter = self.tsMACList.iter_children(iter)
+                childrow = self.tsMACList[childiter]
+                
+                if subj in childrow[0].lower() or subj in childrow[5].lower():
+                    return True
+        
+        return False
+    
+    def searchMACsEdited(self, wdg):
+        self.fltMACFilter.refilter()
+    
     def prepareStack(self):
         self.stkStack = Gtk.Stack()
         self.stkStack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
@@ -341,6 +360,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.entSearchMACs = Gtk.Entry()
         self.entSearchMACs.set_placeholder_text("Search")
         self.entSearchMACs.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "system-search")
+        self.entSearchMACs.connect("changed", self.searchMACsEdited)
         
         hbxSwitcher = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         hbxSwitcher.pack_start(sswSwitcher, True, False, 0)
@@ -572,7 +592,11 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     
     def prepareMACList(self):
         self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str)
-        self.vwMACList = Gtk.TreeView(self.tsMACList)
+        
+        self.fltMACFilter = self.tsMACList.filter_new()
+        self.fltMACFilter.set_visible_func(self.filterMACs, None)
+        
+        self.vwMACList = Gtk.TreeView(self.fltMACFilter)
         
         rdAddress = Gtk.CellRendererText()
         colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0)
