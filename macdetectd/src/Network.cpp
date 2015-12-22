@@ -30,6 +30,10 @@ namespace macdetect {
     close(m_nSocketFDControl);
   }
   
+  std::map<std::string, std::string> Network::macEvidence(std::string strMAC) {
+    return m_mapMACEvidence[strMAC];
+  }
+  
   bool Network::privilegesSuffice() {
     Wire wrTest("", ETH_FRAME_LEN, ETH_P_ALL, true);
     bool bSuffices = (wrTest.socket() > -1);
@@ -419,13 +423,13 @@ namespace macdetect {
   
   void Network::updateMACEvidence(std::string strDeviceName, std::string strMACAddress, std::string strKey, std::string strContent) {
     if(this->macAllowed(strMACAddress)) {
-      std::shared_ptr<MACEvent> meEvidence = std::make_shared<MACEvent>(Event::MACEvidenceChanged, strDeviceName, strMACAddress);
-      // NOTE(winkler): We're ignoring the `former-value` option
-      // here. This might become subject to refactoring if that value
-      // makes sense to remember.
-      meEvidence->setEvidence(strKey, strContent, "");
-      
-      this->scheduleEvent(meEvidence);
+      if(m_mapMACEvidence[strMACAddress][strKey] != strContent) {
+	std::shared_ptr<MACEvent> meEvidence = std::make_shared<MACEvent>(Event::MACEvidenceChanged, strDeviceName, strMACAddress);
+	meEvidence->setEvidence(strKey, strContent, m_mapMACEvidence[strMACAddress][strKey]);
+	m_mapMACEvidence[strMACAddress][strKey] = strContent;
+	
+	this->scheduleEvent(meEvidence);
+      }
     }
   }
   
@@ -443,21 +447,21 @@ namespace macdetect {
 	
 	this->addMAC(strMAC, dvDevice->deviceName());
 	
-	// Testing begin
-	this->updateMACEvidence(dvDevice->deviceName(), strMAC, "test-key", "test-value");
-	// Testing end
-	
 	switch(ntohs(efhHeader.h_proto)) {
 	case 0x0800: { // IP
 	  struct iphdr iphHeader;
 	  memcpy(&iphHeader, &(ucBuffer[sizeof(ethhdr)]), sizeof(struct iphdr));
 	  
-	  std::string strSenderIP = inet_ntoa(((struct sockaddr_in*)&iphHeader.saddr)->sin_addr);
+	  struct in_addr iaAddr;
+	  iaAddr.s_addr = iphHeader.saddr;
+	  std::string strSenderIP = inet_ntoa(iaAddr);
+	  iaAddr.s_addr = iphHeader.daddr;
+	  std::string strReceiverIP = inet_ntoa(iaAddr);
+	  
+	  std::cout << "[" << strMAC << "] " << strSenderIP << " -> " << strReceiverIP << std::endl;
 	  
 	  if(this->ipAllowed(strSenderIP)) {
-	    // TODO(winkler): Fully implement IP address support.
-	    // NOTE(winkler): This is the source for MAC evidence
-	    // changes related to IP addresses.
+	    this->updateMACEvidence(dvDevice->deviceName(), strMAC, "ip", strSenderIP);
 	  }
 	  
 	  if(iphHeader.protocol == 0x1) { // ICMP

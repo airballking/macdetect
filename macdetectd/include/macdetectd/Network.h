@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <regex>
+#include <map>
 
 // MAC Detect
 #include <macdetectd/Device.h>
@@ -88,6 +89,8 @@ namespace macdetect {
     Data m_dtData;
     RARP m_rpRARP;
     
+    std::map<std::string, std::map<std::string, std::string>> m_mapMACEvidence;
+    
   protected:
     void scheduleEvent(std::shared_ptr<Event> evSchedule);
     void updateMACEvidence(std::string strDeviceName, std::string strMACAddress, std::string strKey, std::string strContent);
@@ -97,6 +100,8 @@ namespace macdetect {
     ~Network();
     
     bool privilegesSuffice();
+    
+    std::map<std::string, std::string> macEvidence(std::string strMAC);
     
     void clearDeviceWhiteBlacklist();
     void setDeviceWhiteBlacklistMode(WhiteBlackListMode wbmSet);
