@@ -458,8 +458,6 @@ namespace macdetect {
 	  iaAddr.s_addr = iphHeader.daddr;
 	  std::string strReceiverIP = inet_ntoa(iaAddr);
 	  
-	  std::cout << "[" << strMAC << "] " << strSenderIP << " -> " << strReceiverIP << std::endl;
-	  
 	  if(this->ipAllowed(strSenderIP)) {
 	    this->updateMACEvidence(dvDevice->deviceName(), strMAC, "ip", strSenderIP);
 	  }
