@@ -338,8 +338,14 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         sswSwitcher = Gtk.StackSwitcher()
         sswSwitcher.set_stack(self.stkStack)
         
-        hbxSwitcher = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self.entSearchMACs = Gtk.Entry()
+        self.entSearchMACs.set_placeholder_text("Search")
+        self.entSearchMACs.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "system-search")
+        
+        hbxSwitcher = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         hbxSwitcher.pack_start(sswSwitcher, True, False, 0)
+        
+        hbxSwitcher.pack_end(self.entSearchMACs, False, False, 0)
         
         vbxStack = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         vbxStack.pack_start(hbxSwitcher, False, True, 0)
