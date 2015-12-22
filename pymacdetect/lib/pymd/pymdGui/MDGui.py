@@ -123,7 +123,11 @@ class MainWindow:
                         # TODO(winkler): Handle this case
                         pass
                     elif what == "mac-evidence-changed":
-                        print subs
+                        key = subs["field"]["content"]
+                        content = subs["value"]["content"]
+                        mac_address = subs["mac-address"]["content"]
+                        
+                        self.updateMACEvidence(mac_address, {key: content})
                 elif "response" in packet:
                     what = packet["response"]["content"]
                     subs = None
@@ -172,7 +176,23 @@ class MainWindow:
             return False
     
     def updateMACEvidence(self, mac_address, evidence_dict):
-        print "Update MAC evidence:", mac_address, evidence_dict
+        for key in evidence_dict:
+            content = evidence_dict[key]
+            
+            for i in range(len(self.tsMACList)):
+                treeiter = self.tsMACList.get_iter(Gtk.TreePath(i))
+                row = self.tsMACList[treeiter]
+                
+                if row[0] == mac_address:
+                    if self.tsMACList.iter_has_child(treeiter):
+                        childiter = self.tsMACList.iter_children(treeiter)
+                        childrow = self.tsMACList[childiter]
+                        
+                        if childrow[0] == key:
+                            childrow[5] = content
+                            break
+                    else:
+                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content])
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -551,25 +571,25 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         rdAddress = Gtk.CellRendererText()
         colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0)
         
-        rdVendor = Gtk.CellRendererText()
-        colVendor = Gtk.TreeViewColumn("Vendor", rdVendor, text=1)
-        
-        rdDevice = Gtk.CellRendererText()
-        colDevice = Gtk.TreeViewColumn("Device", rdDevice, text=2)
-        
-        rdIdentity = Gtk.CellRendererText()
-        colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
-        
         rdNickname = Gtk.CellRendererText()
         rdNickname.set_property("editable", True)
         rdNickname.connect("edited", self.nicknameEdited)
         colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=5)
         
+        rdIdentity = Gtk.CellRendererText()
+        colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
+        
+        rdDevice = Gtk.CellRendererText()
+        colDevice = Gtk.TreeViewColumn("Device", rdDevice, text=2)
+        
+        rdVendor = Gtk.CellRendererText()
+        colVendor = Gtk.TreeViewColumn("Vendor", rdVendor, text=1)
+        
         self.vwMACList.append_column(colAddress)
-        self.vwMACList.append_column(colVendor)
-        self.vwMACList.append_column(colDevice)
-        self.vwMACList.append_column(colIdentity)
         self.vwMACList.append_column(colNickname)
+        self.vwMACList.append_column(colIdentity)
+        self.vwMACList.append_column(colDevice)
+        self.vwMACList.append_column(colVendor)
         
         self.mnuMACs = Gtk.Menu()
         mniAssign = Gtk.MenuItem("Assign to Identity")
