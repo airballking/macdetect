@@ -121,6 +121,9 @@ namespace macdetect {
       struct iphdr iphHeader;
       memset(&iphHeader, 0, sizeof(struct iphdr));
       
+      // TODO(winkler): version and ihl both only have 4 bits; ihl =
+      // 21 sets version = 4 and ihl = 20 correctly, but this should
+      // be cleaned out.
       iphHeader.version = 4;
       iphHeader.ihl = 21;
       iphHeader.tot_len = htons(84);
