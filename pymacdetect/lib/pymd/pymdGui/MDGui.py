@@ -330,6 +330,12 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.vwLog.append_column(colTime)
         self.vwLog.append_column(colDescription)
     
+    def filterIdentities(self, model, iter, data):
+        subj = self.entSearchMACs.get_text().lower()
+        
+        if subj == "" or subj in model[iter][0].lower():
+            return True
+    
     def filterMACs(self, model, iter, data):
         subj = self.entSearchMACs.get_text().lower()
         row = model[iter]
@@ -347,15 +353,24 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         return False
     
     def searchMACsEdited(self, wdg):
-        self.fltMACFilter.refilter()
+        selected_stack = self.sswSwitcher.get_stack().get_visible_child_name()
+        
+        if selected_stack == "devices":
+            self.fltMACFilter.refilter()
+        elif selected_stack == "identities":
+            self.fltIdentities.refilter()
+    
+    def switchStack(self, wdg, btn):
+        self.entSearchMACs.set_text("")
     
     def prepareStack(self):
         self.stkStack = Gtk.Stack()
         self.stkStack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stkStack.set_transition_duration(300)
         
-        sswSwitcher = Gtk.StackSwitcher()
-        sswSwitcher.set_stack(self.stkStack)
+        self.sswSwitcher = Gtk.StackSwitcher()
+        self.sswSwitcher.set_stack(self.stkStack)
+        self.sswSwitcher.connect("set-focus-child", self.switchStack)
         
         self.entSearchMACs = Gtk.Entry()
         self.entSearchMACs.set_placeholder_text("Search")
@@ -363,7 +378,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.entSearchMACs.connect("changed", self.searchMACsEdited)
         
         hbxSwitcher = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        hbxSwitcher.pack_start(sswSwitcher, True, False, 0)
+        hbxSwitcher.pack_start(self.sswSwitcher, True, False, 0)
         
         hbxSwitcher.pack_end(self.entSearchMACs, False, False, 0)
         
@@ -824,7 +839,11 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.ivIdentities.set_pixbuf_column(ID_COLUMN_PIXBUF)
         
         self.lsIdentities = Gtk.ListStore(str, GdkPixbuf.Pixbuf, int)
-        self.ivIdentities.set_model(self.lsIdentities)
+        
+        self.fltIdentities = self.lsIdentities.filter_new()
+        self.fltIdentities.set_visible_func(self.filterIdentities, None)
+        
+        self.ivIdentities.set_model(self.fltIdentities)
         
         self.mnuIdentityEdit = Gtk.Menu()
         mniRename = Gtk.MenuItem("Rename")
