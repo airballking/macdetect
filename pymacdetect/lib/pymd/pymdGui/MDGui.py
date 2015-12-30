@@ -611,24 +611,31 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.fltMACFilter = self.tsMACList.filter_new()
         self.fltMACFilter.set_visible_func(self.filterMACs, None)
         
-        self.vwMACList = Gtk.TreeView(self.fltMACFilter)
+        self.tmsMACList = Gtk.TreeModelSort(self.fltMACFilter)
+        
+        self.vwMACList = Gtk.TreeView(self.tmsMACList)
         
         rdAddress = Gtk.CellRendererText()
         colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0)
+        colAddress.set_sort_column_id(0)
         
         rdNickname = Gtk.CellRendererText()
         rdNickname.set_property("editable", True)
         rdNickname.connect("edited", self.nicknameEdited)
         colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=5)
+        colNickname.set_sort_column_id(5)
         
         rdIdentity = Gtk.CellRendererText()
         colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
+        colIdentity.set_sort_column_id(4)
         
         rdDevice = Gtk.CellRendererText()
         colDevice = Gtk.TreeViewColumn("Device", rdDevice, text=2)
+        colDevice.set_sort_column_id(2)
         
         rdVendor = Gtk.CellRendererText()
         colVendor = Gtk.TreeViewColumn("Vendor", rdVendor, text=1)
+        colVendor.set_sort_column_id(1)
         
         self.vwMACList.append_column(colAddress)
         self.vwMACList.append_column(colNickname)
