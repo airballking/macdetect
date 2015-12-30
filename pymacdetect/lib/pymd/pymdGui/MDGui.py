@@ -192,7 +192,7 @@ class MainWindow:
                             childrow[5] = content
                             break
                     else:
-                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content])
+                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False])
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -514,7 +514,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             nickname = self.nicknameForMAC(mac)
             
-            self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname])
+            self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname, True])
             self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
             self.sql_conn.commit()
     
@@ -606,7 +606,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 row[5] = nickname
     
     def prepareMACList(self):
-        self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str)
+        self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str, bool)
         
         self.fltMACFilter = self.tsMACList.filter_new()
         self.fltMACFilter.set_visible_func(self.filterMACs, None)
@@ -624,6 +624,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         rdNickname.connect("edited", self.nicknameEdited)
         colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=5)
         colNickname.set_sort_column_id(5)
+        colNickname.add_attribute(rdNickname, "editable", 6)
         
         rdIdentity = Gtk.CellRendererText()
         colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
