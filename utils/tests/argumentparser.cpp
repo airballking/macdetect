@@ -30,7 +30,7 @@ std::pair<int, char**> makeArguments(std::vector<std::string> vecArguments) {
   vecArguments.insert(vecArguments.begin(), "executable");
   char** carrArguments = new char*[vecArguments.size()];
   
-  for(int nI = 0; nI < vecArguments.size(); nI++) {
+  for(int nI = 0; nI < vecArguments.size(); ++nI) {
     carrArguments[nI] = new char[vecArguments[nI].length() + 1];
     memcpy(carrArguments[nI], vecArguments[nI].c_str(), vecArguments[nI].length());
     carrArguments[nI][vecArguments[nI].length()] = '\0';
@@ -41,7 +41,7 @@ std::pair<int, char**> makeArguments(std::vector<std::string> vecArguments) {
 
 
 void deleteArguments(std::pair<int, char**> prArguments) {
-  for(int nI = 0; nI < prArguments.first; nI++) {
+  for(int nI = 0; nI < prArguments.first; ++nI) {
     delete[] prArguments.second[nI];
   }
   

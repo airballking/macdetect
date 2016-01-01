@@ -118,7 +118,7 @@ static std::shared_ptr<macdetect::Value> pyObjectToValue(PyObject* pyoObject) {
     PyObject* pyoSubKeys = PyDict_Keys(pyoSubs);
     int nSize = PyList_Size(pyoSubKeys);
     
-    for(int nI = 0; nI < nSize; nI++) {
+    for(int nI = 0; nI < nSize; ++nI) {
       PyObject* pyoSubKey = PyList_GetItem(pyoSubKeys, 0);
       std::string strSubKey = PyString_AsString(pyoSubKey);
       

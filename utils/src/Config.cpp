@@ -49,7 +49,7 @@ namespace macdetect {
 	std::string strLineFiltered;
 	char cStringDelimiter = '\0';
 	
-	for(int nI = 0; nI < strLine.length(); nI++) {
+	for(int nI = 0; nI < strLine.length(); ++nI) {
 	  char cAt = strLine.at(nI);
 	  
 	  if(cAt == '"' || cAt == '\'') {
@@ -138,7 +138,7 @@ namespace macdetect {
     char cStringDelimiter = '\0';
     size_t idxLast = 0;
     
-    for(int nI = 0; nI < strValue.length(); nI++) {
+    for(int nI = 0; nI < strValue.length(); ++nI) {
       char cAt = strValue.at(nI);
       
       if(cAt == '"' || cAt == '\'') {

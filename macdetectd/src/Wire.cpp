@@ -81,7 +81,7 @@ namespace macdetect {
 	  char carrBuffer[17];
 	  int nOffset = 0;
     
-	  for(int nI = 0; nI < 6; nI++) {
+	  for(int nI = 0; nI < 6; ++nI) {
 	    sprintf(&(carrBuffer[nI + nOffset]), "%.2x", (unsigned char)ifrTemp.ifr_hwaddr.sa_data[nI]);
 	    nOffset++;
       

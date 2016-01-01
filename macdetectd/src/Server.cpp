@@ -101,7 +101,7 @@ namespace macdetect {
     bool bReturn = m_bRun;
     
     if(m_bRun) {
-      for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); itServing++) {
+      for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); ++itServing) {
 	if((*itServing).stStatus == Serving::Stopped) {
 	  if(::listen((*itServing).nSocketFD, 3) == 0) {
 	    (*itServing).stStatus = Serving::Started;
@@ -141,7 +141,7 @@ namespace macdetect {
       while(bChanged) {
 	bChanged = false;
 	
-	for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); itServing++) {
+	for(std::list<Serving>::iterator itServing = m_lstServings.begin(); itServing != m_lstServings.end(); ++itServing) {
 	  if((*itServing).stStatus == Serving::Invalid || (*itServing).stStatus == Serving::Stopped) {
 	    ::close((*itServing).nSocketFD);
 	    m_lstServings.erase(itServing);
@@ -173,7 +173,7 @@ namespace macdetect {
       }
       
       for(std::shared_ptr<Served> svrRemove : lstRemoveServed) {
-	for(std::list< std::pair< std::shared_ptr<Served>, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); itServed++) {
+	for(std::list< std::pair< std::shared_ptr<Served>, int> >::iterator itServed = m_lstServed.begin(); itServed != m_lstServed.end(); ++itServed) {
 	  if((*itServed).first == svrRemove) {
 	    Serving svrServing = this->servingByID((*itServed).second);
 	      
@@ -208,7 +208,7 @@ namespace macdetect {
       if(ioctl(m_nSocketFDControl, SIOCGIFCONF, &ifcConf) != -1) {
 	unsigned int unInterfaces = ifcConf.ifc_len / sizeof(ifrReq[0]);
 	
-	for(unsigned int unInterface = 0; unInterface < unInterfaces; unInterface++) {
+	for(unsigned int unInterface = 0; unInterface < unInterfaces; ++unInterface) {
 	  struct ifreq ifrReqCurrent = ifrReq[unInterface];
 	  std::string strInterfaceName = ifrReqCurrent.ifr_name;
 	  

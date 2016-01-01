@@ -90,7 +90,7 @@ namespace macdetect {
 	while(bChanged) {
 	  bChanged = false;
 	  
-	  for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+	  for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); ++itStream) {
 	    if((*itStream).svrServed == svrServed) {
 	      m_lstStreams.erase(itStream);
 	      bChanged = true;
@@ -254,7 +254,7 @@ namespace macdetect {
 	  while(bChanged) {
 	    bChanged = false;
 	    
-	    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+	    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); ++itStream) {
 	      if((*itStream).strDeviceName == devEvent->deviceName()) {
 		std::shared_ptr<Value> valDisabled = std::make_shared<Value>("info", "stream-disabled");
 		valDisabled->add(std::make_shared<Value>("device-name", devEvent->deviceName()));
@@ -371,7 +371,7 @@ namespace macdetect {
   bool Daemon::disableStream(std::shared_ptr<Served> svrServed, std::string strDeviceName) {
     bool bResult = false;
     
-    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); ++itStream) {
       if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
 	m_lstStreams.erase(itStream);
 	bResult = true;
@@ -386,7 +386,7 @@ namespace macdetect {
   bool Daemon::streamEnabled(std::shared_ptr<Served> svrServed, std::string strDeviceName) {
     bool bResult = false;
     
-    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); itStream++) {
+    for(std::list<Stream>::iterator itStream = m_lstStreams.begin(); itStream != m_lstStreams.end(); ++itStream) {
       if((*itStream).svrServed == svrServed && (*itStream).strDeviceName == strDeviceName) {
 	bResult = true;
 	

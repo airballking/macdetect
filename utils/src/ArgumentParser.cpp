@@ -35,11 +35,11 @@ namespace macdetect {
   void ArgumentParser::parse(int nArgCount, char** carrArgs) {
     std::vector<std::string> vecArtifacts;
     
-    for(unsigned int unI = 1; unI < nArgCount; unI++) {
+    for(unsigned int unI = 1; unI < nArgCount; ++unI) {
       vecArtifacts.push_back(std::string(carrArgs[unI]));
     }
     
-    for(unsigned int unI = 0; unI < vecArtifacts.size(); unI++) {
+    for(unsigned int unI = 0; unI < vecArtifacts.size(); ++unI) {
       std::string strArtifact = vecArtifacts[unI];
       
       ArgumentType atType;

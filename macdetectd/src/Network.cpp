@@ -131,7 +131,7 @@ namespace macdetect {
       bChanged = false;
       
       for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
-	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	  itMAC != m_lstMACSeen.end(); ++itMAC) {
 	if(dTime - (*itMAC).dLastSeen > m_dMaxMACAge) {
 	  this->scheduleEvent(std::make_shared<MACEvent>(Event::MACAddressDisappeared, (*itMAC).strDeviceName, (*itMAC).strMAC));
 	  
@@ -145,7 +145,7 @@ namespace macdetect {
     
     // Try MAC entity update
     for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
-	itMAC != m_lstMACSeen.end(); itMAC++) {
+	itMAC != m_lstMACSeen.end(); ++itMAC) {
       if((*itMAC).strHostName == "") {
 	if(dTime - (*itMAC).dLastUpdate > m_dUpdateInterval) {
 	  (*itMAC).dLastUpdate = dTime;
@@ -193,7 +193,7 @@ namespace macdetect {
     bool bResult = false;
     
     for(std::list< std::shared_ptr<Device> >::iterator itDevice = m_lstDevices.begin();
-	itDevice != m_lstDevices.end(); itDevice++) { 
+	itDevice != m_lstDevices.end(); ++itDevice) { 
       if((*itDevice)->deviceName() == strDeviceName) {
 	m_lstDevices.erase(itDevice);
 	
@@ -208,7 +208,7 @@ namespace macdetect {
       bChanged = false;
       
       for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
-	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	  itMAC != m_lstMACSeen.end(); ++itMAC) {
 	if((*itMAC).strDeviceName == strDeviceName) {
 	  this->removeMAC(strDeviceName, (*itMAC).strMAC);
 	  bChanged = true;
@@ -263,7 +263,7 @@ namespace macdetect {
       if(ioctl(m_nSocketFDControl, SIOCGIFCONF, &ifcConf) != -1) {
 	unsigned int unInterfaces = ifcConf.ifc_len / sizeof(ifrReq[0]);
 	
-	for(unsigned int unInterface = 0; unInterface < unInterfaces; unInterface++) {
+	for(unsigned int unInterface = 0; unInterface < unInterfaces; ++unInterface) {
 	  struct ifreq ifrReqCurrent = ifrReq[unInterface];
 	  std::string strInterfaceName = ifrReqCurrent.ifr_name;
 	  
@@ -363,7 +363,7 @@ namespace macdetect {
 	if(ioctl(m_nSocketFDControl, SIOCGIFCONF, &ifcConf) != -1) {
 	  unsigned int unInterfaces = ifcConf.ifc_len / sizeof(ifrReq[0]);
 	  
-	  for(unsigned int unInterface = 0; unInterface < unInterfaces; unInterface++) {
+	  for(unsigned int unInterface = 0; unInterface < unInterfaces; ++unInterface) {
 	    struct ifreq ifrReqCurrent = ifrReq[unInterface];
 	    std::string strInterfaceName = ifrReqCurrent.ifr_name;
 	    
@@ -402,7 +402,7 @@ namespace macdetect {
   std::string Network::mac(unsigned char* ucMAC) {
     std::stringstream sts;
     
-    for(int nI = 0; nI < 6; nI++) {
+    for(int nI = 0; nI < 6; ++nI) {
       int nByte = ucMAC[nI];
       sts << std::setfill('0') << std::setw(2) << std::hex << nByte;
 	  
@@ -523,7 +523,7 @@ namespace macdetect {
       
       bool bWasPresent = false;
       for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
-	  itMAC != m_lstMACSeen.end(); itMAC++) {
+	  itMAC != m_lstMACSeen.end(); ++itMAC) {
 	if((*itMAC).strMAC == strMACAddress && (*itMAC).strDeviceName == strDeviceName) {
 	  (*itMAC).dLastSeen = this->time();
 	  bWasPresent = true;
@@ -542,7 +542,7 @@ namespace macdetect {
   
   void Network::removeMAC(std::string strDeviceName, std::string strMAC) {
     for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
-	itMAC != m_lstMACSeen.end(); itMAC++) {
+	itMAC != m_lstMACSeen.end(); ++itMAC) {
       if((*itMAC).strDeviceName == strDeviceName && (*itMAC).strMAC == strMAC) {
 	m_lstMACSeen.erase(itMAC);
 	

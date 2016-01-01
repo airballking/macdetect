@@ -115,7 +115,7 @@ namespace macdetect {
     memcpy(&unSubValueCount, &(ucBuffer[unOffset]), sizeof(unsigned int));
     unOffset += sizeof(unsigned int);
     
-    for(unsigned int unI = 0; unI < unSubValueCount; unI++) {
+    for(unsigned int unI = 0; unI < unSubValueCount; ++unI) {
       std::shared_ptr<Value> valSub = std::make_shared<Value>();
       unOffset += valSub->deserialize(&(ucBuffer[unOffset]), unLength - unOffset);
       
@@ -139,7 +139,7 @@ namespace macdetect {
   
   void Value::print(unsigned int unIndent) {
     std::string strIndentation = "";
-    for(unsigned int unI = 0; unI < unIndent; unI++) {
+    for(unsigned int unI = 0; unI < unIndent; ++unI) {
       strIndentation += "  ";
     }
     
