@@ -35,9 +35,17 @@ int main(int argc, char** argv) {
     macdetect::Config cfgConfig;
     
     if(cfgConfig.loadFromFile(strFile)) {
-      // TODO(winkler): Make test more elaborate!
-      
-      nReturnvalue = EXIT_SUCCESS;
+      if(cfgConfig.loadFromFile("") == false) {
+	std::string strConfig = "[general]\ntest-field=test-value";
+	
+	if(cfgConfig.loadFromString(strConfig)) {
+	  if(cfgConfig.value("general", "test-field", "") == "test-value") {
+	    if(cfgConfig.value("general", "test-field-nonexist", "empty") == "empty") {
+	      nReturnvalue = EXIT_SUCCESS;
+	    }
+	  }
+	}
+      }
     }
   }
   
