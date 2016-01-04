@@ -47,7 +47,16 @@ after_success:
 deploy:
   provider: releases
   api_key: ${GITHUB_OAUTH_TOKEN}
-  file: "${TRAVIS_BUILD_DIR}/build/macdetect-release.deb"
+  file:
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-client-cli.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-client-lib.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-daemon.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-daemon-dev.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-data.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-docs.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-pymacdetect.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-utils-dev.deb"
+    - "${TRAVIS_BUILD_DIR}/build/macdetect-utils-lib.deb"
   skip_cleanup: true
   on:
     tags: true
