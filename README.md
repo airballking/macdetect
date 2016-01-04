@@ -46,6 +46,9 @@ principle interface for clients shouldn't change that much, though
 (maybe function names, but the basic functionality will stay the
 same).
 
+You can find the latest in-depth documentation
+[here](http://macdetect.readthedocs.org/en/latest/).
+
 The whole code is licensed under the GPL 2.0 license. See any header
 files, source files, or the LICENSE file for more info. The copyright
 belongs to me. If you want to do anything with this software that is
