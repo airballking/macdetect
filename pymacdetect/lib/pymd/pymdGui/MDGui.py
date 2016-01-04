@@ -37,8 +37,9 @@ class ConnectionState:
 
 
 class MainWindow:
-    def __init__(self):
+    def __init__(self, bDemonstration):
         self.cliClient = PyMACDetect.Client()
+        self.bDemonstration = bDemonstration
         
         self.prepareUI()
         self.setConnectionState(ConnectionState.DISCONNECTED)
@@ -46,6 +47,9 @@ class MainWindow:
         self.prepareEnvironment()
         
         self.log("Startup")
+        
+        if self.bDemonstration:
+            self.log("PyMACDetect was started in demo mode. Identities and MACs will be shortened.")
     
     def prepareEnvironment(self):
         datadir = os.path.expanduser("~") + "/.pymacdetect"
@@ -72,7 +76,7 @@ class MainWindow:
         pixbuf = Gtk.IconTheme.get_default().load_icon("face-smile", 32, 0)
         
         for identity in identities:
-            self.lsIdentities.append([identity[1], pixbuf, identity[0]])
+            self.lsIdentities.append([identity[1] if self.bDemonstration == False else self.demoIdentityStr(identity[1]), pixbuf, identity[0]])
     
     def checkPyMACDetect(self):
         if self.cliClient and self.cliClient.connected():
@@ -192,7 +196,7 @@ class MainWindow:
                             childrow[5] = content
                             break
                     else:
-                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False])
+                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -211,7 +215,7 @@ class MainWindow:
         self.winRef.set_border_width(10)
         self.winRef.set_position(Gtk.WindowPosition.CENTER)
         
-        hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop")
+        hdrTitle = Gtk.HeaderBar(title="PyMACDetect Desktop" if self.bDemonstration == False else "PyMACDetect Desktop (Demo Mode)")
         hdrTitle.props.show_close_button = True
         
         self.btnConnection = Gtk.Button("Connect")
@@ -514,9 +518,19 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             nickname = self.nicknameForMAC(mac)
             
-            self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname, True])
+            demo_mac = self.demoMAC(mac)
+            demo_identity_str = self.demoIdentityStr(identity_str)
+            self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname, True, demo_mac, demo_identity_str])
             self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
             self.sql_conn.commit()
+    
+    def demoMAC(self, mac):
+        # Replace the last two words with `XX`
+        return mac[:-5] + "XX:XX"
+    
+    def demoIdentityStr(self, identity_str):
+        # Return everything except for the last token
+        return " ".join(identity_str.split(" ")[:-1])
     
     def nicknameForMAC(self, mac):
         self.sql_c.execute("SELECT nickname FROM macs_data WHERE mac=?", (mac,))
@@ -606,7 +620,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 row[5] = nickname
     
     def prepareMACList(self):
-        self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str, bool)
+        self.tsMACList = Gtk.TreeStore(str, str, str, int, str, str, bool, str, str)
         
         self.fltMACFilter = self.tsMACList.filter_new()
         self.fltMACFilter.set_visible_func(self.filterMACs, None)
@@ -616,7 +630,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.vwMACList = Gtk.TreeView(self.tmsMACList)
         
         rdAddress = Gtk.CellRendererText()
-        colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0)
+        colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0 if not self.bDemonstration else 7)
         colAddress.set_sort_column_id(0)
         
         rdNickname = Gtk.CellRendererText()
@@ -627,7 +641,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         colNickname.add_attribute(rdNickname, "editable", 6)
         
         rdIdentity = Gtk.CellRendererText()
-        colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4)
+        colIdentity = Gtk.TreeViewColumn("Identity", rdIdentity, text=4 if not self.bDemonstration else 8)
         colIdentity.set_sort_column_id(4)
         
         rdDevice = Gtk.CellRendererText()
