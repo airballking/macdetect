@@ -29,12 +29,16 @@ if(PYTHON)
   add_custom_target(${PROJECT_NAME} ALL DEPENDS pymacdetect_ext.so)
   
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/setup.py"
+    COMPONENT pymacdetect
     DESTINATION "/usr/share/pyshared/pymacdetect/scripts")
   install(FILES lib/pymd/__init__.py lib/pymd/pymdClient.py lib/pymd/pymdDesktop.py
+    COMPONENT pymacdetect
     DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd")
   install(FILES lib/pymd/pymdGui/__init__.py lib/pymd/pymdGui/MDGui.py lib/pymd/pymdGui/ConnectionManager.py 
+    COMPONENT pymacdetect
     DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd/pymdGui")
   install(FILES lib/pymd/pymdLib/PyMACDetect.py
+    COMPONENT pymacdetect
     DESTINATION "/usr/share/pyshared/pymacdetect/lib/pymd/pymdLib")
 endif()
 

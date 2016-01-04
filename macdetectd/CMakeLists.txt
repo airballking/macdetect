@@ -36,14 +36,17 @@ add_test(NAME readvendordata
 ## Install
 install(TARGETS ${PROJECT_NAME}
   DESTINATION "bin"
+  COMPONENT daemon
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) # 755
 
 file(GLOB HEADERS "include/macdetectd/*.h")
 
 install(FILES ${HEADERS}
   DESTINATION "include/macdetect/macdetectd"
+  COMPONENT daemon-dev
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 install(FILES "config/default.config"
   DESTINATION "share/macdetect/config"
+  COMPONENT daemon
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750

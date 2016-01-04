@@ -28,10 +28,12 @@ add_subdirectory(pymacdetect)
 ## Install
 install(FILES "data/oui.txt"
   DESTINATION "share/macdetect/data"
+  COMPONENT data
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 install(DIRECTORY "docs/_build/html"
   DESTINATION "share/macdetect/doc"
+  COMPONENT docs
   PATTERN ".git" EXCLUDE
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
@@ -62,7 +64,23 @@ set(CPACK_SET_DESTDIR "ON")
 set(CPACK_SOURCE_STRIP_FILES "")
 set(CPACK_STRIP_FILES "usr/bin/macdetectd;usr/bin/macdetect-client-cli")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}-release")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}")
+set(CPACK_DEB_COMPONENT_INSTALL ON)
+
+# Intercomponent-Dependencies
+set(CPACK_COMPONENT_CLIENT_CLI_DEPENDS client-lib)
+set(CPACK_COMPONENT_DAEMON_DEV_DEPENDS daemon)
+set(CPACK_COMPONENT_DAEMON_DEPENDS data)
+set(CPACK_COMPONENT_DAEMON_DEPENDS utils-lib)
+set(CPACK_COMPONENT_UTILS_DEV_DEPENDS utils-lib)
+
+# set(CPACK_COMPONENT_CLIENT_LIB_GROUP "Libraries")
+# set(CPACK_COMPONENT_UTILS_LIB_GROUP "Libraries")
+# set(CPACK_COMPONENT_CLIENT_CLI_GROUP "Client Runtime")
+# set(CPACK_COMPONENT_PYMACDETECT_GROUP "Client Runtime")
+# set(CPACK_COMPONENT_DAEMON_GROUP "Daemon Runtime")
+# set(CPACK_COMPONENT_UTILS_DEV_GROUP "Development")
+# set(CPACK_COMPONENT_DAEMON_DEV_GROUP "Development")
 
 configure_file(scripts/repackage_deb.sh.in scripts/repackage_deb.sh @ONLY)
 configure_file(scripts/postinst.in scripts/postinst @ONLY)
