@@ -63,7 +63,7 @@ To run the macdetect environment, you have to start two components:
    ``$ ./pymacdetect/scripts/desktop.sh``
    
    After that, click ``Connect``, choose ``localhost``, and click
-   ``Connect`` again. You should now see a notice form the server that
+   ``Connect`` again. You should now see a notice from the server that
    a client has requested a connection.
    
    On the left pane of the client window, you will now see all
