@@ -22,11 +22,12 @@
 
 from gi.repository import Gtk
 import pymdGui.MDGui
+import sys
 
 
 class MDDesktop:
-    def __init__(self):
-        self.winMain = pymdGui.MDGui.MainWindow()
+    def __init__(self, bDemonstration):
+        self.winMain = pymdGui.MDGui.MainWindow(bDemonstration)
     
     def run(self):
         self.winMain.show()
@@ -35,5 +36,11 @@ class MDDesktop:
 
 
 if __name__ == "__main__":
-    mddDesktop = MDDesktop()
+    bDemonstration = False
+    
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "demo":
+            bDemonstration = True
+    
+    mddDesktop = MDDesktop(bDemonstration)
     mddDesktop.run()
