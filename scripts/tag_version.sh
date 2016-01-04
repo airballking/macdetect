@@ -9,7 +9,7 @@ CWDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # later on), go into the base directory of the repository first.
 cd ${CWDIR}/..
 
-git tag -a $1 -m $2
+git tag -a "$1" -m "\"$2\""
 git push --tags
 
 cd -
