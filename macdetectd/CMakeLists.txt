@@ -43,7 +43,7 @@ file(GLOB HEADERS "include/macdetectd/*.h")
 
 install(FILES ${HEADERS}
   DESTINATION "include/macdetect/macdetectd"
-  COMPONENT daemon-dev
+  COMPONENT dev
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 install(FILES "config/default.config"

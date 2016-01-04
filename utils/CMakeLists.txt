@@ -30,12 +30,12 @@ add_test(NAME config
 ## Install
 install(TARGETS ${PROJECT_NAME}
   DESTINATION "lib"
-  COMPONENT utils-lib
+  COMPONENT lib
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750
 
 file(GLOB HEADERS "include/macdetect-utils/*.h")
 
 install(FILES ${HEADERS}
   DESTINATION "include/macdetect/macdetect-utils"
-  COMPONENT utils-dev
+  COMPONENT dev
   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ) # 750

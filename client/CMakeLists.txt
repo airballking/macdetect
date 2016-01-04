@@ -22,7 +22,7 @@ target_link_libraries(${PROJECT_NAME}-cli
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
-  COMPONENT client-lib
+  COMPONENT lib
   DESTINATION "lib")
 
 install(TARGETS ${PROJECT_NAME}-cli
@@ -32,5 +32,5 @@ install(TARGETS ${PROJECT_NAME}-cli
 file(GLOB HEADERS "include/client/*.h")
 
 install(FILES ${HEADERS}
-  COMPONENT client-dev
+  COMPONENT dev
   DESTINATION "include/macdetect/macdetect-client")
