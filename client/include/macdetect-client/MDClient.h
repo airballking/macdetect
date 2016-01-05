@@ -57,6 +57,10 @@ namespace macdetect_client {
     bool send(std::shared_ptr<macdetect::Value> valSend);
     
     void detectServers();
+    
+    void cycle();
+    
+    std::list<macdetect::DiscoveryClient::ServerInfo> detectedServers();
   };
 }
 

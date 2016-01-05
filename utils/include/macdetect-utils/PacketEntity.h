@@ -45,8 +45,10 @@ namespace macdetect {
     
     bool send(std::shared_ptr<Value> valSend);
 
-    virtual int recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags);
+    virtual int recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags, std::string& strIP);
+    
     std::shared_ptr<Value> receive(bool& bDisconnected);
+    std::shared_ptr<Value> receive(bool& bDisconnected, std::string& strIP);
     
     int socket();
     void setSocket(int nSocketFD);

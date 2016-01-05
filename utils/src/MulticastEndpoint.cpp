@@ -51,9 +51,13 @@ namespace macdetect {
     return sendto(this->socket(), vdBuffer, unLength, 0, (struct sockaddr*)&m_saAddrGroup, sizeof(m_saAddrGroup));
   }
   
-  int MulticastEndpoint::read(unsigned char* vdBuffer, unsigned int unLength, int nFlags) {
+  int MulticastEndpoint::read(unsigned char* vdBuffer, unsigned int unLength, int nFlags, std::string& strIP) {
+    struct sockaddr saAddr;
+    
     socklen_t slLength = sizeof(m_saAddrGroup);
-    int nRecv = ::recvfrom(this->socket(), vdBuffer, unLength, nFlags | MSG_DONTWAIT, (struct sockaddr*)&m_saAddrAny, &slLength);
+    int nRecv = ::recvfrom(this->socket(), vdBuffer, unLength, nFlags | MSG_DONTWAIT, &saAddr, &slLength);
+    
+    strIP = std::string(inet_ntoa(((struct sockaddr_in*)&saAddr)->sin_addr));
     
     if(nRecv == -1) {
       if(errno == EWOULDBLOCK) {

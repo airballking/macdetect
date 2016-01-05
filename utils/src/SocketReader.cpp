@@ -45,7 +45,18 @@ namespace macdetect {
   }
   
   int SocketReader::read(unsigned char* ucBuffer, unsigned int unLength, int nFlags) {
-    int nRecv = ::recv(m_nSocket, ucBuffer, unLength, nFlags | MSG_DONTWAIT);
+    std::string strIP = "";
+    
+    return this->read(ucBuffer, unLength, nFlags, strIP);
+  }
+  
+  int SocketReader::read(unsigned char* ucBuffer, unsigned int unLength, int nFlags, std::string& strIP) {
+    struct sockaddr_in siAddr;
+    socklen_t slSize = sizeof(siAddr);
+    
+    int nRecv = ::recvfrom(m_nSocket, ucBuffer, unLength, nFlags | MSG_DONTWAIT, (struct sockaddr*)&siAddr, &slSize);
+    
+    strIP = std::string(inet_ntoa(siAddr.sin_addr));
     
     if(nRecv == -1) {
       if(errno == EWOULDBLOCK) {

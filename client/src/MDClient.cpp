@@ -91,4 +91,12 @@ namespace macdetect_client {
   void MDClient::detectServers() {
     m_dcClient.detectServers();
   }
+  
+  void MDClient::cycle() {
+    m_dcClient.cycle();
+  }
+  
+  std::list<macdetect::DiscoveryClient::ServerInfo> MDClient::detectedServers() {
+    return m_dcClient.detectedServers();
+  }
 }

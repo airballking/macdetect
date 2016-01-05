@@ -83,11 +83,17 @@ namespace macdetect {
     return ::send(nSocketFD, vdBuffer, unLength, 0);
   }
   
-  int PacketEntity::recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags) {
+  int PacketEntity::recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags, std::string& strIP) {
     return ::recv(nSocketFD, vdBuffer, nLength, nFlags);
   }
   
   std::shared_ptr<Value> PacketEntity::receive(bool& bDisconnected) {
+    std::string strIP = "";
+    
+    return this->receive(bDisconnected, strIP);
+  }
+  
+  std::shared_ptr<Value> PacketEntity::receive(bool& bDisconnected, std::string& strIP) {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     
     std::shared_ptr<Value> valReceived = NULL;
@@ -104,7 +110,7 @@ namespace macdetect {
       }
       
       ucarrBuffer = new unsigned char[nBufferSize];
-      nLength = this->recv(m_nSocketFD, ucarrBuffer, nBufferSize, MSG_PEEK);
+      nLength = this->recv(m_nSocketFD, ucarrBuffer, nBufferSize, MSG_PEEK, strIP);
       
       if(!(nLength > 0)) {
 	break;
@@ -125,7 +131,8 @@ namespace macdetect {
       
       // Only pull so many formerly peeked bytes in as we actually
       // used for the deserialization.
-      ::recv(m_nSocketFD, ucarrBuffer, nBytesUsed, 0);
+      std::string strIP = "";
+      this->recv(m_nSocketFD, ucarrBuffer, nBytesUsed, 0, strIP);
     }
     
     delete[] ucarrBuffer;

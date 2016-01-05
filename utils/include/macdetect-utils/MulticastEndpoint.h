@@ -34,7 +34,7 @@ namespace macdetect {
     bool cycle();
     
     int write(void* vdBuffer, unsigned int unLength);
-    int read(unsigned char* ucBuffer, unsigned int unLength, int nFlags) override;
+    int read(unsigned char* ucBuffer, unsigned int unLength, int nFlags, std::string& strIP) override;
   };
 }
 

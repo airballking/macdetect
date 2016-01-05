@@ -50,6 +50,8 @@ class MainWindow:
         
         if self.bDemonstration:
             self.log("PyMACDetect was started in demo mode. Identities and MACs will be shortened.")
+        
+        self.check_server_info = GObject.timeout_add(100, self.checkServerInfo)
     
     def prepareEnvironment(self):
         datadir = os.path.expanduser("~") + "/.pymacdetect"
@@ -77,6 +79,15 @@ class MainWindow:
         
         for identity in identities:
             self.lsIdentities.append([identity[1] if self.bDemonstration == False else self.demoIdentityStr(identity[1]), pixbuf, identity[0]])
+    
+    def checkServerInfo(self):
+        if self.cliClient:
+            server_info = self.cliClient.detectedServerInfo()
+            
+            if server_info:
+                print server_info
+        
+        return True
     
     def checkPyMACDetect(self):
         if self.cliClient and self.cliClient.connected():
@@ -175,6 +186,7 @@ class MainWindow:
                             
                             if mac_address != "":
                                 self.updateMACEvidence(mac_address, evidence_dict)
+            
             return True
         else:
             return False

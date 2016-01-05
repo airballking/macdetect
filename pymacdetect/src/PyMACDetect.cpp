@@ -410,6 +410,49 @@ static PyObject* detectServers(PyObject* pyoSelf, PyObject* pyoArgs) {
 }
 
 
+static PyObject* cycle(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    mdcClient->cycle();
+    
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
+static PyObject* detectedServers(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    std::list<macdetect::DiscoveryClient::ServerInfo> lstServers = mdcClient->detectedServers();
+    
+    // Transform into list.
+    if(lstServers.size() > 0) {
+      for(macdetect::DiscoveryClient::ServerInfo siInfo : lstServers) {
+	std::cout << siInfo.strName << " (" << siInfo.strIP << ")" << std::endl;
+      }
+    }
+    
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
 PyMODINIT_FUNC initpymacdetect_ext(void) {
   g_pyoModule = Py_InitModule("pymacdetect_ext", PyMACDetectMethods);
   

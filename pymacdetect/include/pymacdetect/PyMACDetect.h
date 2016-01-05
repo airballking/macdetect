@@ -56,6 +56,9 @@ static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs);
 
 static PyObject* detectServers(PyObject* pyoSelf, PyObject* pyoArgs);
 
+static PyObject* cycle(PyObject* pyoSelf, PyObject* pyoArgs);
+
+static PyObject* detectedServers(PyObject* pyoSelf, PyObject* pyoArgs);
 
 PyMODINIT_FUNC initpymacdetect(void);
 
@@ -81,6 +84,10 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Disables the live streaming of network changes on the given network interface."},
   {"detectServers", detectServers, METH_VARARGS,
    "Sends a discovery signal to request information about macdetectd servers on the same network."},
+  {"cycle", cycle, METH_VARARGS,
+   "Process outstanding data for discovery."},
+  {"detectedServers", detectedServers, METH_VARARGS,
+   "Returns a list of detected servers on the network."},
   {NULL, NULL, 0, NULL}
 };
 

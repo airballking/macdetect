@@ -51,3 +51,7 @@ class Client:
     
     def detectServers(self):
         return pymacdetect_ext.detectServers(self.mdcClient)
+    
+    def detectedServerInfo(self):
+        pymacdetect_ext.cycle(self.mdcClient)
+        return pymacdetect_ext.detectedServers(self.mdcClient)
