@@ -436,14 +436,24 @@ static PyObject* detectedServers(PyObject* pyoSelf, PyObject* pyoArgs) {
     std::list<macdetect::DiscoveryClient::ServerInfo> lstServers = mdcClient->detectedServers();
     
     // Transform into list.
-    if(lstServers.size() > 0) {
-      for(macdetect::DiscoveryClient::ServerInfo siInfo : lstServers) {
-	std::cout << siInfo.strName << " (" << siInfo.strIP << ")" << std::endl;
-      }
+    PyObject* pyoList = PyList_New(0);
+    
+    for(macdetect::DiscoveryClient::ServerInfo siInfo : lstServers) {
+      PyObject* pyoServerInfo = PyDict_New();
+      
+      PyObject* pyoName = Py_BuildValue("s#", siInfo.strName.c_str(), siInfo.strName.length());
+      PyDict_SetItemString(pyoServerInfo, "name", pyoName);
+      Py_DECREF(pyoName);
+      
+      PyObject* pyoIP = Py_BuildValue("s#", siInfo.strIP.c_str(), siInfo.strIP.length());
+      PyDict_SetItemString(pyoServerInfo, "ip", pyoIP);
+      Py_DECREF(pyoIP);
+      
+      PyList_Append(pyoList, pyoServerInfo);
+      Py_DECREF(pyoServerInfo);
     }
     
-    Py_INCREF(Py_None);
-    pyoResult = Py_None;
+    pyoResult = pyoList;
   } else {
     pyoResult = NULL;
     g_pyoException = mdcInvalidException();

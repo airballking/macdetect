@@ -66,8 +66,6 @@ class ConnectionManager:
     
     def prepareServerList(self):
         self.lsServerList = Gtk.ListStore(str, str, str)
-        self.lsServerList.append(["localhost", "127.0.0.1", "manual"]) # Test
-        self.lsServerList.append(["pi", "192.168.178.26", "manual"]) # Test
         
         self.vwServerList = Gtk.TreeView(self.lsServerList)
         
@@ -103,3 +101,14 @@ class ConnectionManager:
         scwScrolled.add(wdgWidget)
         
         return scwScrolled
+    
+    def ipInList(self, strIP):
+        for iter in self.lsServerList:
+            if iter[1] == strIP:
+                return True
+        
+        return False
+    
+    def addServer(self, siServerInfo):
+        if not self.ipInList(siServerInfo["ip"]):
+            self.lsServerList.append([siServerInfo["name"], siServerInfo["ip"], "automatic"])

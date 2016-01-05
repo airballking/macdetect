@@ -82,10 +82,11 @@ class MainWindow:
     
     def checkServerInfo(self):
         if self.cliClient:
-            server_info = self.cliClient.detectedServerInfo()
+            server_infos = self.cliClient.detectedServerInfo()
             
-            if server_info:
-                print server_info
+            if server_infos:
+                for siServerInfo in server_infos:
+                    self.cmgrConnectionManager.addServer(siServerInfo)
         
         return True
     
