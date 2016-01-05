@@ -15,7 +15,8 @@ add_library(${PROJECT_NAME}
   src/SocketReader.cpp
   src/MulticastEndpoint.cpp
   src/DiscoveryNode.cpp
-  src/DiscoveryServer.cpp)
+  src/DiscoveryServer.cpp
+  src/DiscoveryClient.cpp)
 
 add_executable(test-argumentparser
   src/ArgumentParser.cpp

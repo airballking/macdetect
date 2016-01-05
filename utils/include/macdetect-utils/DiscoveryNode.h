@@ -21,10 +21,11 @@ namespace macdetect {
     DiscoveryNode();
     ~DiscoveryNode();
     
-    Value receive(bool bSuccess);
-    bool send(Value valSend);
+    std::shared_ptr<Value> receive(bool bSuccess);
     
     bool cycle();
+    
+    virtual void processReceivedValue(std::shared_ptr<Value> valReceived) = 0;
   };
 }
 

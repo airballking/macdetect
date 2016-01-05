@@ -28,15 +28,16 @@
 
 // MAC detect
 #include <macdetect-client/Client.h>
+#include <macdetect-utils/DiscoveryClient.h>
 
 
 namespace macdetect_client {
   class MDClient {
   private:
     macdetect::Client m_cliClient;
+    macdetect::DiscoveryClient m_dcClient;
     
   protected:
-    
   public:
     MDClient();
     ~MDClient();

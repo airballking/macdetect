@@ -1,8 +1,12 @@
-#include <macdetect-utils/DiscoveryNode.h>
+#ifndef __DISCOVERY_SERVER_H__
+#define __DISCOVERY_SERVER_H__
 
 
 // System
 #include <string>
+
+// macdetect
+#include <macdetect-utils/DiscoveryNode.h>
 
 
 namespace macdetect {
@@ -14,5 +18,9 @@ namespace macdetect {
   public:
     DiscoveryServer(std::string strIdentifier);
     ~DiscoveryServer();
+    
+    void processReceivedValue(std::shared_ptr<Value> valReceived) override;
   };
 }
+
+#endif /* __DISCOVERY_SERVER_H__ */

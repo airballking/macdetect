@@ -9,23 +9,30 @@ namespace macdetect {
   DiscoveryNode::~DiscoveryNode() {
   }
   
-  Value DiscoveryNode::receive(bool bSuccess) {
-    Value valReceived;
-    bSuccess = false;
+  std::shared_ptr<Value> DiscoveryNode::receive(bool bSuccess) {
+    std::shared_ptr<Value> valReceived;
+    bSuccess = true;
     
-    // TODO(winkler): Implement this.
+    bool bDisconnected;
+    std::shared_ptr<Value> valReceivedTemp = this->PacketEntity::receive(bDisconnected);
+    
+    if(valReceivedTemp != NULL) {
+      if(!bDisconnected) {
+	bSuccess = true;
+	valReceived = valReceivedTemp;
+      }
+    }
     
     return valReceived;
   }
   
-  bool DiscoveryNode::send(Value valSend) {
-    // TODO(winkler): Implement this.
-    
-    return true;
-  }
-  
   bool DiscoveryNode::cycle() {
-    // TODO(winkler): Implement this.
+    bool bSuccess;
+    std::shared_ptr<Value> valReceived = this->receive(bSuccess);
+    
+    if(bSuccess) {
+      this->processReceivedValue(valReceived);
+    }
     
     return true;
   }
