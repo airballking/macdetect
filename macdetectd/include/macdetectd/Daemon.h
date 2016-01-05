@@ -29,6 +29,7 @@
 #include <macdetectd/Network.h>
 #include <macdetectd/Server.h>
 #include <macdetect-utils/Config.h>
+#include <macdetect-utils/MulticastEndpoint.h>
 
 
 namespace macdetect {
@@ -46,6 +47,8 @@ namespace macdetect {
     
     double m_dLastKeepAlive;
     double m_dKeepAliveInterval;
+    
+    MulticastEndpoint m_meMulticast;
     
   protected:
   public:

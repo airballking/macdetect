@@ -34,7 +34,7 @@
 #include <sstream>
 
 // MAC Detect
-#include <macdetectd/SocketReader.h>
+#include <macdetect-utils/SocketReader.h>
 #include <macdetectd/Globals.h>
 
 

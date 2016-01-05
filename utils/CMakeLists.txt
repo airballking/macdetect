@@ -11,7 +11,9 @@ add_library(${PROJECT_NAME}
   src/Value.cpp
   src/PacketEntity.cpp
   src/ArgumentParser.cpp
-  src/Config.cpp)
+  src/Config.cpp
+  src/SocketReader.cpp
+  src/MulticastEndpoint.cpp)
 
 add_executable(test-argumentparser
   src/ArgumentParser.cpp

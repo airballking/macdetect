@@ -15,7 +15,6 @@ add_executable(${PROJECT_NAME}
   src/Network.cpp
   src/Device.cpp
   src/Event.cpp
-  src/SocketReader.cpp
   src/Wire.cpp
   src/Data.cpp
   src/RARP.cpp
