@@ -33,8 +33,8 @@ namespace macdetect {
     
     bool cycle();
     
-    bool write(void* vdBuffer, unsigned int unLength);
-    int read(unsigned char* ucBuffer, unsigned int unLength) override;
+    int write(void* vdBuffer, unsigned int unLength);
+    int read(unsigned char* ucBuffer, unsigned int unLength, int nFlags) override;
   };
 }
 

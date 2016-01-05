@@ -44,12 +44,16 @@ namespace macdetect {
     ~PacketEntity();
     
     bool send(std::shared_ptr<Value> valSend);
+
+    virtual int recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags);
     std::shared_ptr<Value> receive(bool& bDisconnected);
     
     int socket();
     void setSocket(int nSocketFD);
     
     bool failureState();
+    
+    virtual int write(int nSocketFD, void* vdBuffer, unsigned int unLength);
   };
 }
 

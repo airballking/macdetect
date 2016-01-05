@@ -392,6 +392,24 @@ static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs) {
 }
 
 
+static PyObject* detectServers(PyObject* pyoSelf, PyObject* pyoArgs) {
+  PyObject* pyoResult = NULL;
+  macdetect_client::MDClient* mdcClient = clientFromPyArgs(pyoArgs);
+  
+  if(mdcClient) {
+    mdcClient->detectServers();
+    
+    Py_INCREF(Py_None);
+    pyoResult = Py_None;
+  } else {
+    pyoResult = NULL;
+    g_pyoException = mdcInvalidException();
+  }
+  
+  return pyoResult;
+}
+
+
 PyMODINIT_FUNC initpymacdetect_ext(void) {
   g_pyoModule = Py_InitModule("pymacdetect_ext", PyMACDetectMethods);
   

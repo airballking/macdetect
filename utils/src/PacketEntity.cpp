@@ -47,7 +47,7 @@ namespace macdetect {
     
     do {
       nBufferSize += 2048;
-
+      
       if(ucarrBuffer) {
 	delete[] ucarrBuffer;
       }
@@ -58,7 +58,7 @@ namespace macdetect {
     
     int nSentBytes = 0;
     while(nSentBytes < nSerializedLength) {
-      int nResult = ::write(m_nSocketFD, &ucarrBuffer[nSentBytes], nSerializedLength - nSentBytes);
+      int nResult = this->write(m_nSocketFD, &ucarrBuffer[nSentBytes], nSerializedLength - nSentBytes);
       
       if(nResult > 0) {
 	nSentBytes += nResult;
@@ -72,7 +72,19 @@ namespace macdetect {
       delete[] ucarrBuffer;
     }
     
+    if(nSentBytes == nSerializedLength) {
+      bResult = true;
+    }
+    
     return bResult;
+  }
+  
+  int PacketEntity::write(int nSocketFD, void* vdBuffer, unsigned int unLength) {
+    return ::send(nSocketFD, vdBuffer, unLength, 0);
+  }
+  
+  int PacketEntity::recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags) {
+    return ::recv(nSocketFD, vdBuffer, nLength, nFlags);
   }
   
   std::shared_ptr<Value> PacketEntity::receive(bool& bDisconnected) {
@@ -92,7 +104,7 @@ namespace macdetect {
       }
       
       ucarrBuffer = new unsigned char[nBufferSize];
-      nLength = ::recv(m_nSocketFD, ucarrBuffer, nBufferSize, MSG_PEEK);
+      nLength = this->recv(m_nSocketFD, ucarrBuffer, nBufferSize, MSG_PEEK);
       
       if(!(nLength > 0)) {
 	break;
@@ -116,7 +128,7 @@ namespace macdetect {
       ::recv(m_nSocketFD, ucarrBuffer, nBytesUsed, 0);
     }
     
-    delete[] ucarrBuffer; 
+    delete[] ucarrBuffer;
     
     return valReceived;
   }

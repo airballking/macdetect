@@ -48,3 +48,6 @@ class Client:
     
     def send(self, dicMessage):
         return pymacdetect_ext.send(self.mdcClient, dicMessage)
+    
+    def detectServers(self):
+        return pymacdetect_ext.detectServers(self.mdcClient)

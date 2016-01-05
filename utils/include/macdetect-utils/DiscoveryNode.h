@@ -21,11 +21,13 @@ namespace macdetect {
     DiscoveryNode();
     ~DiscoveryNode();
     
-    std::shared_ptr<Value> receive(bool bSuccess);
+    int recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags) override;
+    std::shared_ptr<Value> receive(bool& bSuccess);
     
     bool cycle();
     
     virtual void processReceivedValue(std::shared_ptr<Value> valReceived) = 0;
+    int write(int nSocketFD, void* vdBuffer, unsigned int unLength) override;
   };
 }
 

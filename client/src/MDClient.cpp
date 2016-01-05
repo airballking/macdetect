@@ -87,4 +87,8 @@ namespace macdetect_client {
   bool MDClient::send(std::shared_ptr<macdetect::Value> valSend) {
     return m_cliClient.send(valSend);
   }
+  
+  void MDClient::detectServers() {
+    m_dcClient.detectServers();
+  }
 }

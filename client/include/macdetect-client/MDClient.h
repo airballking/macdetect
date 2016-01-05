@@ -55,6 +55,8 @@ namespace macdetect_client {
     std::shared_ptr<macdetect::Value> receive(bool& bDisconnected, bool bBlock = false);
     
     bool send(std::shared_ptr<macdetect::Value> valSend);
+    
+    void detectServers();
   };
 }
 

@@ -54,7 +54,11 @@ static PyObject* disconnectMDClient(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* receive(PyObject* pyoSelf, PyObject* pyoArgs);
 static PyObject* send(PyObject* pyoSelf, PyObject* pyoArgs);
 
+static PyObject* detectServers(PyObject* pyoSelf, PyObject* pyoArgs);
+
+
 PyMODINIT_FUNC initpymacdetect(void);
+
 
 static PyMethodDef PyMACDetectMethods[] = {
   {"createClient", createMDClient, METH_VARARGS,
@@ -75,6 +79,8 @@ static PyMethodDef PyMACDetectMethods[] = {
    "Enables the live streaming of network changes on the given network interface."},
   {"disableStream", disableStream, METH_VARARGS,
    "Disables the live streaming of network changes on the given network interface."},
+  {"detectServers", detectServers, METH_VARARGS,
+   "Sends a discovery signal to request information about macdetectd servers on the same network."},
   {NULL, NULL, 0, NULL}
 };
 

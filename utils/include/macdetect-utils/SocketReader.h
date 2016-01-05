@@ -47,7 +47,8 @@ namespace macdetect {
     SocketReader();
     ~SocketReader();
     
-    virtual int read(unsigned char* ucBuffer, unsigned int unLength);
+    int read(unsigned char* ucBuffer, unsigned int unLength);
+    virtual int read(unsigned char* ucBuffer, unsigned int unLength, int nFlags);
     int bufferedRead(unsigned char** ucBuffer);
     int bufferedRead(unsigned char** ucBuffer, int nReadingLength);
     void setDefaultReadingLength(int nDefaultReadingLength);

@@ -4,16 +4,21 @@
 namespace macdetect {
   DiscoveryNode::DiscoveryNode() : PacketEntity(-1), m_meMulticast("225.0.0.37", 2077) {
     this->setSocket(m_meMulticast.socket());
+    this->socket();
   }
   
   DiscoveryNode::~DiscoveryNode() {
   }
   
-  std::shared_ptr<Value> DiscoveryNode::receive(bool bSuccess) {
-    std::shared_ptr<Value> valReceived;
-    bSuccess = true;
+  int DiscoveryNode::recv(int nSocketFD, void* vdBuffer, int nLength, int nFlags) {
+    return m_meMulticast.read((unsigned char*)vdBuffer, nLength, nFlags);
+  }
+  
+  std::shared_ptr<Value> DiscoveryNode::receive(bool& bSuccess) {
+    std::shared_ptr<Value> valReceived = NULL;
+    bSuccess = false;
     
-    bool bDisconnected;
+    bool bDisconnected = false;
     std::shared_ptr<Value> valReceivedTemp = this->PacketEntity::receive(bDisconnected);
     
     if(valReceivedTemp != NULL) {
@@ -27,7 +32,7 @@ namespace macdetect {
   }
   
   bool DiscoveryNode::cycle() {
-    bool bSuccess;
+    bool bSuccess = false;
     std::shared_ptr<Value> valReceived = this->receive(bSuccess);
     
     if(bSuccess) {
@@ -35,5 +40,9 @@ namespace macdetect {
     }
     
     return true;
+  }
+ 
+  int DiscoveryNode::write(int nSocketFD, void* vdBuffer, unsigned int unLength) {
+    return m_meMulticast.write(vdBuffer, unLength);
   }
 }

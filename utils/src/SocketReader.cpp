@@ -41,7 +41,11 @@ namespace macdetect {
   }
   
   int SocketReader::read(unsigned char* ucBuffer, unsigned int unLength) {
-    int nRecv = ::recv(m_nSocket, ucBuffer, unLength, MSG_DONTWAIT);
+    return this->read(ucBuffer, unLength, 0);
+  }
+  
+  int SocketReader::read(unsigned char* ucBuffer, unsigned int unLength, int nFlags) {
+    int nRecv = ::recv(m_nSocket, ucBuffer, unLength, nFlags | MSG_DONTWAIT);
     
     if(nRecv == -1) {
       if(errno == EWOULDBLOCK) {

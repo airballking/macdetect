@@ -301,6 +301,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.lsLog.append([time, message])
     
     def clickConnectionManager(self, wdgWidget):
+        self.cliClient.detectServers()
+        
         if self.connectionState == ConnectionState.DISCONNECTED:
             self.cmgrConnectionManager.show()
             self.cmgrConnectionManager.winRef.set_modal(True)

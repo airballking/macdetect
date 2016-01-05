@@ -9,7 +9,7 @@ namespace macdetect {
   }
   
   void DiscoveryClient::processReceivedValue(std::shared_ptr<Value> valReceived) {
-    if(valReceived->sub("server-info")) {
+    if(valReceived->content() == "server-info") {
       valReceived->print();
     }
   }

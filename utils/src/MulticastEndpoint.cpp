@@ -47,13 +47,13 @@ namespace macdetect {
     return false;
   }
   
-  bool MulticastEndpoint::write(void* vdBuffer, unsigned int unLength) {
-    return sendto(this->socket(), vdBuffer, unLength, 0, (struct sockaddr*)&m_saAddrGroup, sizeof(m_saAddrGroup)) >= 0;
+  int MulticastEndpoint::write(void* vdBuffer, unsigned int unLength) {
+    return sendto(this->socket(), vdBuffer, unLength, 0, (struct sockaddr*)&m_saAddrGroup, sizeof(m_saAddrGroup));
   }
   
-  int MulticastEndpoint::read(unsigned char* ucBuffer, unsigned int unLength) {
+  int MulticastEndpoint::read(unsigned char* vdBuffer, unsigned int unLength, int nFlags) {
     socklen_t slLength = sizeof(m_saAddrGroup);
-    int nRecv = recvfrom(this->socket(), ucBuffer, unLength, 0, (struct sockaddr*)&m_saAddrAny, &slLength);
+    int nRecv = ::recvfrom(this->socket(), vdBuffer, unLength, nFlags | MSG_DONTWAIT, (struct sockaddr*)&m_saAddrAny, &slLength);
     
     if(nRecv == -1) {
       if(errno == EWOULDBLOCK) {
