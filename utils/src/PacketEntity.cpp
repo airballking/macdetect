@@ -33,6 +33,10 @@ namespace macdetect {
     return m_nSocketFD;
   }
   
+  void PacketEntity::setSocket(int nSocketFD) {
+    m_nSocketFD = nSocketFD;
+  }
+  
   bool PacketEntity::send(std::shared_ptr<Value> valSend) {
     std::lock_guard<std::mutex> lgGuard(m_mtxSocketAccess);
     

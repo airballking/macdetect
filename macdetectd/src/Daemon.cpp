@@ -22,7 +22,7 @@
 
 
 namespace macdetect {
-  Daemon::Daemon() : m_dLastKeepAlive(0.0), m_dKeepAliveInterval(1.0), m_meMulticast("225.0.0.37", 2077) {
+  Daemon::Daemon(std::string strIdentifier) : DiscoveryServer(strIdentifier), m_dLastKeepAlive(0.0), m_dKeepAliveInterval(1.0) {
     m_nwNetwork.setAutoManageDevices(true);
     m_nwNetwork.setDeviceWhiteBlacklistMode(macdetect::Network::Whitelist);
   }
@@ -343,10 +343,8 @@ namespace macdetect {
 	}
       }
       
-      // Test multicast
-      /*char caBuffer[] = "asd";
-	m_meMulticast.write(caBuffer, 3);*/
-      // End test multicast
+      // Cycle discovery mechanisms
+      this->DiscoveryServer::cycle();
       
       // Last but not least, send the keepalive packages if necessary
       double dTime = m_nwNetwork.time();

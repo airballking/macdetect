@@ -29,11 +29,11 @@
 #include <macdetectd/Network.h>
 #include <macdetectd/Server.h>
 #include <macdetect-utils/Config.h>
-#include <macdetect-utils/MulticastEndpoint.h>
+#include <macdetect-utils/DiscoveryServer.h>
 
 
 namespace macdetect {
-  class Daemon {
+  class Daemon : public DiscoveryServer {
   private:
     typedef struct {
       std::shared_ptr<Served> svrServed;
@@ -48,11 +48,9 @@ namespace macdetect {
     double m_dLastKeepAlive;
     double m_dKeepAliveInterval;
     
-    MulticastEndpoint m_meMulticast;
-    
   protected:
   public:
-    Daemon();
+    Daemon(std::string strIdentifier);
     ~Daemon();
     
     bool parseConfigFile(std::string strFilepath);

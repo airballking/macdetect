@@ -33,7 +33,7 @@
 #include <macdetect-utils/ArgumentParser.h>
 
 
-macdetect::Daemon g_dmDaemon;
+macdetect::Daemon g_dmDaemon("test-server");
 
 namespace macdetect {
   bool g_bDaemon = false;

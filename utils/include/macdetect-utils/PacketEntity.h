@@ -47,6 +47,8 @@ namespace macdetect {
     std::shared_ptr<Value> receive(bool& bDisconnected);
     
     int socket();
+    void setSocket(int nSocketFD);
+    
     bool failureState();
   };
 }
