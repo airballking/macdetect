@@ -20,6 +20,8 @@ namespace macdetect {
     ~DiscoveryServer();
     
     void processReceivedValue(std::shared_ptr<Value> valReceived, std::string strSenderIP) override;
+    
+    void setIdentifier(std::string strIdentifier);
   };
 }
 

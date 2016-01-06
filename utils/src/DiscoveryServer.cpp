@@ -18,4 +18,8 @@ namespace macdetect {
       this->send(valResponse);
     }
   }
+  
+  void DiscoveryServer::setIdentifier(std::string strIdentifier) {
+    m_strIdentifier = strIdentifier;
+  }
 }
