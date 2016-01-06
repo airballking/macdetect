@@ -208,6 +208,8 @@ class MainWindow:
                         if childrow[0] == key:
                             childrow[5] = content
                             break
+                        
+                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
                     else:
                         self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
     
