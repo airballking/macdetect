@@ -64,10 +64,14 @@ class ConnectionManager:
         
         self.parent.processConnectionManager()
     
+    def activateItem(self, wdg, itm, btn):
+        self.clickConnect(wdg)
+    
     def prepareServerList(self):
         self.lsServerList = Gtk.ListStore(str, str, str)
         
         self.vwServerList = Gtk.TreeView(self.lsServerList)
+        self.vwServerList.connect("row-activated", self.activateItem)
         
         rdNickname = Gtk.CellRendererText()
         colNickname = Gtk.TreeViewColumn("Nickname", rdNickname, text=0)
