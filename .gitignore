@@ -8,3 +8,10 @@ build
 _build
 _static
 _templates
+lib/pymdGui
+lib/pymdLib
+lib/*.a
+lib/*.so
+docs/.doctrees
+docs/_sources
+docs/*.html
