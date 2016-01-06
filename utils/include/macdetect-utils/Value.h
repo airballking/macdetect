@@ -45,7 +45,7 @@ namespace macdetect {
     ~Value();
     
     void add(std::shared_ptr<Value> valAdd);
-    void add(std::string strKey, std::string strContent);
+    std::shared_ptr<Value> add(std::string strKey, std::string strContent);
     
     int serialize(void* vdBuffer, unsigned int unLength);
     unsigned int deserialize(void* vdBuffer, unsigned int unLength);

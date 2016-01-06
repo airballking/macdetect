@@ -35,8 +35,11 @@ namespace macdetect {
     m_lstSubValues.push_back(valAdd);
   }
   
-  void Value::add(std::string strKey, std::string strContent) {
-    this->add(std::make_shared<Value>(strKey, strContent));
+  std::shared_ptr<Value> Value::add(std::string strKey, std::string strContent) {
+    std::shared_ptr<Value> valAdd = std::make_shared<Value>(strKey, strContent);
+    this->add(valAdd);
+    
+    return valAdd;
   }
   
   int Value::serialize(void* vdBuffer, unsigned int unLength) {
