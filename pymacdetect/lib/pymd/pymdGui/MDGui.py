@@ -42,7 +42,7 @@ class MainWindow:
         self.bDemonstration = bDemonstration
         
         self.prepareUI()
-        self.setConnectionState(ConnectionState.DISCONNECTED)
+        self.setConnectionState(ConnectionState.DISCONNECTED, "")
         
         self.prepareEnvironment()
         
@@ -100,7 +100,7 @@ class MainWindow:
                 self.tsMACList.clear()
                 self.lsDeviceList.clear()
                 self.log("Connection closed by server.")
-                self.setConnectionState(ConnectionState.Disconnected)
+                self.setConnectionState(ConnectionState.Disconnected, "")
                 
                 return False
             
@@ -203,15 +203,24 @@ class MainWindow:
                 if row[0] == mac_address:
                     if self.tsMACList.iter_has_child(treeiter):
                         childiter = self.tsMACList.iter_children(treeiter)
-                        childrow = self.tsMACList[childiter]
                         
-                        if childrow[0] == key:
-                            childrow[5] = content
-                            break
+                        bFound = False
+                        while childiter:
+                            childrow = self.tsMACList[childiter]
+                            
+                            if childrow[0] == key:
+                                childrow[5] = content
+                                bFound = True
+                                break
+                            else:
+                                childiter = self.tsMACList.iter_next(childiter)
                         
-                        self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
+                        if not bFound:
+                            self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
                     else:
                         self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
+                    
+                    break
     
     def prepareUI(self):
         self.cmgrConnectionManager = ConnectionManager.ConnectionManager(self)
@@ -236,6 +245,8 @@ class MainWindow:
         self.btnConnection = Gtk.Button("Connect")
         self.btnConnection.connect("clicked", self.clickConnectionManager)
         
+        self.lblServer = Gtk.Label("")
+        
         self.btnSettings = Gtk.Button()
         self.btnSettings.connect("clicked", self.clickSettings)
         img = Gtk.Image()
@@ -251,6 +262,7 @@ class MainWindow:
         self.btnAbout.show_all()
         
         hdrTitle.add(self.btnConnection)
+        hdrTitle.add(self.lblServer)
         #hdrTitle.pack_end(self.btnSettings)
         hdrTitle.pack_end(self.btnAbout)
         
@@ -282,8 +294,10 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         about.run()
         about.destroy()
     
-    def setConnectionState(self, state):
+    def setConnectionState(self, state, where):
         self.connectionState = state
+        
+        self.lblServer.set_text(where)
         
         if state == ConnectionState.DISCONNECTED:
             self.btnConnection.set_label("Connect")
@@ -298,17 +312,17 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         
         if what == "connect":
             self.log("Connecting to " + where + "...")
-            self.setConnectionState(ConnectionState.CONNECTING)
+            self.setConnectionState(ConnectionState.CONNECTING, where)
             
             if self.cliClient.connect(where):
-                self.setConnectionState(ConnectionState.CONNECTED)
+                self.setConnectionState(ConnectionState.CONNECTED, where)
                 self.log("Connected to " + where + ".")
                 
                 self.check_timeout_id = GObject.timeout_add(10, self.checkPyMACDetect)
                 self.cliClient.send({"request": {"content": "devices-list"}})
                 self.requestKnownMACAddresses()
             else:
-                self.setConnectionState(ConnectionState.DISCONNECTED)
+                self.setConnectionState(ConnectionState.DISCONNECTED, where)
                 self.log("Failed to connect to " + where + ".")
         else:
             # Everything else
@@ -329,7 +343,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             pass
         elif self.connectionState == ConnectionState.CONNECTED:
             self.cliClient.disconnect()
-            self.setConnectionState(ConnectionState.DISCONNECTED)
+            self.setConnectionState(ConnectionState.DISCONNECTED, "")
             self.log("Connection closed.")
             
             self.tsMACList.clear()
@@ -432,10 +446,32 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.prepareMACList()
         
         hbxDeviceView = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        vbxDevicesAndControls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         
-        hbxDeviceView.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
+        vbxDevicesAndControls.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
         
-        self.stkStack.add_titled(hbxDeviceView, "devices", "Device View")
+        hbxDeviceControls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        
+        btnExpandAll = Gtk.Button("Expand all")
+        btnExpandAll.connect("clicked", self.clickExpandAllDevices)
+        
+        btnCollapseAll = Gtk.Button("Collapse all")
+        btnCollapseAll.connect("clicked", self.clickCollapseAllDevices)
+        
+        hbxDeviceControls.pack_start(btnExpandAll, False, False, 0)
+        hbxDeviceControls.pack_start(btnCollapseAll, False, False, 0)
+        
+        vbxDevicesAndControls.pack_start(hbxDeviceControls, False, False, 0)
+        
+        hbxDeviceView.pack_start(vbxDevicesAndControls, True, True, 0)
+        
+        self.stkStack.add_titled(hbxDeviceView, "devices", "MACs")
+    
+    def clickExpandAllDevices(self, wdg):
+        self.vwMACList.expand_all()
+    
+    def clickCollapseAllDevices(self, wdg):
+        self.vwMACList.collapse_all()
     
     def addDevice(self, device, devtype):
         is_present = False
@@ -871,7 +907,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         # NOTE(winkler): Commented out until this feature gets actually used.
         #hbxIdentities.pack_start(vbxControls, False, True, 0)
         
-        self.stkStack.add_titled(hbxIdentities, "identities", "Identity View")
+        self.stkStack.add_titled(hbxIdentities, "identities", "Identities")
     
     def prepareIdentityFlow(self):
         self.scwFlow = Gtk.ScrolledWindow()
