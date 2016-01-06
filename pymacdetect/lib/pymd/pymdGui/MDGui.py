@@ -272,6 +272,9 @@ class MainWindow:
 PyMACDetect is developed by Jan Winkler <jan.winkler.84@gmail.com>.
 Copyright 2015. Licensed under GPL 2.0.
 
+Get the most up to date version here:
+https://github.com/fairlight1337/macdetect
+
 For more details, see the LICENSE file in the base macdetect folder.''')
         
         about.run()
