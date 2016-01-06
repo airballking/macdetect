@@ -439,7 +439,6 @@ namespace macdetect {
       bool bHasHostname = prEntry.second.find("hostname") != prEntry.second.end();
       
       if(bHasIP && !bHasHostname) {
-	std::cout << "check " << prEntry.first << std::endl;
 	struct in_addr ipv4addr;
 	struct hostent* he;
 	
