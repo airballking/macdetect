@@ -25,6 +25,7 @@ import ConnectionManager
 from time import gmtime, strftime, sleep
 import sqlite3
 import os
+import cairo
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -231,6 +232,7 @@ class MainWindow:
         self.prepareStack()
         self.prepareDeviceView()
         self.prepareIdentityView()
+        self.prepareTimelineView()
     
     def prepareWindow(self):
         self.winRef = Gtk.Window()
@@ -891,6 +893,43 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                         self.mnuMACs.popup(None, None, None, None, evEvent.button, evEvent.time)
                         
                         return True
+    
+    def onDrawTimeline(self, wdg, ctx):
+        width = wdg.get_allocation().width
+        height = wdg.get_allocation().height
+        
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle(0, 0, width, height)
+        ctx.fill()
+        
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.move_to(25, 25)
+        ctx.show_text("Timeline widget in the works (we're at position " + str(self.timelinePosition) + "!)")
+    
+    def prepareTimelineView(self):
+        vbxTimeline = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        
+        # TODO: Build timeline widget
+        self.daTimeline = Gtk.DrawingArea()
+        self.daTimeline.connect("draw", self.onDrawTimeline)
+        
+        self.sclTimelineSlider = Gtk.HScale()
+        self.sclTimelineSlider.connect("value-changed", self.timelineScaleValueChanged)
+        self.setTimelineMax(100)
+        
+        vbxTimeline.pack_start(self.daTimeline, True, True, 0)
+        vbxTimeline.pack_start(self.sclTimelineSlider, False, False, 0)
+        
+        self.stkStack.add_titled(vbxTimeline, "timeline", "Timeline")
+        
+        self.timelinePosition = 0.0
+    
+    def setTimelineMax(self, value):
+        self.sclTimelineSlider.set_range(0, value)
+    
+    def timelineScaleValueChanged(self, wdg):
+        self.timelinePosition = self.sclTimelineSlider.get_value()
+        self.daTimeline.queue_draw()
     
     def prepareIdentityView(self):
         self.prepareIdentityFlow()
