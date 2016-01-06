@@ -50,6 +50,8 @@ namespace macdetect {
     
     std::string value(std::string strSection, std::string strTerm, std::string strDefault = "", bool bCutoffQuotes = true);
     std::list<std::string> list(std::string strSection, std::string strTerm);
+    
+    double doubleValue(std::string strSection, std::string strTerm, double dDefault = 0.0);
   };
 }
 

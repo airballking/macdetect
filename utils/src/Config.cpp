@@ -190,4 +190,17 @@ namespace macdetect {
     
     return lstList;
   }
+  
+  double Config::doubleValue(std::string strSection, std::string strTerm, double dDefault) {
+    std::string strValue = this->value(strSection, strTerm);
+    
+    if(strValue != "") {
+      double dValue = 0.0;
+      sscanf(strValue.c_str(), "%lf", &dValue);
+      
+      return dValue;
+    }
+    
+    return dDefault;
+  }
 }
