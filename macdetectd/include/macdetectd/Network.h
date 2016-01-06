@@ -32,6 +32,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <linux/wireless.h>
+#include <netdb.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -83,6 +84,10 @@ namespace macdetect {
     double m_dMaxMACAge;
     double m_dUpdateInterval;
     double m_dPingBroadcastInterval;
+    
+    double m_dHostnamesLastChecked;
+    double m_dHostnameCheckInterval;
+    
     bool m_bShouldRun;
     bool m_bIgnoreDeviceMACs;
     
@@ -120,6 +125,7 @@ namespace macdetect {
     
     bool addDevice(std::string strDeviceName);
     bool removeDevice(std::string strDeviceName);
+    std::string deviceForMAC(std::string strMAC);
     
     void setAutoManageDevices(bool bAutoManageDevices);
     bool autoManageDevices();
@@ -140,6 +146,7 @@ namespace macdetect {
     
     double time();
     
+    void checkHostnames();
     void detectNetworkActivity();
     
     bool ipAllowed(std::string strIP);

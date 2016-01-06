@@ -22,7 +22,7 @@
 
 
 namespace macdetect {
-  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_dUpdateInterval(10.0), m_dPingBroadcastInterval(10.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_bIgnoreDeviceMACs(true) {
+  Network::Network() : m_bShouldRun(true), m_dMaxMACAge(300.0), m_dUpdateInterval(10.0), m_dPingBroadcastInterval(10.0), m_nSocketFDControl(socket(AF_INET, SOCK_STREAM, 0)), m_wbmDevices(Blacklist), m_dHostnamesLastChecked(0.0), m_dHostnameCheckInterval(15.0), m_bIgnoreDeviceMACs(true) {
     m_dtData.readVendors();
   }
   
@@ -433,6 +433,26 @@ namespace macdetect {
     return tsTime.tv_sec + double(tsTime.tv_nsec) / NSEC_PER_SEC;
   }
   
+  void Network::checkHostnames() {
+    for(std::pair<std::string, std::map<std::string, std::string>> prEntry : m_mapMACEvidence) {
+      bool bHasIP = prEntry.second.find("ip") != prEntry.second.end();
+      bool bHasHostname = prEntry.second.find("hostname") != prEntry.second.end();
+      
+      if(bHasIP && !bHasHostname) {
+	std::cout << "check " << prEntry.first << std::endl;
+	struct in_addr ipv4addr;
+	struct hostent* he;
+	
+	inet_pton(AF_INET, prEntry.second["ip"].c_str(), &ipv4addr);
+	he = gethostbyaddr(&ipv4addr, sizeof ipv4addr, AF_INET);
+	
+	if(he) {
+	  this->updateMACEvidence(this->deviceForMAC(prEntry.first), prEntry.first, "hostname", he->h_name);
+	}
+      }
+    }
+  }
+  
   void Network::updateMACEvidence(std::string strDeviceName, std::string strMACAddress, std::string strKey, std::string strContent) {
     if(this->macAllowed(strMACAddress)) {
       if(m_mapMACEvidence[strMACAddress][strKey] != strContent) {
@@ -443,6 +463,19 @@ namespace macdetect {
 	this->scheduleEvent(meEvidence);
       }
     }
+  }
+  
+  std::string Network::deviceForMAC(std::string strMAC) {
+    std::string strDevice = "";
+    
+    for(MACEntity meEntity : m_lstMACSeen) {
+      if(meEntity.strMAC == strMAC) {
+	strDevice = meEntity.strDeviceName;
+	break;
+      }
+    }
+    
+    return strDevice;
   }
   
   void Network::detectNetworkActivity() {
@@ -491,6 +524,13 @@ namespace macdetect {
       } else if(nLengthRead == -1) {
 	std::cerr << "Error while reading from device '" << dvDevice->deviceName() << "'" << std::endl;
       }
+    }
+    
+    double dTime = this->time();
+    
+    if(dTime - m_dHostnamesLastChecked > m_dHostnameCheckInterval) {
+      this->checkHostnames();
+      m_dHostnamesLastChecked = dTime;
     }
   }
   
