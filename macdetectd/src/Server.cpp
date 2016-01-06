@@ -131,7 +131,8 @@ namespace macdetect {
 	  
 	  // Send hello packet
 	  std::shared_ptr<Value> valHello = std::make_shared<Value>("info", "hello");
-	  valHello->add("node", "node-0");
+	  std::shared_ptr<Value> valServerInfo = valHello->add("detail", "server-info");
+	  valServerInfo->add("server-name", m_strServerName);
 	  
 	  svrServed->send(valHello);
 	}
@@ -189,6 +190,10 @@ namespace macdetect {
     }
     
     return bReturn;
+  }
+  
+  void Server::setServerName(std::string strServerName) {
+    m_strServerName = strServerName;
   }
   
   void Server::shutdown() {

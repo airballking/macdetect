@@ -61,6 +61,9 @@ namespace macdetect {
 	this->serve(strDevice, nPort);
       }
       
+      std::string strServerName = cfgConfig.value("server", "name", "New Server");
+      this->DiscoveryServer::setIdentifier(strServerName);
+      
       return true;
     }
     

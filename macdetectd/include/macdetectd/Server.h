@@ -65,6 +65,7 @@ namespace macdetect {
     } QueuedValue;
     
   private:
+    std::string m_strServerName;
     int m_nSocketFDControl;
     bool m_bRun;
     std::list<Serving> m_lstServings;
@@ -82,6 +83,8 @@ namespace macdetect {
     
     bool cycle();
     void shutdown();
+    
+    void setServerName(std::string strServerName);
     
     std::list<std::string> systemDeviceNames();
     
