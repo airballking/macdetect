@@ -26,6 +26,8 @@ from time import gmtime, strftime, sleep
 import sqlite3
 import os
 import cairo
+import time
+import random
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -35,6 +37,11 @@ class ConnectionState:
     DISCONNECTED = 0
     CONNECTING = 1
     CONNECTED = 2
+
+class EventType:
+    MACAdded = "mac_added",
+    MACRemoved = "mac_removed",
+    MACEvidenceUpdated = "mac_evidence_updated"
 
 
 class MainWindow:
@@ -53,6 +60,40 @@ class MainWindow:
             self.log("PyMACDetect was started in demo mode. Identities and MACs will be shortened.")
         
         self.check_server_info = GObject.timeout_add(100, self.checkServerInfo)
+        
+        self.arrEvents = {}
+        self.arrColors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 1.0]]
+    
+    def color(self, index):
+        return self.arrColors[index % len(self.arrColors)]
+    
+    def currentTime(self):
+        return time.mktime(time.localtime())
+    
+    def addEvent(self, event_type, mac, evidence_field, evidence_value):
+        if not mac in self.arrEvents:
+            self.arrEvents[mac] = []
+        
+        self.arrEvents[mac].append({"time": self.currentTime(),
+                                    "event_type": event_type,
+                                    "evidence_field": evidence_field,
+                                    "evidence_value": evidence_value})
+        
+        if event_type == EventType.MACAdded:
+            height = len(self.arrEvents) * 25 + 50
+            
+            self.setTimelineHeight(height)
+        
+        self.daTimeline.queue_draw()
+    
+    def macEvents(self, mac):
+        if mac in self.arrEvents:
+            return self.arrEvents[mac]
+        else:
+            return []
+    
+    def sortedEventMACs(self):
+        return sorted(self.arrEvents.keys())
     
     def prepareEnvironment(self):
         datadir = os.path.expanduser("~") + "/.pymacdetect"
@@ -69,6 +110,7 @@ class MainWindow:
             self.sql_c.execute("CREATE TABLE identities (id integer, name text)")
             self.sql_c.execute("CREATE TABLE macs (mac text, identity_id integer)")
             self.sql_c.execute("CREATE TABLE macs_data (mac text, nickname text)")
+            
             self.sql_conn.commit()
         
         self.loadIdentities()
@@ -100,6 +142,8 @@ class MainWindow:
             except pymacdetect_ext.DisconnectedError:
                 self.tsMACList.clear()
                 self.lsDeviceList.clear()
+                self.arrEvents = {}
+                self.daTimeline.queue_draw()
                 self.log("Connection closed by server.")
                 self.setConnectionState(ConnectionState.Disconnected, "")
                 
@@ -217,8 +261,10 @@ class MainWindow:
                                 childiter = self.tsMACList.iter_next(childiter)
                         
                         if not bFound:
+                            self.addEvent(EventType.MACEvidenceUpdated, mac_address, key, content)
                             self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
                     else:
+                        self.addEvent(EventType.MACEvidenceUpdated, mac_address, key, content)
                         self.tsMACList.append(treeiter, [key, "", "", 0, "", content, False, key, ""])
                     
                     break
@@ -350,6 +396,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             self.tsMACList.clear()
             self.lsDeviceList.clear()
+            self.arrEvents = {}
+            self.daTimeline.queue_draw()
     
     def logChanged(self, wdgWidget, evEvent, dtData=None):
         adjAdjustment = wdgWidget.get_vadjustment()
@@ -582,6 +630,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             self.tsMACList.append(None, [mac, vendor, device, identity, identity_str, nickname, True, demo_mac, demo_identity_str])
             self.sql_c.execute("INSERT INTO macs_data VALUES(?, ?)", (mac, "",))
             self.sql_conn.commit()
+            
+            self.addEvent(EventType.MACAdded, mac, "", "")
     
     def demoMAC(self, mac):
         # Replace the last two words with `XX`
@@ -660,6 +710,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             if row[0] == mac and row[2] == device:
                 self.lstMACs.remove(treeiter)
                 break
+        
+        self.addEvent(EventType.MACRemoved, mac, "", "")
     
     def nicknameEdited(self, wdgWidget, ptPath, txtText):
         self.tsMACList[ptPath][5] = txtText
@@ -902,9 +954,41 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         ctx.rectangle(0, 0, width, height)
         ctx.fill()
         
-        ctx.set_source_rgb(0, 0, 0)
-        ctx.move_to(25, 25)
-        ctx.show_text("Timeline widget in the works (we're at position " + str(self.timelinePosition) + "!)")
+        #ctx.set_source_rgb(0, 0, 0)
+        #ctx.move_to(25, 25)
+        #ctx.show_text("Timeline widget in the works (we're at position " + str(self.timelinePosition) + "!)")
+        
+        height_per_mac = 25
+        margin_top = 25
+        margin_side = 25
+        bar_thickness = 10
+        
+        macs = self.sortedEventMACs()
+        widest_mac = 0
+        mac_height = 0
+        for mac in macs:
+            xbearing, ybearing, txt_width, txt_height, xadvance, yadvance = ctx.text_extents(mac)
+            if txt_width > widest_mac:
+                widest_mac = txt_width
+            
+            mac_height = txt_height
+        
+        index = 0
+        for mac in macs:
+            ctx.set_source_rgb(0, 0, 0)
+            ctx.move_to(margin_side, margin_top + index * height_per_mac)
+            ctx.show_text(mac)
+            
+            color = self.color(index)
+            ctx.set_source_rgb(color[0], color[1], color[2])
+            ctx.rectangle(margin_side + widest_mac + 10,
+                          margin_top + index * height_per_mac - bar_thickness / 2 - mac_height / 2,
+                          width - (margin_side * 2) - (widest_mac + 10),
+                          bar_thickness)
+            
+            ctx.fill()
+            
+            index = index + 1
     
     def prepareTimelineView(self):
         vbxTimeline = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -919,27 +1003,16 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         
         hbxTimeline = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         
-        self.sclTimelineSelector = Gtk.VScale()
-        self.sclTimelineSelector.connect("value-changed", self.timelineSelectorValueChanged)
         # TODO(winkler): Flip, no fill levels, no digits, increment step discrete
-        self.setTimelineSelectorMax(10)
-        
-        hbxTimeline.pack_start(self.sclTimelineSelector, False, False, 0)
-        hbxTimeline.pack_start(self.daTimeline, True, True, 0)
-        
-        vbxTimeline.pack_start(hbxTimeline, True, True, 0)
+        vbxTimeline.pack_start(self.withScrolledWindow(self.daTimeline), True, True, 0)
         vbxTimeline.pack_start(self.sclTimelineSlider, False, False, 0)
         
         self.stkStack.add_titled(vbxTimeline, "timeline", "Timeline")
         
         self.timelinePosition = 0.0
-    
-    def timelineSelectorValueChanged(self, wdg):
-        self.timelineSelection = self.sclTimelineSelector.get_value()
-        self.daTimeline.queue_draw()
-    
-    def setTimelineSelectorMax(self, value):
-        self.sclTimelineSelector.set_range(0, value)
+        
+    def setTimelineHeight(self, height):
+        self.daTimeline.set_size_request(-1, height)
     
     def setTimelineMax(self, value):
         self.sclTimelineSlider.set_range(0, value)
