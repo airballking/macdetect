@@ -33,8 +33,7 @@ namespace macdetect {
   bool Daemon::parseConfigFile(std::string strFilepath) {
     Config cfgConfig;
     
-    // TODO(winkler): Honor the other options set in the config file
-    // as well. Also, add option for auto-managing devices.
+    // TODO(winkler): Add option for auto-managing devices.
     
     if(cfgConfig.loadFromFile(strFilepath)) {
       std::string strListMode = cfgConfig.value("network", "list-mode", "whitelist");
@@ -48,6 +47,16 @@ namespace macdetect {
       for(std::string strEntry : lstListEntries) {
 	m_nwNetwork.addDeviceWhiteBlacklistEntry(strEntry);
       }
+      
+      m_dKeepAliveInterval = cfgConfig.doubleValue("server", "keepalive-interval", 1.0);
+      
+      double dMaxMACAge = cfgConfig.doubleValue("network", "max-mac-age", 300.0);
+      double dUpdateInterval = cfgConfig.doubleValue("network", "update-interval", 10.0);
+      double dPingBroadcastInterval = cfgConfig.doubleValue("network", "ping-broadcast-interval", 10.0);
+      
+      m_nwNetwork.setMaxMACAge(dMaxMACAge);
+      m_nwNetwork.setUpdateInterval(dUpdateInterval);
+      m_nwNetwork.setPingBroadcastInterval(dPingBroadcastInterval);
       
       std::list<std::string> lstServes = cfgConfig.list("server", "serve");
       for(std::string strServe : lstServes) {

@@ -108,6 +108,10 @@ namespace macdetect {
     void addDeviceWhiteBlacklistEntry(std::string strPattern);
     bool deviceAllowed(std::string strDeviceName);
     
+    void setMaxMACAge(double dMaxMACAge);
+    void setUpdateInterval(double dUpdateInterval);
+    void setPingBroadcastInterval(double dPingBroadcastInterval);
+    
     void setIgnoreDeviceMACs(bool bIgnore);
     bool ignoreDeviceMACs();
     

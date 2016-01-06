@@ -41,6 +41,18 @@ namespace macdetect {
     return bSuffices;
   }
   
+  void Network::setMaxMACAge(double dMaxMACAge) {
+    m_dMaxMACAge = dMaxMACAge;
+  }
+  
+  void Network::setUpdateInterval(double dUpdateInterval) {
+    m_dUpdateInterval = dUpdateInterval;
+  }
+  
+  void Network::setPingBroadcastInterval(double dPingBroadcastInterval) {
+    m_dPingBroadcastInterval = dPingBroadcastInterval;
+  }
+  
   void Network::setIgnoreDeviceMACs(bool bIgnore) {
     m_bIgnoreDeviceMACs = bIgnore;
   }
