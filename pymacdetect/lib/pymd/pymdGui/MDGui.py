@@ -494,6 +494,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
     def enableStream(self, device):
         self.cliClient.send({"request": {"content": "enable-stream",
                                          "subs": {"device-name": {"content": device}}}})
+        self.requestKnownMACAddresses()
     
     def disableStream(self, device):
         self.cliClient.send({"request": {"content": "disable-stream",
