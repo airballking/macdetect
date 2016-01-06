@@ -917,12 +917,29 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.sclTimelineSlider.connect("value-changed", self.timelineScaleValueChanged)
         self.setTimelineMax(100)
         
-        vbxTimeline.pack_start(self.daTimeline, True, True, 0)
+        hbxTimeline = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        
+        self.sclTimelineSelector = Gtk.VScale()
+        self.sclTimelineSelector.connect("value-changed", self.timelineSelectorValueChanged)
+        # TODO(winkler): Flip, no fill levels, no digits, increment step discrete
+        self.setTimelineSelectorMax(10)
+        
+        hbxTimeline.pack_start(self.sclTimelineSelector, False, False, 0)
+        hbxTimeline.pack_start(self.daTimeline, True, True, 0)
+        
+        vbxTimeline.pack_start(hbxTimeline, True, True, 0)
         vbxTimeline.pack_start(self.sclTimelineSlider, False, False, 0)
         
         self.stkStack.add_titled(vbxTimeline, "timeline", "Timeline")
         
         self.timelinePosition = 0.0
+    
+    def timelineSelectorValueChanged(self, wdg):
+        self.timelineSelection = self.sclTimelineSelector.get_value()
+        self.daTimeline.queue_draw()
+    
+    def setTimelineSelectorMax(self, value):
+        self.sclTimelineSelector.set_range(0, value)
     
     def setTimelineMax(self, value):
         self.sclTimelineSlider.set_range(0, value)
