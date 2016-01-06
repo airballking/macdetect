@@ -48,7 +48,7 @@ namespace macdetect {
     bool loadFromString(std::string strConfig);
     bool loadFromFile(std::string strFilepath);
     
-    std::string value(std::string strSection, std::string strTerm, std::string strDefault = "");
+    std::string value(std::string strSection, std::string strTerm, std::string strDefault = "", bool bCutoffQuotes = true);
     std::list<std::string> list(std::string strSection, std::string strTerm);
   };
 }

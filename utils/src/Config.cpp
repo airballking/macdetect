@@ -121,10 +121,19 @@ namespace macdetect {
     return false;
   }
   
-  std::string Config::value(std::string strSection, std::string strTerm, std::string strDefault) {
+  std::string Config::value(std::string strSection, std::string strTerm, std::string strDefault, bool bCutoffQuotes) {
     if(m_mapSections.find(strSection) != m_mapSections.end()) {
       if(m_mapSections[strSection].find(strTerm) != m_mapSections[strSection].end()) {
-	return m_mapSections[strSection][strTerm];
+	std::string strValue = m_mapSections[strSection][strTerm];
+	std::string strValueParsed = strValue;
+	
+	if(bCutoffQuotes) {
+	  if(strValueParsed[0] == '"' && strValueParsed[strValueParsed.length() - 1] == '"') {
+	    strValueParsed = strValue.substr(1, strValue.length() - 2);
+	  }
+	}
+	
+	return strValueParsed;
       }
     }
     
@@ -134,7 +143,8 @@ namespace macdetect {
   std::list<std::string> Config::list(std::string strSection, std::string strTerm) {
     std::list<std::string> lstList;
     
-    std::string strValue = this->value(strSection, strTerm);
+    std::string strValue = this->value(strSection, strTerm, "", false);
+    
     char cStringDelimiter = '\0';
     size_t idxLast = 0;
     
