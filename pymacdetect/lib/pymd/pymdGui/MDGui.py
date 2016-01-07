@@ -1036,20 +1036,28 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         ctx.set_source_rgb(0, 0, 0)
         ctx.set_line_width(1.0)
         
+        ctx.move_to(bars_begin_x + unknown_width, bars_begin_y + ticks_margin_top)
+        ctx.line_to(bars_begin_x + unknown_width, bars_begin_y + bars_height + ticks_margin_top)
+        ctx.stroke()
+        
+        ctx.move_to(bars_begin_x, bars_begin_y + ticks_margin_top)
+        ctx.line_to(bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+        ctx.stroke()
+        
         tick_fraction = bars_width / 24.0
         
         for i in range(25):
-            ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + ticks_margin_top)
-            ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+            if i * tick_fraction >= unknown_width:
+                ctx.set_source_rgb(0.0, 0.0, 0.0)
+                
+                ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + ticks_margin_top)
+                ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+            else:
+                ctx.set_source_rgb(0.9, 0.9, 0.9)
             
             tick_text = str(i)
             xbearing, ybearing, txt_width, txt_height, xadvance, yadvance = ctx.text_extents(tick_text)
             ctx.move_to(i * tick_fraction + bars_begin_x - txt_width / 2, bars_begin_y + ticks_margin_top - txt_height)
-            
-            if i * tick_fraction >= unknown_width:
-                ctx.set_source_rgb(0.0, 0.0, 0.0)
-            else:
-                ctx.set_source_rgb(0.8, 0.8, 0.8)
             
             ctx.show_text(tick_text)
             
