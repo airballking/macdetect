@@ -46,6 +46,8 @@ class EventType:
 
 class MainWindow:
     def __init__(self, bDemonstration):
+        self.startTime = self.currentTime()
+        
         self.cliClient = PyMACDetect.Client()
         self.bDemonstration = bDemonstration
         
@@ -1006,7 +1008,17 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             index = index + 1
         
-        unknown_width = self.timelinePosition
+        loc_time = time.gmtime(self.startTime)
+        
+        strtime = ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mday) + " " + ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mon) + " " + str(loc_time.tm_year)
+        
+        lt = time.mktime(time.strptime(strtime, "%d %m %Y"))
+        alt = time.mktime(time.localtime())
+        
+        tdiff = alt - lt
+        day_secs = 86400
+        
+        unknown_width = bars_width * (tdiff / day_secs)
         diagonal_stroke_distance = 10
         angle = math.radians(225.0)
         
@@ -1050,8 +1062,13 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             if i * tick_fraction >= unknown_width:
                 ctx.set_source_rgb(0.0, 0.0, 0.0)
                 
-                ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + ticks_margin_top)
-                ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+                if i == 0 or i == 24:
+                    ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + ticks_margin_top)
+                    ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+                else:
+                    for j in range(len(macs)):
+                        ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + j * height_per_mac - 3)
+                        ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + j * height_per_mac + bar_thickness + 3)
             else:
                 ctx.set_source_rgb(0.9, 0.9, 0.9)
             
