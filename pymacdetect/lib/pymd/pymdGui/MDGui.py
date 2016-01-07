@@ -22,12 +22,12 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 from pymdLib import PyMACDetect
 import pymacdetect_ext
 import ConnectionManager
-from time import gmtime, strftime, sleep
 import sqlite3
 import os
 import cairo
 import time
 import random
+import math
 
 
 (ID_COLUMN_TEXT, ID_COLUMN_PIXBUF) = range(2)
@@ -63,6 +63,14 @@ class MainWindow:
         
         self.arrEvents = {}
         self.arrColors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 1.0]]
+        
+        ## Begin Timeline test data
+        #self.arrEvents["aa:bb:cc:dd:ee:ff"] = [{"time": (self.currentTime() - }]
+        self.addEvent(EventType.MACAdded, "aa:bb:cc:dd:ee:ff",
+                      event_time=(self.currentTime() - 60))
+        self.addEvent(EventType.MACAdded, "ff:ee:dd:cc:bb:aa",
+                      event_time=(self.currentTime() - 60))
+        ## End Timeline test data
     
     def color(self, index):
         return self.arrColors[index % len(self.arrColors)]
@@ -70,11 +78,14 @@ class MainWindow:
     def currentTime(self):
         return time.mktime(time.localtime())
     
-    def addEvent(self, event_type, mac, evidence_field, evidence_value):
+    def addEvent(self, event_type, mac, evidence_field="", evidence_value="", event_time=None):
         if not mac in self.arrEvents:
             self.arrEvents[mac] = []
         
-        self.arrEvents[mac].append({"time": self.currentTime(),
+        if not event_time:
+            event_time = self.currentTime()
+        
+        self.arrEvents[mac].append({"time": event_time,
                                     "event_type": event_type,
                                     "evidence_field": evidence_field,
                                     "evidence_value": evidence_value})
@@ -377,8 +388,8 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             pass
     
     def log(self, message):
-        time = strftime("%H:%M:%S", gmtime())
-        self.lsLog.append([time, message])
+        current_time = time.strftime("%H:%M:%S", time.gmtime())
+        self.lsLog.append([current_time, message])
     
     def clickConnectionManager(self, wdgWidget):
         self.cliClient.detectServers()
@@ -950,16 +961,16 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         width = wdg.get_allocation().width
         height = wdg.get_allocation().height
         
+        ctx.set_antialias(cairo.ANTIALIAS_NONE)
+        
         ctx.set_source_rgb(1, 1, 1)
         ctx.rectangle(0, 0, width, height)
         ctx.fill()
         
-        #ctx.set_source_rgb(0, 0, 0)
-        #ctx.move_to(25, 25)
-        #ctx.show_text("Timeline widget in the works (we're at position " + str(self.timelinePosition) + "!)")
+        ticks_margin_top = -7
         
         height_per_mac = 25
-        margin_top = 25
+        margin_top = 50
         margin_side = 25
         bar_thickness = 10
         
@@ -973,6 +984,11 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             mac_height = txt_height
         
+        bars_begin_x = margin_side + widest_mac + 10
+        bars_begin_y = margin_top - bar_thickness / 2 - mac_height / 2
+        bars_width = width - (margin_side * 2) - (widest_mac + 10)
+        bars_height = height_per_mac * len(macs)
+        
         index = 0
         for mac in macs:
             ctx.set_source_rgb(0, 0, 0)
@@ -981,14 +997,54 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             color = self.color(index)
             ctx.set_source_rgb(color[0], color[1], color[2])
-            ctx.rectangle(margin_side + widest_mac + 10,
-                          margin_top + index * height_per_mac - bar_thickness / 2 - mac_height / 2,
-                          width - (margin_side * 2) - (widest_mac + 10),
+            ctx.rectangle(bars_begin_x,
+                          bars_begin_y + index * height_per_mac,
+                          bars_width,
                           bar_thickness)
             
             ctx.fill()
             
             index = index + 1
+        
+        unknown_width = self.timelinePosition
+        diagonal_stroke_distance = 10
+        angle = math.radians(225.0)
+        
+        strokes_horizontal = int(bars_width / diagonal_stroke_distance)
+        strokes_vertical = int(bars_height / diagonal_stroke_distance)
+        
+        ctx.set_source_rgb(0.2, 0.2, 0.2)
+        ctx.set_line_width(1.0)
+        
+        ctx.rectangle(bars_begin_x, bars_begin_y + ticks_margin_top, unknown_width, bars_height)
+        ctx.clip()
+        
+        for i in range(strokes_horizontal + strokes_vertical):
+            w = i * diagonal_stroke_distance
+            h = w * math.tan(angle)
+            
+            ctx.move_to(bars_begin_x + w, bars_begin_y + ticks_margin_top)
+            ctx.line_to(bars_begin_x + w - diagonal_stroke_distance, bars_begin_y + bars_height + ticks_margin_top)
+            
+            ctx.stroke()
+        
+        ctx.reset_clip()
+        
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.set_line_width(1.0)
+        
+        tick_fraction = bars_width / 24.0
+        
+        for i in range(25):
+            ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + ticks_margin_top)
+            ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
+            
+            tick_text = str(i)
+            xbearing, ybearing, txt_width, txt_height, xadvance, yadvance = ctx.text_extents(tick_text)
+            ctx.move_to(i * tick_fraction + bars_begin_x - txt_width / 2, bars_begin_y + ticks_margin_top - txt_height)
+            ctx.show_text(tick_text)
+            
+            ctx.stroke()
     
     def prepareTimelineView(self):
         vbxTimeline = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
