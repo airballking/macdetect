@@ -1058,7 +1058,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             index = index + 1
         
-        alt = time.mktime(time.localtime())
+        alt = self.startTime# Time.mktime(time.localtime())
         
         tdiff = alt - lt
         day_secs = 86400
