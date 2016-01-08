@@ -291,11 +291,15 @@ class MainWindow:
         accel.connect(Gdk.keyval_from_name('2'), Gdk.ModifierType.MOD1_MASK, 0, lambda *args: self.on_accel_pressed("switch", "identities"))
         accel.connect(Gdk.keyval_from_name('3'), Gdk.ModifierType.MOD1_MASK, 0, lambda *args: self.on_accel_pressed("switch", "timeline"))
         
+        accel.connect(Gdk.keyval_from_name('c'), Gdk.ModifierType.CONTROL_MASK, 0, lambda *args: self.on_accel_pressed("connect", ""))
+        
         self.winRef.add_accel_group(accel)
     
     def on_accel_pressed(self, param_1, param_2):
         if param_1 == "switch":
             self.stkStack.set_visible_child_name(param_2)
+        elif param_1 == "connect":
+            self.clickConnectionManager(None)
     
     def prepareWindow(self):
         self.winRef = Gtk.Window()
