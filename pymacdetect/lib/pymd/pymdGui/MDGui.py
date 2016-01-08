@@ -39,8 +39,8 @@ class ConnectionState:
     CONNECTED = 2
 
 class EventType:
-    MACAdded = "mac_added",
-    MACRemoved = "mac_removed",
+    MACAdded = "mac_added"
+    MACRemoved = "mac_removed"
     MACEvidenceUpdated = "mac_evidence_updated"
 
 
@@ -65,14 +65,6 @@ class MainWindow:
         
         self.arrEvents = {}
         self.arrColors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 1.0]]
-        
-        ## Begin Timeline test data
-        #self.arrEvents["aa:bb:cc:dd:ee:ff"] = [{"time": (self.currentTime() - }]
-        self.addEvent(EventType.MACAdded, "aa:bb:cc:dd:ee:ff",
-                      event_time=(self.currentTime() - 60))
-        self.addEvent(EventType.MACAdded, "ff:ee:dd:cc:bb:aa",
-                      event_time=(self.currentTime() - 60))
-        ## End Timeline test data
     
     def color(self, index):
         return self.arrColors[index % len(self.arrColors)]
@@ -292,6 +284,18 @@ class MainWindow:
         self.prepareDeviceView()
         self.prepareIdentityView()
         self.prepareTimelineView()
+        
+        accel = Gtk.AccelGroup()
+        
+        accel.connect(Gdk.keyval_from_name('1'), Gdk.ModifierType.MOD1_MASK, 0, lambda *args: self.on_accel_pressed("switch", "devices"))
+        accel.connect(Gdk.keyval_from_name('2'), Gdk.ModifierType.MOD1_MASK, 0, lambda *args: self.on_accel_pressed("switch", "identities"))
+        accel.connect(Gdk.keyval_from_name('3'), Gdk.ModifierType.MOD1_MASK, 0, lambda *args: self.on_accel_pressed("switch", "timeline"))
+        
+        self.winRef.add_accel_group(accel)
+    
+    def on_accel_pressed(self, param_1, param_2):
+        if param_1 == "switch":
+            self.stkStack.set_visible_child_name(param_2)
     
     def prepareWindow(self):
         self.winRef = Gtk.Window()
@@ -979,6 +983,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         macs = self.sortedEventMACs()
         widest_mac = 0
         mac_height = 0
+        
         for mac in macs:
             xbearing, ybearing, txt_width, txt_height, xadvance, yadvance = ctx.text_extents(mac)
             if txt_width > widest_mac:
@@ -991,6 +996,38 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         bars_width = width - (margin_side * 2) - (widest_mac + 10)
         bars_height = height_per_mac * len(macs)
         
+        # This is the unix timestamp of zero seconds into the current
+        # day
+        loc_time = time.gmtime(self.startTime)
+        strtime = ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mday) + " " + ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mon) + " " + str(loc_time.tm_year)
+        lt = time.mktime(time.strptime(strtime, "%d %m %Y"))
+        
+        # Prepare the MAC attendance segments
+        arrSegments = {}
+        for mac in macs:
+            arrSegments[mac] = []
+            on = False
+            on_time = -1
+            events = self.macEvents(mac)
+            
+            for event in events:
+                if on == False:
+                    if event["event_type"] == EventType.MACAdded:
+                        on = True
+                        on_time = event["time"]
+                else:
+                    if event["event_type"] == EventType.MACRemoved:
+                        on = False
+                        arrSegments[mac].append([on_time - lt, event["time"] - lt])
+                        on_time = -1
+            
+            if on  == True:
+                # This is the currently running segment
+                on = False
+                arrSegments[mac].append([on_time - lt, self.currentTime() - lt])
+                on_time = -1
+        
+        # Draw the actual MAC attendances
         index = 0
         for mac in macs:
             ctx.set_source_rgb(0, 0, 0)
@@ -999,20 +1036,26 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             color = self.color(index)
             ctx.set_source_rgb(color[0], color[1], color[2])
-            ctx.rectangle(bars_begin_x,
-                          bars_begin_y + index * height_per_mac,
-                          bars_width,
-                          bar_thickness)
+            
+            y = bars_begin_y + index * height_per_mac
+            h = bar_thickness
+            day_length = 86400
+            
+            for segment in arrSegments[mac]:
+                time_begin = segment[0]
+                time_end = segment[1]
+                
+                x = bars_begin_x + bars_width * (time_begin / day_length)
+                w = bars_width * (time_end - time_begin) / day_length
+                
+                ctx.rectangle(x, y, w, h)
+                
+                print x, y, w, h
             
             ctx.fill()
             
             index = index + 1
         
-        loc_time = time.gmtime(self.startTime)
-        
-        strtime = ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mday) + " " + ("0" if loc_time.tm_mday < 10 else "") + str(loc_time.tm_mon) + " " + str(loc_time.tm_year)
-        
-        lt = time.mktime(time.strptime(strtime, "%d %m %Y"))
         alt = time.mktime(time.localtime())
         
         tdiff = alt - lt
@@ -1024,8 +1067,6 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         
         strokes_horizontal = int(bars_width / diagonal_stroke_distance)
         strokes_vertical = int(bars_height / diagonal_stroke_distance)
-        
-        #ctx.rectangle(bars_begin_x, bars_begin_y + ticks_margin_top, unknown_width, bars_height)
         
         for i in range(len(macs)):
             x = bars_begin_x
@@ -1099,10 +1140,12 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             ctx.stroke()
     
+    def redrawTimeline(self):
+        self.daTimeline.queue_draw()
+    
     def prepareTimelineView(self):
         vbxTimeline = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         
-        # TODO: Build timeline widget
         self.daTimeline = Gtk.DrawingArea()
         self.daTimeline.connect("draw", self.onDrawTimeline)
         
@@ -1110,11 +1153,17 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.sclTimelineSlider.connect("value-changed", self.timelineScaleValueChanged)
         self.setTimelineMax(100)
         
+        GObject.timeout_add_seconds(1, self.redrawTimeline)
+        
         hbxTimeline = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         
-        # TODO(winkler): Flip, no fill levels, no digits, increment step discrete
         vbxTimeline.pack_start(self.withScrolledWindow(self.daTimeline), True, True, 0)
-        vbxTimeline.pack_start(self.sclTimelineSlider, False, False, 0)
+        # TODO(winkler): Flip, no fill levels, no digits, increment step discrete
+        #vbxTimeline.pack_start(self.sclTimelineSlider, False, False, 0)
+        
+        # NOTE(winkler): The scale will be used to set the resolution
+        # of the timeline. This feature has not been implemented yet,
+        # and so the scale is not added to the UI at the moment.
         
         self.stkStack.add_titled(vbxTimeline, "timeline", "Timeline")
         
