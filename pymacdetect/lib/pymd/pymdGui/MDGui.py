@@ -1025,7 +1025,16 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         strokes_horizontal = int(bars_width / diagonal_stroke_distance)
         strokes_vertical = int(bars_height / diagonal_stroke_distance)
         
-        ctx.rectangle(bars_begin_x, bars_begin_y + ticks_margin_top, unknown_width, bars_height)
+        #ctx.rectangle(bars_begin_x, bars_begin_y + ticks_margin_top, unknown_width, bars_height)
+        
+        for i in range(len(macs)):
+            x = bars_begin_x
+            y = bars_begin_y + ticks_margin_top + i * height_per_mac + height_per_mac / 2 - bar_thickness / 2
+            w = unknown_width
+            h = bar_thickness
+            
+            ctx.rectangle(x, y, w, h)
+        
         ctx.clip()
         
         ctx.set_source_rgb(1, 1, 1)
@@ -1040,6 +1049,16 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             
             ctx.move_to(bars_begin_x + w, bars_begin_y + ticks_margin_top)
             ctx.line_to(bars_begin_x + w - bars_height * (math.cos(angle) / math.sin(angle)), bars_begin_y + bars_height + ticks_margin_top)
+            
+            ctx.stroke()
+        
+        for i in range(len(macs)):
+            x = bars_begin_x
+            y = bars_begin_y + ticks_margin_top + i * height_per_mac + height_per_mac / 2 - bar_thickness / 2 + 1
+            w = unknown_width
+            h = bar_thickness - 1
+            
+            ctx.rectangle(x, y, w, h)
             
             ctx.stroke()
         
