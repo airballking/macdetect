@@ -1053,8 +1053,6 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                 w = bars_width * (time_end - time_begin) / day_length
                 
                 ctx.rectangle(x, y, w, h)
-                
-                print x, y, w, h
             
             ctx.fill()
             
