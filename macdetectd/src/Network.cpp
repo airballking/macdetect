@@ -155,6 +155,9 @@ namespace macdetect {
       }
     }
     
+    // TODO(winkler): Is this by now done by the Daemon class? Check
+    // and maybe remove this instance here.
+    
     // Try MAC entity update
     for(std::list<MACEntity>::iterator itMAC = m_lstMACSeen.begin();
 	itMAC != m_lstMACSeen.end(); ++itMAC) {
