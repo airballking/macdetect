@@ -560,7 +560,7 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             elif devtype == "wireless":
                 pixbuf = Gtk.IconTheme.get_default().load_icon("network-wireless", 16, 0)
             
-            self.lsDeviceList.append([False, device, pixbuf])
+            self.lsDeviceList.append([False, device, pixbuf, devtype])
     
     def removeDevice(self, device):
         for i in range(len(self.lsDeviceList)):
@@ -611,18 +611,21 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.cliClient.send({"request": {"content": "known-mac-addresses"}})
     
     def prepareDeviceList(self):
-        self.lsDeviceList = Gtk.ListStore(bool, str, GdkPixbuf.Pixbuf)
+        self.lsDeviceList = Gtk.ListStore(bool, str, GdkPixbuf.Pixbuf, str)
         self.vwDeviceList = Gtk.TreeView(self.lsDeviceList)
         
         rdActive = Gtk.CellRendererToggle()
         rdActive.connect("toggled", self.deviceListToggled)
         colActive = Gtk.TreeViewColumn("Active", rdActive, active=0)
+        colActive.set_sort_column_id(0)
         
         rdText = Gtk.CellRendererText()
         colDeviceName = Gtk.TreeViewColumn("Device", rdText, text=1)
+        colDeviceName.set_sort_column_id(1)
         
         rdType = Gtk.CellRendererPixbuf()
         colType = Gtk.TreeViewColumn("Type", rdType, pixbuf=2)
+        colType.set_sort_column_id(3)
         
         self.vwDeviceList.append_column(colActive)
         self.vwDeviceList.append_column(colDeviceName)
