@@ -32,6 +32,16 @@ class ConnectionManager:
         self.prepareServerList()
         
         self.winRef.add(self.withScrolledWindow(self.vwServerList))
+        
+        accel = Gtk.AccelGroup()
+        
+        accel.connect(Gdk.keyval_from_name('Escape'), 0, 0, lambda *args: self.on_accel_pressed("close", ""))
+        
+        self.winRef.add_accel_group(accel)
+    
+    def on_accel_pressed(self, param_1, param_2):
+        if param_1 == "close":
+            self.triggerClose(None, None)
     
     def prepareWindow(self):
         self.winRef = Gtk.Window()
