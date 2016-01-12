@@ -14,18 +14,20 @@ namespace macdetect {
     bool bOK = false;
     
     if(setsockopt(this->socket(), SOL_SOCKET, SO_REUSEADDR, &unYes, sizeof(unYes)) >= 0) {
-      memset(&m_saAddrAny, 0, sizeof(m_saAddrAny));
-      m_saAddrAny.sin_family = AF_INET;
-      m_saAddrAny.sin_addr.s_addr = htonl(INADDR_ANY);
-      m_saAddrAny.sin_port = htons(m_usPort);
-      
-      if(bind(this->socket(), (struct sockaddr*)&m_saAddrAny, sizeof(m_saAddrAny)) >= 0) {
-	struct ip_mreq ipmReq;
-	ipmReq.imr_multiaddr.s_addr = inet_addr(m_strMulticastGroup.c_str());
-	ipmReq.imr_interface.s_addr = htonl(INADDR_ANY);
+      if(setsockopt(this->socket(), IPPROTO_IP, IP_MULTICAST_LOOP, &unYes, sizeof(unYes)) >= 0) {
+	memset(&m_saAddrAny, 0, sizeof(m_saAddrAny));
+	m_saAddrAny.sin_family = AF_INET;
+	m_saAddrAny.sin_addr.s_addr = htonl(INADDR_ANY);
+	m_saAddrAny.sin_port = htons(m_usPort);
 	
-	if(setsockopt(this->socket(), IPPROTO_IP, IP_ADD_MEMBERSHIP, &ipmReq, sizeof(ipmReq)) >= 0) {
-	  bOK = true;
+	if(bind(this->socket(), (struct sockaddr*)&m_saAddrAny, sizeof(m_saAddrAny)) >= 0) {
+	  struct ip_mreq ipmReq;
+	  ipmReq.imr_multiaddr.s_addr = inet_addr(m_strMulticastGroup.c_str());
+	  ipmReq.imr_interface.s_addr = htonl(INADDR_ANY);
+	  
+	  if(setsockopt(this->socket(), IPPROTO_IP, IP_ADD_MEMBERSHIP, &ipmReq, sizeof(ipmReq)) >= 0) {
+	    bOK = true;
+	  }
 	}
       }
     }
@@ -33,6 +35,11 @@ namespace macdetect {
     if(!bOK) {
       ::close(this->socket());
       this->setSocket(-1);
+      
+      // TODO(winkler): Solve problem with multicast group not being
+      // joined when only the loopback interface is available.
+      
+      //std::cerr << strerror(errno) << std::endl;
     }
   }
   
