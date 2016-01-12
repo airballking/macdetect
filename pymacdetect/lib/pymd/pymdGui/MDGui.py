@@ -120,6 +120,7 @@ class MainWindow:
             self.sql_conn.commit()
         
         self.loadIdentities()
+        self.loadMACHistory()
     
     def loadIdentities(self):
         self.sql_c.execute("SELECT * FROM identities")
@@ -518,9 +519,11 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.prepareMACList()
         
         hbxDeviceView = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        vbxDevicesAndControls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.vbxDevicesAndControls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         
-        vbxDevicesAndControls.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
+        self.vbxDevicesAndControls.pack_start(self.withScrolledWindow(self.vwMACList), True, True, 0)
+        
+        self.scwMACHistoryList = self.withScrolledWindow(self.vwMACHistoryList)
         
         hbxDeviceControls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         
@@ -533,11 +536,22 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         hbxDeviceControls.pack_start(btnExpandAll, False, False, 0)
         hbxDeviceControls.pack_start(btnCollapseAll, False, False, 0)
         
-        vbxDevicesAndControls.pack_start(hbxDeviceControls, False, False, 0)
+        btnMACHistory = Gtk.ToggleButton("MAC History")
+        hbxDeviceControls.pack_end(btnMACHistory, False, False, 0)
+        btnMACHistory.connect("clicked", self.toggleMACHistory)
         
-        hbxDeviceView.pack_start(vbxDevicesAndControls, True, True, 0)
+        self.vbxDevicesAndControls.pack_start(hbxDeviceControls, False, False, 0)
+        
+        hbxDeviceView.pack_start(self.vbxDevicesAndControls, True, True, 0)
         
         self.stkStack.add_titled(hbxDeviceView, "devices", "MACs")
+    
+    def toggleMACHistory(self, wdg):
+        if wdg.get_state() == Gtk.StateType.ACTIVE:
+            self.vbxDevicesAndControls.pack_start(self.scwMACHistoryList, True, True, 0)
+            self.scwMACHistoryList.show_all()
+        else:
+            self.vbxDevicesAndControls.remove(self.scwMACHistoryList)
     
     def clickExpandAllDevices(self, wdg):
         self.vwMACList.expand_all()
@@ -660,18 +674,24 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         
         self.addMACToHistory(mac)
     
+    def loadMACHistory(self):
+        self.sql_c.execute("SELECT * FROM macs_history")
+        historical_macs = self.sql_c.fetchall()
+        
+        for row in historical_macs:
+            self.tsMACHistoryList.append(None, [row[0], self.demoMAC(row[0])])
+            
     def addMACToHistory(self, mac):
         self.sql_c.execute("SELECT mac FROM macs_history WHERE mac=?", (mac,))
         result = self.sql_c.fetchone()
         
-        is_new = result != None
+        is_new = result == None
         
         if is_new:
             self.sql_c.execute("INSERT INTO macs_history VALUES(?)", (mac,))
             self.sql_conn.commit()
             
-            # TODO(winkler): Update a potential table that holds all
-            # known MACs
+            self.tsMACHistoryList.append([mac, self.demoMAC(mac)])
     
     def demoMAC(self, mac):
         # Replace the last two words with `XX`
@@ -826,6 +846,15 @@ For more details, see the LICENSE file in the base macdetect folder.''')
         self.mnuMACs.show_all()
         
         self.vwMACList.connect("button-press-event", self.clickMACList)
+        
+        # MAC History list
+        self.tsMACHistoryList = Gtk.TreeStore(str, str)
+        self.vwMACHistoryList = Gtk.TreeView(self.tsMACHistoryList)
+        
+        rdAddress = Gtk.CellRendererText()
+        colAddress = Gtk.TreeViewColumn("MAC Address", rdAddress, text=0 if not self.bDemonstration else 1)
+        colAddress.set_sort_column_id(0)
+        self.vwMACHistoryList.append_column(colAddress)
     
     def clickAssignNew(self, wdgWidget):
         model, treeiter = self.vwMACList.get_selection().get_selected()
