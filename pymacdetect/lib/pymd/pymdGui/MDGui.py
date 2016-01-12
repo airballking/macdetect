@@ -115,6 +115,7 @@ class MainWindow:
             self.sql_c.execute("CREATE TABLE identities (id integer, name text)")
             self.sql_c.execute("CREATE TABLE macs (mac text, identity_id integer)")
             self.sql_c.execute("CREATE TABLE macs_data (mac text, nickname text)")
+            self.sql_c.execute("CREATE TABLE macs_history (mac text)")
             
             self.sql_conn.commit()
         
@@ -656,6 +657,21 @@ For more details, see the LICENSE file in the base macdetect folder.''')
             self.sql_conn.commit()
             
             self.addEvent(EventType.MACAdded, mac, "", "")
+        
+        self.addMACToHistory(mac)
+    
+    def addMACToHistory(self, mac):
+        self.sql_c.execute("SELECT mac FROM macs_history WHERE mac=?", (mac,))
+        result = self.sql_c.fetchone()
+        
+        is_new = result != None
+        
+        if is_new:
+            self.sql_c.execute("INSERT INTO macs_history VALUES(?)", (mac,))
+            self.sql_conn.commit()
+            
+            # TODO(winkler): Update a potential table that holds all
+            # known MACs
     
     def demoMAC(self, mac):
         # Replace the last two words with `XX`
