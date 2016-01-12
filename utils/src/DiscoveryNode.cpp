@@ -2,7 +2,7 @@
 
 
 namespace macdetect {
-  DiscoveryNode::DiscoveryNode() : PacketEntity(-1), m_meMulticast("225.0.0.37", 2077) {
+  DiscoveryNode::DiscoveryNode() : PacketEntity(-1), m_meMulticast("224.0.0.1", 2077) {
     this->setSocket(m_meMulticast.socket());
     this->socket();
   }
