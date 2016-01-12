@@ -1177,8 +1177,26 @@ For more details, see the LICENSE file in the base macdetect folder.''')
                     ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + bars_height + ticks_margin_top)
                 else:
                     for j in range(len(macs)):
-                        ctx.move_to(i * tick_fraction + bars_begin_x, bars_begin_y + j * height_per_mac - 3)
-                        ctx.line_to(i * tick_fraction + bars_begin_x, bars_begin_y + j * height_per_mac + bar_thickness + 3)
+                        base_x = i * tick_fraction + bars_begin_x
+                        base_y = bars_begin_y + j * height_per_mac
+                        
+                        ctx.move_to(base_x, base_y - 3)
+                        ctx.line_to(base_x, base_y + bar_thickness + 3)
+                        
+                        sub_ticks = 5
+                        
+                        if tick_fraction < 20:
+                            sub_ticks = 1
+                        elif tick_fraction < 30:
+                            sub_ticks = 3
+                        
+                        for k in range(sub_ticks):
+                            tick_x_offset = float((float(k + 1.0) / (float(sub_ticks) + 1.0)))
+                            
+                            ctx.move_to(base_x + tick_fraction * tick_x_offset,
+                                        base_y - 0)
+                            ctx.line_to(base_x + tick_fraction * tick_x_offset,
+                                        base_y + bar_thickness + 0)
             else:
                 ctx.set_source_rgb(0.9, 0.9, 0.9)
             
