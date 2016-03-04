@@ -71,11 +71,14 @@ namespace macdetect {
 	socket_address.sll_ifindex = ifr.ifr_ifindex;
 	socket_address.sll_protocol = htons(usProtocol);
 	socket_address.sll_halen = ETH_ALEN;
-      
+	
 	struct ifreq ifrTemp;
 	memset(&ifrTemp, 0, sizeof(ifrTemp));
 	strcpy(ifrTemp.ifr_name, strDeviceName.c_str());
-      
+	
+	unsigned int unYes = 1;
+	setsockopt(nSocket, SOL_SOCKET, SO_REUSEADDR, &unYes, sizeof(unYes));
+	
 	if(ioctl(nSocket, SIOCGIFHWADDR, &ifrTemp) > -1) {
 	  std::string strDeviceMAC = "";
 	  char carrBuffer[17];
